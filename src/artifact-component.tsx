@@ -4,6 +4,24 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 
+interface Recommendations {
+  preferences_recommendations: Array<{
+    "Campo de Estudio": string;
+    "Razon": string;
+  }>;
+  skills_recommendations: Array<{
+    "Campo de Estudio": string;
+    "Razon": string;
+  }>;
+  university_recommendations: Array<{
+    "Campo de Estudio": string;
+    "Recomendacion Uno": string;
+    "Recomendacion Dos": string;
+    "Recomendacion Tres": string;
+  }>;
+}
+
+
 function App() {
   const [skills, setSkills] = useState({
     mechanical_reasoning: 0,
@@ -29,19 +47,19 @@ function App() {
     pedagogy: 0,
   });
 
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState<Recommendations | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>('');
 
-  const handleSkillChange = (key, value) => {
+  const handleSkillChange = (key: string, value: number[]) => {
     setSkills(prev => ({ ...prev, [key]: value[0] }));
   };
 
-  const handlePreferenceChange = (key, value) => {
+  const handlePreferenceChange = (key: string, value: number[]) => {
     setPreferences(prev => ({ ...prev, [key]: value[0] }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -65,6 +83,7 @@ function App() {
       const data = await response.json();
       setResults(data);
     } catch (error) {
+      
       console.error('Error:', error);
       setError('Failed to fetch recommendations. Please try again.');
     } finally {
@@ -72,7 +91,7 @@ function App() {
     }
   };
 
-  const renderSkillInputs = (inputType) => {
+  const renderSkillInputs = (inputType: string) => {
     const data = inputType === 'skills' ? skills : preferences;
     const handleChange = inputType === 'skills' ? handleSkillChange : handlePreferenceChange;
 
