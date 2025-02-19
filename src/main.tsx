@@ -3,10 +3,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css'
-import App from './App';
+import FormView from './App';
 import Login from './Login'; // optional login page if you want a custom login view
 import ProtectedRoute from './ProtectedRoute';
 import { Auth0Provider } from '@auth0/auth0-react';
+import About from './pages/About';
 
 const domain = 'dev-cw4j08ldhb6pgkzs.us.auth0.com';       // e.g. dev-abc123.us.auth0.com
 const clientId = 'FOHKg168YFW90b7jRMF2k4K49Jb1vjXF';    // Your Auth0 Client ID
@@ -28,7 +29,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             path="/"
             element={
               <ProtectedRoute>
-                <App />
+                <FormView />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/about"
+            element={
+              <ProtectedRoute>
+                <About />
               </ProtectedRoute>
             }
           />
