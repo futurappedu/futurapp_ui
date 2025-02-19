@@ -58,7 +58,7 @@ function App() {
 
     try {
       const token = await getAccessTokenSilently();
-      const response = await fetch('http://localhost:5000/generate_recommendations', {
+      const response = await fetch('https://futurappapi-production.up.railway.app/recommendations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
