@@ -1,5 +1,5 @@
 import './App.css'
-import Artifact from './artifact-component'
+import Artifact from './pages/Recommender'
 
 function FormView() {
   return (

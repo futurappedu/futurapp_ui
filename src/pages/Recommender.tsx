@@ -21,7 +21,7 @@ interface Recommendations {
   }>;
 }
 
-function App() {
+function Recommender() {
   const navigate = useNavigate();
   const { getAccessTokenSilently, isAuthenticated } = useAuth0(); // ✅ Check auth state
 
@@ -245,4 +245,4 @@ function App() {
   );
 }
 
-export default App;
+export default Recommender;
