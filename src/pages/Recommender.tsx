@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { useAuth0 } from '@auth0/auth0-react';
-import LogoutButton from './Logout'; // ✅ Import Logout Button
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { useAuth0 } from "@auth0/auth0-react";
+import LogoutButton from "./Logout"; // ✅ Import Logout Button
+import { useNavigate } from "react-router-dom";
 
 interface Recommendations {
-  preferences_recommendations: Array<{ "Campo de Estudio": string; "Razon": string; }>;
-  skills_recommendations: Array<{ "Campo de Estudio": string; "Razon": string; }>;
-  university_recommendations: Array<{ "Campo de Estudio": string; "Recomendacion Uno": string; "Recomendacion Dos": string; "Recomendacion Tres": string; }>;
+  preferences_recommendations: Array<{
+    "Campo de Estudio": string;
+    Razon: string;
+  }>;
+  skills_recommendations: Array<{ "Campo de Estudio": string; Razon: string }>;
+  university_recommendations: Array<{
+    "Campo de Estudio": string;
+    "Recomendacion Uno": string;
+    "Recomendacion Dos": string;
+    "Recomendacion Tres": string;
+  }>;
 }
 
-function App() {
+function Recommender() {
+  const navigate = useNavigate();
   const { getAccessTokenSilently, isAuthenticated } = useAuth0(); // ✅ Check auth state
 
   const [skills, setSkills] = useState({
@@ -44,11 +54,11 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   const handleSkillChange = (key: string, value: number[]) => {
-    setSkills(prev => ({ ...prev, [key]: value[0] }));
+    setSkills((prev) => ({ ...prev, [key]: value[0] }));
   };
 
   const handlePreferenceChange = (key: string, value: number[]) => {
-    setPreferences(prev => ({ ...prev, [key]: value[0] }));
+    setPreferences((prev) => ({ ...prev, [key]: value[0] }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,37 +68,41 @@ function App() {
 
     try {
       const token = await getAccessTokenSilently();
-      const response = await fetch('https://futurappapi-production.up.railway.app/recommendations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ skills, preferences }),
-      });
+      const response = await fetch(
+        "https://futurappapi-production.up.railway.app/recommendations",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ skills, preferences }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       const data = await response.json();
       setResults(data);
     } catch (error) {
-      console.error('Error:', error);
-      setError('Failed to fetch recommendations. Please try again.');
+      console.error("Error:", error);
+      setError("Failed to fetch recommendations. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const renderSkillInputs = (inputType: string) => {
-    const data = inputType === 'skills' ? skills : preferences;
-    const handleChange = inputType === 'skills' ? handleSkillChange : handlePreferenceChange;
+    const data = inputType === "skills" ? skills : preferences;
+    const handleChange =
+      inputType === "skills" ? handleSkillChange : handlePreferenceChange;
 
     return Object.entries(data).map(([key, value]) => (
       <div key={key} className="mb-4">
         <Label htmlFor={key} className="block mb-2 capitalize">
-          {key.replace('_', ' ')}
+          {key.replace("_", " ")}
         </Label>
         <Slider
           id={key}
@@ -107,7 +121,8 @@ function App() {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Futurapp: Career Recommender</h1>
-        {isAuthenticated && <LogoutButton />} {/* ✅ Show Logout Button only when logged in */}
+        {isAuthenticated && <LogoutButton />}{" "}
+        {/* ✅ Show Logout Button only when logged in */}
       </div>
 
       <Card>
@@ -118,34 +133,47 @@ function App() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">Skills</h2>
-              {renderSkillInputs('skills')}
+              {renderSkillInputs("skills")}
             </div>
 
             <div>
               <h2 className="text-xl font-semibold mb-4">Preferences</h2>
-              {renderSkillInputs('preferences')}
+              {renderSkillInputs("preferences")}
             </div>
+            <button onClick={() => navigate("/about")}>Go to about</button>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Generating...' : 'Generate Recommendations'}
+              {isLoading ? "Generating..." : "Generate Recommendations"}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      {error && <div className="mt-4 p-4 bg-red-100 text-red-800 rounded">{error}</div>}
+      {error && (
+        <div className="mt-4 p-4 bg-red-100 text-red-800 rounded">{error}</div>
+      )}
 
       {results && (
         <div className="mt-6 space-y-6">
           {/* Preferences Recommendations Table */}
           <Card>
-            <CardHeader><CardTitle>Preferences Recommendations</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Preferences Recommendations</CardTitle>
+            </CardHeader>
             <CardContent>
               <table className="w-full">
-                <thead><tr><th>Campo de Estudio</th><th>Razón</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Campo de Estudio</th>
+                    <th>Razón</th>
+                  </tr>
+                </thead>
                 <tbody>
                   {results.preferences_recommendations.map((item, index) => (
-                    <tr key={index}><td className="border p-2">{item["Campo de Estudio"]}</td><td className="border p-2">{item["Razon"]}</td></tr>
+                    <tr key={index}>
+                      <td className="border p-2">{item["Campo de Estudio"]}</td>
+                      <td className="border p-2">{item["Razon"]}</td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -154,13 +182,23 @@ function App() {
 
           {/* Skills Recommendations Table */}
           <Card>
-            <CardHeader><CardTitle>Skills Recommendations</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Skills Recommendations</CardTitle>
+            </CardHeader>
             <CardContent>
               <table className="w-full">
-                <thead><tr><th>Campo de Estudio</th><th>Razón</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Campo de Estudio</th>
+                    <th>Razón</th>
+                  </tr>
+                </thead>
                 <tbody>
                   {results.skills_recommendations.map((item, index) => (
-                    <tr key={index}><td className="border p-2">{item["Campo de Estudio"]}</td><td className="border p-2">{item["Razon"]}</td></tr>
+                    <tr key={index}>
+                      <td className="border p-2">{item["Campo de Estudio"]}</td>
+                      <td className="border p-2">{item["Razon"]}</td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -169,7 +207,9 @@ function App() {
 
           {/* University Recommendations Table */}
           <Card>
-            <CardHeader><CardTitle>University Recommendations</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>University Recommendations</CardTitle>
+            </CardHeader>
             <CardContent>
               <table className="w-full">
                 <thead>
@@ -184,9 +224,15 @@ function App() {
                   {results.university_recommendations.map((item, index) => (
                     <tr key={index}>
                       <td className="border p-2">{item["Campo de Estudio"]}</td>
-                      <td className="border p-2">{item["Recomendacion Uno"]}</td>
-                      <td className="border p-2">{item["Recomendacion Dos"]}</td>
-                      <td className="border p-2">{item["Recomendacion Tres"]}</td>
+                      <td className="border p-2">
+                        {item["Recomendacion Uno"]}
+                      </td>
+                      <td className="border p-2">
+                        {item["Recomendacion Dos"]}
+                      </td>
+                      <td className="border p-2">
+                        {item["Recomendacion Tres"]}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -199,4 +245,4 @@ function App() {
   );
 }
 
-export default App;
+export default Recommender;

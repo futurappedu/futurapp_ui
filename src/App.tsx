@@ -1,7 +1,7 @@
 import './App.css'
-import Artifact from './artifact-component'
+import Artifact from './pages/Recommender'
 
-function App() {
+function FormView() {
   return (
     <>
       <Artifact />
@@ -9,4 +9,4 @@ function App() {
   )
 }
 
-export default App
+export default FormView

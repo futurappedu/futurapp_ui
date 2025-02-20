@@ -1,34 +1,48 @@
 // src/index.tsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import './index.css'
-import App from './App';
-import Login from './Login'; // optional login page if you want a custom login view
-import ProtectedRoute from './ProtectedRoute';
-import { Auth0Provider } from '@auth0/auth0-react';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "./index.css";
+import FormView from "./App";
+import Home from "./pages/Home";
+import Login from "./pages/Login"; // optional login page if you want a custom login view
+import ProtectedRoute from "./pages/ProtectedRoute";
+import { Auth0Provider } from "@auth0/auth0-react";
+import About from "./pages/About";
 
-const domain = 'dev-cw4j08ldhb6pgkzs.us.auth0.com';       // e.g. dev-abc123.us.auth0.com
-const clientId = 'FOHKg168YFW90b7jRMF2k4K49Jb1vjXF';    // Your Auth0 Client ID
+const domain = "dev-cw4j08ldhb6pgkzs.us.auth0.com"; // e.g. dev-abc123.us.auth0.com
+const clientId = "FOHKg168YFW90b7jRMF2k4K49Jb1vjXF"; // Your Auth0 Client ID
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Auth0Provider
       domain={domain}
       clientId={clientId}
       authorizationParams={{
         redirect_uri: window.location.origin,
-        audience: 'https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/'
+        audience: "https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/",
+      }}
+      onRedirectCallback={(appState) => {
+        window.location.replace(appState?.returnTo || window.location.origin);
       }}
     >
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Home />} />
           <Route
-            path="/"
+            path="/about"
             element={
               <ProtectedRoute>
-                <App />
+                <About />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/career_recommender"
+            element={
+              <ProtectedRoute>
+                <FormView />
               </ProtectedRoute>
             }
           />
