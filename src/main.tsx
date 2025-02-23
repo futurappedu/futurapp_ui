@@ -23,7 +23,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         audience: "https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/",
       }}
       onRedirectCallback={(appState) => {
-        window.location.replace(appState?.returnTo || window.location.origin);
+        const returnTo = appState?.returnTo || "/";
+        window.history.replaceState({}, document.title, returnTo); // Preserve correct return path
       }}
     >
       <BrowserRouter>
@@ -42,7 +43,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             path="/career_recommender"
             element={
               <ProtectedRoute>
-                <FormView />
+                <FormView />  
               </ProtectedRoute>
             }
           />
