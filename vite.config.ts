@@ -10,5 +10,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       'src': path.resolve(__dirname, './src'),
     },
+  },
+  base: '/',
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: true  // Recommended for debugging
   }
 })

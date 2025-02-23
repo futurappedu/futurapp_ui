@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: JSX.Element;
@@ -9,29 +9,36 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       loginWithRedirect({
         appState: {
-          returnTo: window.location.pathname
-        }
+          returnTo: location.pathname, // Store the intended page
+        },
       });
     }
-  }, [isLoading, isAuthenticated, loginWithRedirect]);
+  }, [isLoading, isAuthenticated, loginWithRedirect, location.pathname]);
+
+  useEffect(() => {
+    if (isAuthenticated && shouldRedirect) {
+      navigate(location.pathname, { replace: true });
+    }
+  }, [isAuthenticated, shouldRedirect, navigate, location.pathname]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      // Once authenticated, ensure we're on the correct route
-      navigate(window.location.pathname);
+      setShouldRedirect(true);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated]);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  return isAuthenticated ? children : null;
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;
