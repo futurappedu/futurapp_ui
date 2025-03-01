@@ -1,9 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart, BookOpen, Briefcase, Users } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
+
 
 export default function Home() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth0();
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center">
@@ -52,15 +55,23 @@ export default function Home() {
                 </p>
               </div>
               <div className="w-full max-w-sm space-y-4">
-                <Button
-                  type="button"
-                  size="lg"
-                  className="w-full"
-                  onClick={() => navigate("/career_recommender")}
-                >
-                  Comenzar
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+              <Button
+                type="button"
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  if (isAuthenticated) {
+                    navigate("/career_recommender");
+                  } else {
+                    navigate("/login");
+                    // Alternatively, you could directly trigger login:
+                    // loginWithRedirect({ appState: { returnTo: "/career_recommender" } });
+                  }
+                }}
+              >
+                Comenzar
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Inicia tu viaje hoy. No se requiere tarjeta de crédito.
                 </p>

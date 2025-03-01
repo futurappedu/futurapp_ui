@@ -1,20 +1,26 @@
 // src/index.tsx
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import "./index.css";
 import FormView from "./App";
 import Home from "./pages/Home";
 import Login from "./pages/Login"; // optional login page if you want a custom login view
 import ProtectedRoute from "./pages/ProtectedRoute";
-import { Auth0Provider } from "@auth0/auth0-react";
+import { Auth0Provider, AppState } from "@auth0/auth0-react";
 import About from "./pages/About";
 
 const domain = "dev-cw4j08ldhb6pgkzs.us.auth0.com"; // e.g. dev-abc123.us.auth0.com
 const clientId = "FOHKg168YFW90b7jRMF2k4K49Jb1vjXF"; // Your Auth0 Client ID
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+const Auth0ProviderWithNavigate = ({ children }: { children: React.ReactNode }) => {
+  const navigate = useNavigate();
+
+  const onRedirectCallback = (appState?: AppState) => {
+    navigate(appState?.returnTo || "/career_recommender", { replace: true });
+  };
+
+  return (
     <Auth0Provider
       domain={domain}
       clientId={clientId}
@@ -22,12 +28,17 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         redirect_uri: window.location.origin,
         audience: "https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/",
       }}
-      onRedirectCallback={(appState) => {
-        const returnTo = appState?.returnTo || "/";
-        window.history.replaceState({}, document.title, returnTo); // Preserve correct return path
-      }}
+      onRedirectCallback={onRedirectCallback}
     >
-      <BrowserRouter>
+      {children}
+    </Auth0Provider>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <BrowserRouter>
+    <Auth0ProviderWithNavigate>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Home />} />
@@ -49,7 +60,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           />
           {/* Add more routes as needed */}
         </Routes>
+        </Auth0ProviderWithNavigate>
       </BrowserRouter>
-    </Auth0Provider>
   </React.StrictMode>
 );
