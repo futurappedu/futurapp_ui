@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -22,9 +22,18 @@ interface Recommendations {
 }
 
 function Recommender() {
+  const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0(); // ✅ Check auth state
 
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate('/login', { state: { returnTo: '/career_recommender' } });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   const [skills, setSkills] = useState({
     mechanical_reasoning: 0,
     numerical_aptitude: 0,
@@ -50,7 +59,7 @@ function Recommender() {
   });
 
   const [results, setResults] = useState<Recommendations | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSkillChange = (key: string, value: number[]) => {
@@ -63,7 +72,7 @@ function Recommender() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true);
     setError(null);
 
     try {
@@ -90,7 +99,7 @@ function Recommender() {
       console.error("Error:", error);
       setError("Failed to fetch recommendations. Please try again.");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -142,8 +151,8 @@ function Recommender() {
             </div>
             <button onClick={() => navigate("/about")}>Go to about</button>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Generating..." : "Generate Recommendations"}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Generating..." : "Generate Recommendations"}
             </Button>
           </form>
         </CardContent>
