@@ -110,18 +110,23 @@ function Recommender() {
 
     return Object.entries(data).map(([key, value]) => (
       <div key={key} className="mb-4">
-        <Label htmlFor={key} className="block mb-2 capitalize">
-          {key.replace("_", " ")}
-        </Label>
-        <Slider
-          id={key}
-          name={key}
-          value={[value]}
-          onValueChange={(val) => handleChange(key, val)}
-          max={10}
-          step={1}
-          className="w-full"
-        />
+        <div className="flex justify-between items-center mb-2">
+          <Label htmlFor={key} className="capitalize">
+            {key.replace("_", " ")}
+          </Label>
+          <span className="font-medium">{value * 10}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Slider
+            id={key}
+            name={key}
+            value={[value]}
+            onValueChange={(val) => handleChange(key, val)}
+            max={10}
+            step={1}
+            className="w-full"
+          />
+        </div>
       </div>
     ));
   };
