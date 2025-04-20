@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import "./index.css";
 import FormView from "./App";
 import Home from "./pages/Home";
+import VerbalTestApp from "./pages/VerbalTest";
 import Login from "./pages/Login"; // optional login page if you want a custom login view
 import ProtectedRoute from "./pages/ProtectedRoute";
 import { Auth0Provider, AppState } from "@auth0/auth0-react";
@@ -55,6 +56,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             element={
               <ProtectedRoute>
                 <FormView />  
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/verbal_test"
+            element={
+              <ProtectedRoute>
+                <VerbalTestApp />
               </ProtectedRoute>
             }
           />

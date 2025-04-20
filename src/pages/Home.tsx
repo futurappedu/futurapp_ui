@@ -23,9 +23,10 @@ export default function Home() {
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="#"
+            to="/login"
+            state={{ returnTo: "/verbal_test" }}
           >
-            Testimonios
+            Test
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
