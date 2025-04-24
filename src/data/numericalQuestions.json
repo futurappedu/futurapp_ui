@@ -1,0 +1,420 @@
+[
+    {
+      "id": 1,
+      "question": "¿Qué cifra debería reemplazar a la F en esta división cuyo resultado es correcto? F73 : F3 = 11",
+      "options": [
+        "A. 9",
+        "B. 8",
+        "C. 5",
+        "D. 4",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 2,
+      "question": "3x² +7x-9x+10=",
+      "options": [
+        "A. -60x² +10",
+        "B. 3x² -63x+10",
+        "C. 3x² -2x+10",
+        "D. 3x² -16x+10",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 3,
+      "question": "5-12 = ",
+      "options": [
+        "A. -12 + 5",
+        "B. 12 - 5",
+        "C. -(5-12)",
+        "D. - (12 + 5)",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 4,
+      "question": "¿Qué cifra debería ir en lugar de la P en esta suma cuyo resultado es correcto? 4PPP4 + 4PP7 = 47671",
+      "options": [
+        "A. 9",
+        "B. 8",
+        "C. 3",
+        "D. 2",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 5,
+      "question": "¿Cuál es el resto de dividir 2.480.739 entre 20?",
+      "options": [
+        "A. 1",
+        "B. 9",
+        "C. 29",
+        "D. 39",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 6,
+      "question": "¿Qué numero puede sustituir a la L para que la proporción sea correcta? 4/L = L/36",
+      "options": [
+        "A. 3",
+        "B. 9",
+        "C. 12",
+        "D. 18",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 7,
+      "question": "1/2 + 1/4 / 1/2 + 1/2 =",
+      "options": [
+        "A. 1/2",
+        "B. 3/4",
+        "C. 4/3",
+        "D. 3/2",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 8,
+      "question": "El 30% del 50% de 300 es",
+      "options": [
+        "A. 150",
+        "B. 90",
+        "C. 50",
+        "D. 45",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 9,
+      "question": "¿Qué número debería sustituir a la K en esta división cuyo resultado es correcto? 11K8 : 47 = K4",
+      "options": [
+        "A. 2",
+        "B. 3",
+        "C. 5",
+        "D. 6",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 10,
+      "question": "4 = 10% de",
+      "options": [
+        "A. 0,4",
+        "B. 4",
+        "C. 40",
+        "D. 400",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 11,
+      "question": "16x² +4y² +3x² =",
+      "options": [
+        "A. 19x² +4y²",
+        "B. 19x⁴ +4y²",
+        "C. 23x²y²",
+        "D. 23x⁴y²",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 12,
+      "question": "¿Qué número debe sustituir a la N para que la proporción sea correcta? 8/12 = N/6",
+      "options": [
+        "A. 16",
+        "B. 5",
+        "C. 4",
+        "D. 2",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 13,
+      "question": "Si 2x² +6x=2x² +3x+5 entonces x =",
+      "options": [
+        "A. -2,5",
+        "B. -5/4",
+        "C. -1",
+        "D. 0,6",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 14,
+      "question": "¿Qué suma es MAYOR que uno?",
+      "options": [
+        "A. 1/5 + 3/4",
+        "B. 2/3 + 3/8",
+        "C. 8/12 + 1/3",
+        "D. 5/8 + 1/4",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 15,
+      "question": "¿Qué cifra debe sustituir a la J en esta suma cuyo resultado es correcto? 24J4 + 2JJ7 = 54J1",
+      "options": [
+        "A. 0",
+        "B. 6",
+        "C. 8",
+        "D. 9",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 16,
+      "question": "¿Qué número debería continuar? √100, 9, √64, 7, ?",
+      "options": [
+        "A. 5",
+        "B. √36",
+        "C. √49",
+        "D. 8",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 17,
+      "question": "¿Cuál es el número MÁS PEQUEÑO que es divisible exactamente por 2, 4, 7 y 21?",
+      "options": [
+        "A. 1.176",
+        "B. 168",
+        "C. 84",
+        "D. 42",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 18,
+      "question": "¿Qué cifra debe sustituir a la N en esta resta cuyo resultado es correcto? 3N3N3 - 3NN3 = 32700",
+      "options": [
+        "A. 1",
+        "B. 4",
+        "C. 5",
+        "D. 6",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 19,
+      "question": "15/21 / 7/3  =",
+      "options": [
+        "A. 15/49",
+        "B. 5/3",
+        "C. 15/7",
+        "D. 15",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 20,
+      "question": "¿Cuál es el resultado de (84,189 × 1,99) / 6,889 redondeando al número entero más próximo?",
+      "options": [
+        "A. 28",
+        "B. 24",
+        "C. 20",
+        "D. 16",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 21,
+      "question": "¿Qué cifra debe sustituir a la R en esta resta cuyo resultado es correcto? 3R33 - 9R9 = 2R54",
+      "options": [
+        "A. 0",
+        "B. 1",
+        "C. 6",
+        "D. 8",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 22,
+      "question": "¿Qué número es divisible exactamente entre 3?",
+      "options": [
+        "A. 766",
+        "B. 768",
+        "C. 796",
+        "D. 976",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 23,
+      "question": "y+x+7x-6y=",
+      "options": [
+        "A. 8x+5y",
+        "B. 7x-6y",
+        "C. 7x² -6y²",
+        "D. 5y -8x",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 24,
+      "question": "¿Qué número continuaría la serie? 2.400 1.200 600 300 ?",
+      "options": [
+        "A. 0",
+        "B. 100",
+        "C. 150",
+        "D. 200",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 25,
+      "question": "¿Cuál es el millar más próximo al que podría redondearse 710 x 80?",
+      "options": [
+        "A. 50.000",
+        "B. 55.000",
+        "C. 57.000",
+        "D. 60.000",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 26,
+      "question": "¿Qué cifra debería sustituir a la A en esta multiplicación cuyo resultado es correcto? 6A6 x A2 = 64032",
+      "options": [
+        "A. 50.000",
+        "B. 55.000",
+        "C. 57.000",
+        "D. 60.000",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 27,
+      "question": "mn = y Si y = 10, entonces m =",
+      "options": [
+        "A. 10 - n",
+        "B. n - 10",
+        "C. n/10",
+        "D. 10/n",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 28,
+      "question": "(5 x 2) / (4 x 15)=",
+      "options": [
+        "A. 6",
+        "B. 5/6",
+        "C. 2/3",
+        "D. 1/6",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 29,
+      "question": "¿Qué número debe sustituir a la T para que la proporción sea correcta? 1,3/T = 0,2 / 0,8",
+      "options": [
+        "A. 6,5",
+        "B. 5,2",
+        "C. 1,04",
+        "D. 60.000",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 30,
+      "question": "¿Qué valores de x hacen que sea verdadera la expresión x + 3 ≥ 11?",
+      "options": [
+        "A. 5, 6, 7",
+        "B. 6, 7, 8",
+        "C. 7, 8, 9",
+        "D. 8, 9, 10",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 31,
+      "question": "¿Qué cifra debe sustituir a la F en la siguiente división cuyo resultado es correcto? 2F1F2 : F855 = 6; resto = 2",
+      "options": [
+        "A. 9",
+        "B. 7",
+        "C. 4",
+        "D. 3",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 32,
+      "question": "¿Cuál de las siguientes expresiones vale uno?",
+      "options": [
+        "A. (-3 × 2)/6",
+        "B. -6/(-2 × -3)",
+        "C. (2 × -3)/6",
+        "D. 6/(-3 × -2)",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 33,
+      "question": "¿Qué cifra debería sustituir a la J en esta multiplicación cuyo resultado es correcto? 1J56 × J = 582J",
+      "options": [
+        "A. 3",
+        "B. 4",
+        "C. 7",
+        "D. 9",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 34,
+      "question": "¿Cuál es el resultado, redondeado al número entero más próximo, de la siguiente operación? : (1 1/9) × (2 2/3) × (5 1/5)",
+      "options": [
+        "A. 20",
+        "B. 15",
+        "C. 10",
+        "D. 5",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 35,
+      "question": "¿Qué número debería sustituir a la H para que la proporción fuera correcta? 12%/9% = 4%/H",
+      "options": [
+        "A. 0,03 %",
+        "B. 0,3 %",
+        "C. 3 %",
+        "D. 30 %",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 36,
+      "question": "2 × 100.000 + 8 × 1.000 + 9 × 10 =",
+      "options": [
+        "A. 28.090",
+        "B. 28.900",
+        "C. 190.000",
+        "D. 208.090",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 37,
+      "question": "Si x = 10, entonces 3x² - x =",
+      "options": [
+        "A. 50",
+        "B. 200",
+        "C. 270",
+        "D. 290",
+        "E. Ninguna de ellas"
+      ]
+    },
+    {
+      "id": 38,
+      "question": "a = 1/2 bh Si b = 6 y a = 14, entonces h =",
+      "options": [
+        "A. 14/3",
+        "B. 7/3",
+        "C. 7/6",
+        "D. 6/7",
+        "E. Ninguna de ellas"
+      ]
+    }
+  ]
