@@ -1,0 +1,302 @@
+[
+    {
+    "id": 1,
+    "problem": "/spatial/questions/espacial pregunta 1.png",
+    "options": "/spatial/options/espacial opciones 1.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 2,
+    "problem": "/spatial/questions/espacial pregunta 2.png",
+    "options": "/spatial/options/espacial opciones 2.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 3,
+    "problem": "/spatial/questions/espacial pregunta 3.png",
+    "options": "/spatial/options/espacial opciones 3.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 4,
+    "problem": "/spatial/questions/espacial pregunta 4.png",
+    "options": "/spatial/options/espacial opciones 4.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 5,
+    "problem": "/spatial/questions/espacial pregunta 5.png",
+    "options": "/spatial/options/espacial opciones 5.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 6,
+    "problem": "/spatial/questions/espacial pregunta 6.png",
+    "options": "/spatial/options/espacial opciones 6.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 7,
+    "problem": "/spatial/questions/espacial pregunta 7.png",
+    "options": "/spatial/options/espacial opciones 7.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 8,
+    "problem": "/spatial/questions/espacial pregunta 8.png",
+    "options": "/spatial/options/espacial opciones 8.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 9,
+    "problem": "/spatial/questions/espacial pregunta 9.png",
+    "options": "/spatial/options/espacial opciones 9.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 10,
+    "problem": "/spatial/questions/espacial pregunta 10.png",
+    "options": "/spatial/options/espacial opciones 10.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 11,
+    "problem": "/spatial/questions/espacial pregunta 11.png",
+    "options": "/spatial/options/espacial opciones 11.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 12,
+    "problem": "/spatial/questions/espacial pregunta 12.png",
+    "options": "/spatial/options/espacial opciones 12.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 13,
+    "problem": "/spatial/questions/espacial pregunta 13.png",
+    "options": "/spatial/options/espacial opciones 13.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 14,
+    "problem": "/spatial/questions/espacial pregunta 14.png",
+    "options": "/spatial/options/espacial opciones 14.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 15,
+    "problem": "/spatial/questions/espacial pregunta 15.png",
+    "options": "/spatial/options/espacial opciones 15.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 16,
+    "problem": "/spatial/questions/espacial pregunta 16.png",
+    "options": "/spatial/options/espacial opciones 16.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 17,
+    "problem": "/spatial/questions/espacial pregunta 17.png",
+    "options": "/spatial/options/espacial opciones 17.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 18,
+    "problem": "/spatial/questions/espacial pregunta 18.png",
+    "options": "/spatial/options/espacial opciones 18.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 19,
+    "problem": "/spatial/questions/espacial pregunta 19.png",
+    "options": "/spatial/options/espacial opciones 19.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 20,
+    "problem": "/spatial/questions/espacial pregunta 20.png",
+    "options": "/spatial/options/espacial opciones 20.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 21,
+    "problem": "/spatial/questions/espacial pregunta 21.png",
+    "options": "/spatial/options/espacial opciones 21.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 22,
+    "problem": "/spatial/questions/espacial pregunta 22.png",
+    "options": "/spatial/options/espacial opciones 22.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 23,
+    "problem": "/spatial/questions/espacial pregunta 23.png",
+    "options": "/spatial/options/espacial opciones 23.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 24,
+    "problem": "/spatial/questions/espacial pregunta 24.png",
+    "options": "/spatial/options/espacial opciones 24.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 25,
+    "problem": "/spatial/questions/espacial pregunta 25.png",
+    "options": "/spatial/options/espacial opciones 25.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 26,
+    "problem": "/spatial/questions/espacial pregunta 26.png",
+    "options": "/spatial/options/espacial opciones 26.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 27,
+    "problem": "/spatial/questions/espacial pregunta 27.png",
+    "options": "/spatial/options/espacial opciones 27.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 28,
+    "problem": "/spatial/questions/espacial pregunta 28.png",
+    "options": "/spatial/options/espacial opciones 28.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 29,
+    "problem": "/spatial/questions/espacial pregunta 29.png",
+    "options": "/spatial/options/espacial opciones 29.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 30,
+    "problem": "/spatial/questions/espacial pregunta 30.png",
+    "options": "/spatial/options/espacial opciones 30.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 31,
+    "problem": "/spatial/questions/espacial pregunta 31.png",
+    "options": "/spatial/options/espacial opciones 31.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 32,
+    "problem": "/spatial/questions/espacial pregunta 32.png",
+    "options": "/spatial/options/espacial opciones 32.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 33,
+    "problem": "/spatial/questions/espacial pregunta 33.png",
+    "options": "/spatial/options/espacial opciones 33.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 34,
+    "problem": "/spatial/questions/espacial pregunta 34.png",
+    "options": "/spatial/options/espacial opciones 34.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 35,
+    "problem": "/spatial/questions/espacial pregunta 35.png",
+    "options": "/spatial/options/espacial opciones 35.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 36,
+    "problem": "/spatial/questions/espacial pregunta 36.png",
+    "options": "/spatial/options/espacial opciones 36.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 37,
+    "problem": "/spatial/questions/espacial pregunta 37.png",
+    "options": "/spatial/options/espacial opciones 37.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 38,
+    "problem": "/spatial/questions/espacial pregunta 38.png",
+    "options": "/spatial/options/espacial opciones 38.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 39,
+    "problem": "/spatial/questions/espacial pregunta 39.png",
+    "options": "/spatial/options/espacial opciones 39.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 40,
+    "problem": "/spatial/questions/espacial pregunta 40.png",
+    "options": "/spatial/options/espacial opciones 40.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 41,
+    "problem": "/spatial/questions/espacial pregunta 41.png",
+    "options": "/spatial/options/espacial opciones 41.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 42,
+    "problem": "/spatial/questions/espacial pregunta 42.png",
+    "options": "/spatial/options/espacial opciones 42.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 43,
+    "problem": "/spatial/questions/espacial pregunta 43.png",
+    "options": "/spatial/options/espacial opciones 43.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 44,
+    "problem": "/spatial/questions/espacial pregunta 44.png",
+    "options": "/spatial/options/espacial opciones 44.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 45,
+    "problem": "/spatial/questions/espacial pregunta 45.png",
+    "options": "/spatial/options/espacial opciones 45.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 46,
+    "problem": "/spatial/questions/espacial pregunta 46.png",
+    "options": "/spatial/options/espacial opciones 46.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 47,
+    "problem": "/spatial/questions/espacial pregunta 47.png",
+    "options": "/spatial/options/espacial opciones 47.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 48,
+    "problem": "/spatial/questions/espacial pregunta 48.png",
+    "options": "/spatial/options/espacial opciones 48.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 49,
+    "problem": "/spatial/questions/espacial pregunta 49.png",
+    "options": "/spatial/options/espacial opciones 49.png",
+    "choices": ["A", "B", "C", "D"]
+    },
+    {
+    "id": 50,
+    "problem": "/spatial/questions/espacial pregunta 50.png",
+    "options": "/spatial/options/espacial opciones 50.png",
+    "choices": ["A", "B", "C", "D"]
+    }
+    ]

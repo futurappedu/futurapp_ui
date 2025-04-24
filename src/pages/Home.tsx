@@ -24,7 +24,7 @@ export default function Home() {
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
             to="/login"
-            state={{ returnTo: "/verbal_test" }}
+            state={{ returnTo: "/test_home" }}
           >
             Test
           </Link>
