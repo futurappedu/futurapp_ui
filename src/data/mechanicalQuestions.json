@@ -1,0 +1,362 @@
+[
+    {
+      "id": 1,
+      "question": "¿Qué hamaca puede sostener más peso? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-1.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 2,
+      "question": "¿Cuál de los topes es más probable que resbale (se salga de su sitio)? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-2.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 3,
+      "question": "¿Qué peso se levantará con más facilidad? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-3.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 4,
+      "question": "¿Cuál de las dos personas puede ver a la otra en el espejo? (Si las dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-4.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 5,
+      "question": "Si el eje «Y» gira en la dirección que se indica, ¿en qué dirección girará el «X»? (Si en cualquiera de los dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-5.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 6,
+      "question": "¿Qué figura muestra la conexión correcta a la batería para que la bombilla se encienda?",
+      "image": "/mechanical/questions/mecanico-6.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 7,
+      "question": "¿Qué caja puede desplazarse más lejos hacia adelante sin que toque al suelo? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-7.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 8,
+      "question": "¿En qué dirección debería girarse el tablero para desenroscar las sogas? (Si en cualquiera de las dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-8.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 9,
+      "question": "Al ser golpeados, ¿cuál de los dos tambores emitirá un sonido más agudo? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-9.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 10,
+      "question": "Cuando el manubrio se mueva en la dirección indicada, ¿en qué dirección se moverá el piñón «X»? (Si alternativamente en las dos direcciones, marque la C)",
+      "image": "/mechanical/questions/mecanico-10.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 11,
+      "question": "¿Con cuál de las dos tenazas puede cascarse más fácilmente una nuez? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-11.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 12,
+      "question": "¿En qué dirección acaba de moverse el carro de la compra? (Si en cualquiera de las dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-12.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 13,
+      "question": "Si el eje «X» gira en la dirección indicada, ¿en qué dirección girarán las aspas del ventilador? (Si en cualquiera de las dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-13.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 14,
+      "question": "Si sólo se acciona el remo de la derecha, ¿en qué dirección se moverá la barca?",
+      "image": "/mechanical/questions/mecanico-14.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 15,
+      "question": "Si el operario no sujeta fuertemente la lijadora, ¿en qué dirección se moverá ésta? (Si indistintamente en las dos direcciones, marque la C)",
+      "image": "/mechanical/questions/mecanico-15.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 16,
+      "question": "Los trenes se mueven en la misma dirección en que sopla el viento. ¿Qué dibujo muestra que el viento se mueve más de prisa que el tren? (Si ninguno de los, marque la C)",
+      "image": "/mechanical/questions/mecanico-16.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 17,
+      "question": "¿Qué sistema de poleas permite que el travesaño se deslice en la dirección de la flecha? (Si ninguno de los dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-17.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 18,
+      "question": "Si el piñón «X» da únicamente una vuelta completa, el piñón «Y» dará:",
+      "image": "/mechanical/questions/mecanico-18.jpg",
+      "options": ["A. Dos vueltas completas", "B. vuelta y media", "C. una vuelta y media"]
+    },
+    {
+      "id": 19,
+      "question": "¿En qué desagüe es menos probable que se produzcan fugas? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-19.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 20,
+      "question": "Cuando el coche se mueve a velocidad constante, ¿qué par de ruedas girarán más deprisa? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-20.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 21,
+      "question": "Si se deja caer la pelota, ¿en qué punto se estará moviendo más rápidamente? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-21.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 22,
+      "question": "¿En cuál de estos tres grupos los imanes actuarán conjuntamente (sumando su fuerza)?",
+      "image": "/mechanical/questions/mecanico-22.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 23,
+      "question": "¿Cuál de estos remolcadores arrastrará más fácilmente la barcaza a través del canal? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-23.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 24,
+      "question": "¿Qué bombilla podrá seguir luciendo cuando el interruptor se abra (se desconecte)? (Si ninguna, marque la C)",
+      "image": "/mechanical/questions/mecanico-24.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 25,
+      "question": "Si la correa se está moviendo, ¿qué eje girará más deprisa? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-25.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 26,
+      "question": "A medida que la persona se va aproximando a la pared, ¿hacia qué dirección se moverá la parte superior de su sombra? (Si hacia ninguna de las dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-26.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 27,
+      "question": "Si se empuja a los dos objetos, ¿cuál de ellos se moverá circularmente? (Si los dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-27.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 28,
+      "question": "¿En cuál de los bloques de madera será más difícil de separar las dos partes ensambladas? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-28.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 29,
+      "question": "Cuando la palanca se mueve hacia abajo, ¿en qué dirección girará la rueda? (Si en las dos direcciones alternativamente, marque la C)",
+      "image": "/mechanical/questions/mecanico-29.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 30,
+      "question": "¿Qué le ocurrirá al globo lleno de aire cuando salga a la superficie del agua?",
+      "image": "/mechanical/questions/mecanico-30.jpg",
+      "options": ["A. Aumentará de volumen", "B. Disminuirá de volumen", "C. Seguirá teniendo el mismo volumen"]
+    },
+    {
+      "id": 31,
+      "question": "Cuando la plancha «X» se mueva en la dirección indicada, ¿hacia dónde girará el tronco dentado? (Si alternativamente en las dos direcciones, marque la C)",
+      "image": "/mechanical/questions/mecanico-31.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 32,
+      "question": "¿Cuál de los dos columpios volcará más fácilmente cuando ambos estén funcionando? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-32.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 33,
+      "question": "Cuando el ventilador se mueva en la dirección indicada, ¿en qué dirección se moverá más el aire?",
+      "image": "/mechanical/questions/mecanico-33.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 34,
+      "question": "Si las fuerzas ascendente y descendente en el globo son exactamente iguales, ¿hacia dónde se moverá? (Si en ninguna de las dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-34.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 35,
+      "question": "¿Qué timón de las barcas se puede mover más fácilmente? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-35.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 36,
+      "question": "Cuando el tirador se empuja en la dirección indicada, ¿cuál de los pesos se desplazará más arriba? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-36.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 37,
+      "question": "¿En cuál de las dos direcciones está girando la noria? (Si en las dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-37.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 38,
+      "question": "Si los dos automóviles se mueven a la misma velocidad, ¿cuál de ellos es más probable que patine? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-38.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 39,
+      "question": "Al accionar el manubrio «X», ¿en qué dirección se puede levantar más peso? (Si en las dos igual, marque la C)",
+      "image": "/mechanical/questions/mecanico-39.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 40,
+      "question": "Cuando la pelota se lanza al aire, ¿qué trayectoria seguirá? (Si cualquiera de las dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-40.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 41,
+      "question": "¿Cuál de los arcos es más resistente? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-41.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 42,
+      "question": "¿Cuál de los coches extremos del carrusel se está moviendo más deprisa? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-42.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 43,
+      "question": "¿Qué caja pesa más? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-43.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 44,
+      "question": "¿Qué nivel debe alcanzar el agua en el depósito para que empiece a salir por el desagüe?",
+      "image": "/mechanical/questions/mecanico-44.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 45,
+      "question": "Cuando se coloquen las pesas, ¿cuál de los muelles se estirará más? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-45.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 46,
+      "question": "¿Qué patata se asará más deprisa? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-46.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 47,
+      "question": "¿Cuál de los focos iluminará un área más pequeña? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-47.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 48,
+      "question": "Después de puestos en movimiento, ¿cuál de los péndulos puede hacer más veces el recorrido en un minuto? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-48.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 49,
+      "question": "¿Cuál de las dos personas debe aplicar más fuerza para mover la piedra? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-49.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 50,
+      "question": "¿En qué punto un jinete sentirá mayor balanceo?",
+      "image": "/mechanical/questions/mecanico-50.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 51,
+      "question": "¿En qué sentido debería girarse la manivela para subir la barca a la plataforma? (Si en cualquiera de los dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-51.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 52,
+      "question": "¿Qué mesa puede soportar más peso? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-52.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 53,
+      "question": "Para levantar la ruedecilla que presiona a la correa, ¿en qué dirección debería moverse el tirador? (Si en cualquiera de las dos, marque la C)",
+      "image": "/mechanical/questions/mecanico-53.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 54,
+      "question": "¿Qué figura muestra la trayectoria de una pelota, tirada sin efecto, al rebotar en el techo?",
+      "image": "/mechanical/questions/mecanico-54.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 55,
+      "question": "Cuando la bicicleta se mueve, ¿qué rueda da más vueltas? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-55.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 56,
+      "question": "¿Qué soga tiene menos probabilidad de desatarse? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-56.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 57,
+      "question": "¿En cuál de los cuencos la sopa se mantendrá caliente durante más tiempo? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-57.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 58,
+      "question": "Si la trenza es elástica, ¿en qué dirección girará el palo al soltarlo? (Si en ninguna, marque la C)",
+      "image": "/mechanical/questions/mecanico-58.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 59,
+      "question": "¿A través de qué canal el agua pasará más lentamente? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-59.jpg",
+      "options": ["A", "B", "C"]
+    },
+    {
+      "id": 60,
+      "question": "¿Qué barcaza se hundirá más en el agua? (Si no hay diferencia, marque la C)",
+      "image": "/mechanical/questions/mecanico-60.jpg",
+      "options": ["A", "B", "C"]
+    }
+]
