@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { User, Pencil, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {  CheckCircle2, Clock, ArrowRight, FileDown } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -12,23 +10,144 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+
+// PDF Styles
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: 'column',
+    backgroundColor: '#ffffff',
+    padding: 30,
+  },
+  header: {
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    paddingBottom: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#6b7280',
+    marginBottom: 5,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    paddingVertical: 8,
+  },
+  testName: {
+    width: '70%',
+    fontSize: 12,
+  },
+  testScore: {
+    width: '30%',
+    fontSize: 12,
+    textAlign: 'right',
+  },
+  completionInfo: {
+    marginTop: 15,
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 30,
+    right: 30,
+    textAlign: 'center',
+    color: '#9ca3af',
+    fontSize: 10,
+  },
+});
+
+// PDF Document Component
+interface ScoreReportProps {
+  userData: {
+    name: string;
+    email: string;
+    title?: string;
+    company?: string;
+    location?: string;
+    bio?: string;
+    phone?: string;
+  };
+  tests: {
+    id: number;
+    name: string;
+    label: string;
+    url: string;
+    score?: number;
+    status?: "completed" | "pending";
+  }[];
+  completedTests: number;
+}
+
+const ScoreReport = ({ userData, tests, completedTests }: ScoreReportProps) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Reporte de Tests</Text>
+        <Text style={styles.subtitle}>{userData.name} ({userData.email})</Text>
+        {userData.title && <Text style={styles.subtitle}>{userData.title} at {userData.company || 'N/A'}</Text>}
+      </View>
+      
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Resultados</Text>
+        
+        <View style={styles.row}>
+          <Text style={[styles.testName, { fontWeight: 'bold' }]}>Nombre del test</Text>
+          <Text style={[styles.testScore, { fontWeight: 'bold' }]}>Puntaje</Text>
+        </View>
+        
+        {tests.map((test) => (
+          <View key={test.id} style={styles.row}>
+            <Text style={styles.testName}>{test.label}</Text>
+            <Text style={styles.testScore}>
+              {test.status === "completed" ? `${test.score}%` : "Pending"}
+            </Text>
+          </View>
+        ))}
+        
+        <Text style={styles.completionInfo}>
+          Tests completados: {completedTests} de {tests.length} ({Math.round((completedTests / tests.length) * 100)}%)
+        </Text>
+      </View>
+      
+      <View style={styles.footer}>
+        <Text>Reporte generado {new Date().toLocaleDateString()}</Text>
+      </View>
+    </Page>
+  </Document>
+);
 
 export default function UserProfile() {
   const { user, logout } = useAuth0(); 
   const navigate = useNavigate();
-  const [userData, setUserData] = useState({
-    name: user?.name,
-    email: user?.email,
+  const [userData] = useState({
+    name: user?.name ?? "",
+    email: user?.email ?? "",
     title: "",
     company: "",
     location: "",
     bio: "",
     phone: ""
   });
-  const [editingField, setEditingField] = useState<keyof UserData | null>(null);
-  const [editValue, setEditValue] = useState("");
-  const [submitStatus, setSubmitStatus] = useState<null | "success" | "error">(null);
   const [loadingTests, setIsLoadingTests] = useState(true);
+  
   interface Test {
     id: number;
     name: string;
@@ -38,13 +157,12 @@ export default function UserProfile() {
     status?: "completed" | "pending";
   }
 
-  const availableTests: Test[] = [
+  const availableTests = [
     { id: 1, name: "verbal" , label: "Razonamiento verbal" , url: "/verbal_test" },
     { id: 2, name: "mechanical", label: "Razonamiento mecánico", url: "/mechanical_test" },
-    {id: 3, name: "numeric", label: "Razonamiento numérico", url: "/numerical_test"},
-    {id: 4, name: "abstract", label: "Razonamiento abstracto", url: "/abstract_test"},
-    {id:5, name: "spatial", label: "Razonamiento espacial", url: "/spatial_test"},
-    // Add more tests as needed
+    { id: 3, name: "numeric", label: "Razonamiento numérico", url: "/numerical_test"},
+    { id: 4, name: "abstract", label: "Razonamiento abstracto", url: "/abstract_test"},
+    { id: 5, name: "spatial", label: "Razonamiento espacial", url: "/spatial_test"},
   ];
 
   const [tests, setTests] = useState<Test[]>([]);
@@ -76,100 +194,6 @@ export default function UserProfile() {
   const completedTests = tests.filter(test => test.status === "completed").length;
   const completionPercentage = (completedTests / tests.length) * 100;
 
-  interface UserData {
-    name: string;
-    email: string;
-    title: string;
-    company: string;
-    location: string;
-    bio: string;
-    phone: string;
-  }
-
-  const startEditing = (field: keyof UserData, value: string) => {
-    setEditingField(field);
-    setEditValue(value);
-  };
-
-  const saveField = () => {
-    if (editingField) {
-      setUserData({
-        ...userData,
-        [editingField]: editValue
-      });
-      setEditingField(null);
-    }
-  };
-
-  const cancelEdit = () => {
-    setEditingField(null);
-  };
-
-  const renderEditableField = (
-    label: string,
-    field: keyof UserData,
-    value: string
-  ): JSX.Element => {
-    return (
-      <div className="space-y-2 mb-4">
-        <div className="flex justify-between items-center">
-          <Label htmlFor={field} className="text-sm font-medium">{label}</Label>
-          {!editingField && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => startEditing(field, value)}
-              className="h-8 px-2 text-xs"
-            >
-              <Pencil size={14} className="mr-1" />
-              {value ? "Edit" : "Add"}
-            </Button>
-          )}
-        </div>
-        {editingField === field ? (
-          <div className="flex items-center gap-2">
-            <Input
-              id={field}
-              type="text"
-              value={editValue}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditValue(e.target.value)}
-              className="h-9"
-              placeholder={`Enter your ${label.toLowerCase()}`}
-            />
-            <Button size="sm" variant="ghost" onClick={saveField} className="h-9 px-2">
-              <CheckCircle2 size={16} />
-            </Button>
-            <Button size="sm" variant="ghost" onClick={cancelEdit} className="h-9 px-2">
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <div className="text-sm py-1 px-1">
-            {value || <span className="text-muted-foreground italic text-sm">Not provided</span>}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Submit updated profile to backend
-  const handleProfileSubmit = async () => {
-    setSubmitStatus(null);
-    try {
-      const res = await fetch('https://futurappapi-staging.up.railway.app/update-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      if (res.ok) {
-        setSubmitStatus("success");
-      } else {
-        setSubmitStatus("error");
-      }
-    } catch (e) {
-      setSubmitStatus("error");
-    }
-  };
 
   const handleTestClick = (testId: number) => {
     const test = tests.find(t => t.id === testId);
@@ -178,6 +202,8 @@ export default function UserProfile() {
     }
   };
 
+  // Handle PDF generation
+
   return (
     <div className="container max-w-6xl py-8">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -185,11 +211,6 @@ export default function UserProfile() {
         <div className="md:col-span-1">
           <Card>
             <CardHeader className="flex flex-col items-center text-center pb-2">
-              <Avatar className="h-24 w-24 mb-4">
-                <AvatarFallback className="bg-primary/10">
-                  <User size={36} className="text-primary" />
-                </AvatarFallback>
-              </Avatar>
               <CardTitle className="text-xl">{userData.name}</CardTitle>
               <CardDescription className="text-sm">{userData.email}</CardDescription>
             </CardHeader>
@@ -201,51 +222,22 @@ export default function UserProfile() {
                   {completedTests} de {tests.length} tests completados
                 </div>
               </div>
-              <Separator />
-              <Alert variant="default" className="bg-primary/5 border-primary/20">
-                <AlertTitle className="text-sm font-medium">Rellena tu perfil</AlertTitle>
-                <AlertDescription className="text-xs">
-                  Agrega información adicional para completar tu perfil y completar los tests faltantes.
-                </AlertDescription>
-              </Alert>
+              <Separator />              
             </CardContent>
           </Card>
-          {/* Additional Information Card */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Información adicional</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {renderEditableField("Title", "title", userData.title)}
-              {renderEditableField("Company", "company", userData.company)}
-              {renderEditableField("Location", "location", userData.location)}
-              {renderEditableField("Phone", "phone", userData.phone)}
-              {renderEditableField("Bio", "bio", userData.bio)}
-              <Button
-                className="mt-2"
-                variant="default"
-                onClick={handleProfileSubmit}
-              >
-                Guardar perfil
-              </Button>
-              {submitStatus === "success" && (
-                <div className="text-green-600 text-xs mt-2">Perfil actualizado correctamente.</div>
-              )}
-              {submitStatus === "error" && (
-                <div className="text-red-600 text-xs mt-2">Error al actualizar el perfil.</div>
-              )}
-            </CardContent>
-          </Card>
+          
         </div>
         {/* Tests Column */}
         
         <div className="md:col-span-2">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Tus tests</CardTitle>
-              <CardDescription>
-                Controla tu progreso y accede a los tests que has completado.
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">Tus tests</CardTitle>
+                <CardDescription>
+                  Controla tu progreso y accede a los tests que has completado.
+                </CardDescription>
+              </div>
             </CardHeader>
             <CardContent>
               {loadingTests ? (
@@ -319,6 +311,32 @@ export default function UserProfile() {
                 </AlertDescription>
               </Alert>
             </CardFooter>
+             {/* PDF Download Section */}
+             <div className="pt-2">
+                {!loadingTests ? (
+                  <PDFDownloadLink
+                    document={<ScoreReport userData={userData} tests={tests} completedTests={completedTests} />}
+                    fileName={`score-report-${(userData.name ?? 'usuario').replace(/\s+/g, '-').toLowerCase()}.pdf`}
+                    className="w-full"
+                  >
+                    {({ loading }) => (
+                      <Button 
+                        variant="outline" 
+                        className="w-full flex items-center justify-center"
+                        disabled={loading}
+                      >
+                        <FileDown size={16} className="mr-2" />
+                        {loading ? 'Generando PDF...' : 'Descargar Reporte PDF de los Tests'}
+                      </Button>
+                    )}
+                  </PDFDownloadLink>
+                ) : (
+                  <Button variant="outline" className="w-full" disabled>
+                    <FileDown size={16} className="mr-2" />
+                    Cargando datos...
+                  </Button>
+                )}
+              </div>
           </Card>
           {/* Basic Information Card */}
           <Card className="mt-6">
@@ -340,6 +358,7 @@ export default function UserProfile() {
           </Card>
           <Button
             variant="outline"
+            className="mt-6"
             onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
           >
             Logout
