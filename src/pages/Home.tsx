@@ -19,19 +19,6 @@ export default function Home() {
             className="text-sm font-medium hover:underline underline-offset-4"
             to="#"
           >
-            Características
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            to="/login"
-            state={{ returnTo: "/test_home" }}
-          >
-            Test
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            to="#"
-          >
             Precios
           </Link>
           <Link
@@ -62,7 +49,7 @@ export default function Home() {
                 className="w-full"
                 onClick={() => {
                   if (isAuthenticated) {
-                    navigate("/career_recommender");
+                    navigate("/profile");
                   } else {
                     navigate("/login");
                     // Alternatively, you could directly trigger login:
