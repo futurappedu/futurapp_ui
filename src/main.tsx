@@ -13,6 +13,7 @@ import {
   VerbalTestApp,
   AbstractTestApp,
 } from "./pages/tests";
+import Profile from "./pages/Profile";
 import Login from "./pages/Login"; // optional login page if you want a custom login view
 import ProtectedRoute from "./pages/ProtectedRoute";
 import { Auth0Provider, AppState } from "@auth0/auth0-react";
@@ -97,11 +98,17 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             }
           />
           <Route
-            path="/test_home"
+            path="/profile"
             element={
               <ProtectedRoute>
-                <TestHome />
+                <Profile />  
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test_home"
+            element={
+                <TestHome />
             }
           />
           {/* Add more routes as needed */}
