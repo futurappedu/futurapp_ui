@@ -1,10 +1,41 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart, BookOpen, Briefcase, Users } from "lucide-react";
-
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user } = useAuth0();
+  const [loading, setLoading] = useState(false);
+
+
+  const handleStart = async () => {
+    if (!user?.email) {
+      navigate("/profile");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("https://futurappapi-staging.up.railway.app/check-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+      });
+      const data = await res.json();
+      if (data.completed) {
+        navigate("/test_home");
+      } else {
+        navigate("/profile");
+      }
+    } catch (err) {
+      // fallback: go to profile if error
+      navigate("/profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center">
@@ -15,15 +46,10 @@ export default function Home() {
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="#"
+            to="/login"
+            state={{ returnTo: "/test_home" }}
           >
-            Precios
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            to="#"
-          >
-            Contacto
+            Test
           </Link>
         </nav>
       </header>
@@ -45,14 +71,11 @@ export default function Home() {
                 type="button"
                 size="lg"
                 className="w-full"
-                onClick={() => {
-    
-                    navigate("/profile");
-                  
-                }}
+                onClick={handleStart}
+                disabled={loading}
               >
-                Comenzar
-                <ArrowRight className="ml-2 h-4 w-4" />
+        {loading ? "Verificando..." : "Comenzar"}
+        <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Inicia tu viaje hoy. No se requiere tarjeta de crédito.

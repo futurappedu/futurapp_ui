@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useAuth0 } from "@auth0/auth0-react";
-import LogoutButton from "./Logout"; // ✅ Import Logout Button
+import LogoutButton from "./Logout";
 import { useNavigate } from "react-router-dom";
 
 interface Recommendations {
@@ -22,23 +22,14 @@ interface Recommendations {
 }
 
 function Recommender() {
-  const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
+  const { user, getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate('/login', { state: { returnTo: '/career_recommender' } });
-    }
-  }, [isAuthenticated, isLoading, navigate]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
   const [skills, setSkills] = useState({
     mechanical_reasoning: 0,
     numerical_aptitude: 0,
     spatial_aptitude: 0,
-    logical_reasoning: 0,
+    abstract_reasoning: 0,
     verbal_aptitude: 0,
   });
 
@@ -61,10 +52,47 @@ function Recommender() {
   const [results, setResults] = useState<Recommendations | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingSkills, setLoadingSkills] = useState(false);
 
-  const handleSkillChange = (key: string, value: number[]) => {
-    setSkills((prev) => ({ ...prev, [key]: value[0] }));
-  };
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate('/login', { state: { returnTo: '/career_recommender' } });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  // Fetch skills from backend using user email
+  useEffect(() => {
+    const fetchSkills = async () => {
+      if (!user?.email) return;
+      setLoadingSkills(true);
+      try {
+        const response = await fetch(
+          "https://futurappapi-staging.up.railway.app/all-scores",
+          {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: user.email }),
+          }
+        );
+        if (!response.ok) throw new Error("No se pudieron obtener las habilidades.");
+        const data = await response.json();
+        setSkills({
+          mechanical_reasoning: data.mechanical ?? 0,
+          numerical_aptitude: data.numeric ?? 0,
+          spatial_aptitude: data.spatial ?? 0,
+          abstract_reasoning: data.abstract ?? 0,
+          verbal_aptitude: data.verbal ?? 0,
+        });
+      } catch (err) {
+        setError("No se pudieron obtener las habilidades del usuario.");
+      } finally {
+        setLoadingSkills(false);
+      }
+        };
+        fetchSkills();
+      }, [user?.email]);
 
   const handlePreferenceChange = (key: string, value: number[]) => {
     setPreferences((prev) => ({ ...prev, [key]: value[0] }));
@@ -103,12 +131,8 @@ function Recommender() {
     }
   };
 
-  const renderSkillInputs = (inputType: string) => {
-    const data = inputType === "skills" ? skills : preferences;
-    const handleChange =
-      inputType === "skills" ? handleSkillChange : handlePreferenceChange;
-
-    return Object.entries(data).map(([key, value]) => (
+  const renderPreferenceInputs = () => {
+    return Object.entries(preferences).map(([key, value]) => (
       <div key={key} className="mb-4">
         <div className="flex justify-between items-center mb-2">
           <Label htmlFor={key} className="capitalize">
@@ -121,7 +145,7 @@ function Recommender() {
             id={key}
             name={key}
             value={[value]}
-            onValueChange={(val) => handleChange(key, val)}
+            onValueChange={(val) => handlePreferenceChange(key, val)}
             max={10}
             step={1}
             className="w-full"
@@ -131,14 +155,17 @@ function Recommender() {
     ));
   };
 
+  if (isLoading || loadingSkills) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Futurapp: Career Recommender</h1>
-        {isAuthenticated && <LogoutButton />}{" "}
-        {/* ✅ Show Logout Button only when logged in */}
+        {isAuthenticated && <LogoutButton />}
       </div>
-
+     
       <Card>
         <CardHeader>
           <CardTitle>Assessment</CardTitle>
@@ -147,15 +174,20 @@ function Recommender() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">Skills</h2>
-              {renderSkillInputs("skills")}
+              <div className="mb-4">
+                {Object.entries(skills).map(([key, value]) => (
+                  <div key={key} className="flex justify-between items-center mb-2">
+                    <Label className="capitalize">{key.replace("_", " ")}</Label>
+                    <span className="font-medium">{value }</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold mb-4">Preferences</h2>
-              {renderSkillInputs("preferences")}
+              {renderPreferenceInputs()}
             </div>
-            <button onClick={() => navigate("/about")}>Go to about</button>
-
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Generating..." : "Generate Recommendations"}
             </Button>
