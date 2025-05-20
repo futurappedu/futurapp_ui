@@ -336,6 +336,18 @@ export default function UserProfile() {
                     Cargando datos...
                   </Button>
                 )}
+                {/* Recomendador IA Button */}
+  {completedTests === tests.length && (
+    <Button
+      variant="default"
+      className="w-full mt-4"
+      onClick={() => {
+        navigate("/career_recommender");
+      }}
+    >
+      Recomendador IA
+    </Button>
+  )}
               </div>
           </Card>
           {/* Basic Information Card */}
