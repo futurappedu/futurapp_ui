@@ -30,10 +30,9 @@ export default function ProfileCompletionForm() {
         bi_diploma: string;
         graduation_year: string;
         type_of_program: string;
-        area_of_interest: string;
+        area_of_interest: string[];
         motivation: number;
         destination: string[];
-        destinationOther: string;
         post_graduation_plan: string;
         english_level: string;
         study_budget: string;
@@ -43,8 +42,6 @@ export default function ProfileCompletionForm() {
         campus: string;
         city_characteristics: string;
         five_characteristics: string[];
-        countriesInterest: string;
-        interests: string;
     }>({
         phone_number: "",
         date_of_birth: "",
@@ -54,10 +51,9 @@ export default function ProfileCompletionForm() {
         bi_diploma: "",
         graduation_year: "",
         type_of_program: "",
-        area_of_interest: "",
+        area_of_interest: [],
         motivation: 5,
         destination: [],
-        destinationOther: "",
         post_graduation_plan: "",
         english_level: "",
         study_budget: "",
@@ -67,10 +63,9 @@ export default function ProfileCompletionForm() {
         campus: "",
         city_characteristics: "",
         five_characteristics: [],
-        countriesInterest: "",
-        interests: ""
     });
 
+  
     const handleCheckboxChange = (name: string, value: string) => {
         setFormData((prev: any) => {
             const arr = prev[name] || [];
@@ -86,7 +81,11 @@ export default function ProfileCompletionForm() {
         setFormData((prev: any) => ({ ...prev, motivation: Number(e.target.value) }));
     };
 
-    const [formState, setFormState] = useState({
+    const [formState, setFormState] = useState<{
+        isSubmitting: boolean;
+        isSubmitted: boolean;
+        error: string | null;
+    }>({
         isSubmitting: false,
         isSubmitted: false,
         error: null
@@ -98,10 +97,48 @@ export default function ProfileCompletionForm() {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
-
-
+    const fieldLabels: Record<string, string> = {
+        phone_number: "Whatsapp",
+        date_of_birth: "Fecha de nacimiento",
+        citizenship: "Nacionalidad",
+        school: "Colegio",
+        average_score: "Promedio",
+        bi_diploma: "¿Bachillerato Internacional?",
+        graduation_year: "Año de graduación",
+        type_of_program: "Programa de interés",
+        area_of_interest: "Áreas de interés",
+        motivation: "Nivel de decisión",
+        destination: "Destino de interés",
+        post_graduation_plan: "Interés después de graduarte",
+        english_level: "Nivel de inglés",
+        study_budget: "Presupuesto de estudios",
+        need_work: "¿Necesitas trabajar?",
+        sports: "Deporte",
+        accomadation: "Interés de alojamiento",
+        campus: "Tipo de campus",
+        city_characteristics: "Tipo de ciudad",
+        five_characteristics: "Cinco características más importantes",
+      };
+      
+    console.log(formData);
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
+        // Check for empty required fields (strings, arrays, numbers)
+        const missingFields = Object.entries(formData)
+        .filter(([, value]) => {
+          if (typeof value === "number") return false; // motivation always has a default
+          if (Array.isArray(value)) return value.length === 0;
+          return value === "" || value === null || value === undefined;
+        })
+        .map(([key]) => fieldLabels[key] || key);
+      
+      if (missingFields.length > 0) {
+        setFormState({
+          ...formState,
+          error: `Por favor, completa los siguientes campos obligatorios: ${missingFields.join(", ")}.`,
+        });
+        return;
+      }
         setFormState({ ...formState, isSubmitting: true, error: null });
     
         try {
@@ -138,6 +175,28 @@ export default function ProfileCompletionForm() {
     };
     const destinationOptions = ["España", "Estados Unidos", "Reino Unido", "Canadá", "Alemania", "Holanda", "Italia", "No estoy seguro, quisiera varias opciones", "Otro"];
 
+    const knowledgeareas =  [
+        "Negocios y Emprendimiento",
+        "Ingeniería y Tecnología",
+        "Ciencias de la Computación y Desarrollo de Software",
+        "Diseño, Arte y Creatividad Digital",
+        "Ciencias Sociales y Humanidades",
+        "Psicología y Ciencias del Comportamiento",
+        "Comunicación, Marketing y Medios Digitales",
+        "Derecho, Política y Relaciones Internacionales",
+        "Medicina y Ciencias de la Salud",
+        "Biotecnología, Genética y Ciencias Biomédicas",
+        "Ciencias Ambientales y Sostenibilidad",
+        "Arquitectura y Diseño Urbano",
+        "Ciencias Económicas y Finanzas",
+        "Educación, Pedagogía y Desarrollo Humano",
+        "Matemáticas, Estadística y Ciencia de Datos",
+        "Ciberseguridad y Tecnologías de la Información",
+        "Inteligencia Artificial y Robótica",
+        "Turismo, Hospitalidad y Gestión de Eventos",
+        "Producción Audiovisual, Cine y Medios Interactivos",
+        "Deporte, Nutrición y Ciencias del Movimiento Humano"
+    ];
     const characteristicsOptions = [
         "Tipo y ubicación del campus",
         "Tamaño de la ciudad",
@@ -272,14 +331,22 @@ export default function ProfileCompletionForm() {
                             </div>
                             {/* Average Grade */}
                             <div>
-                                <Label htmlFor="average_score">Promedio</Label>
+                                <Label htmlFor="average_score">Promedio (En Escala de 10)</Label>
                                 <Input
                                     id="average_score"
                                     name="average_score"
-                                    type="number"
+                                    type="text"
+                                    inputMode="decimal"
+                                    pattern="^\d+(\.\d{1,2})?$"
+                                    placeholder="Ej: 8.5"
                                     value={formData.average_score}
-                                    onChange={handleChange}
+                                    onChange={e => {
+                                        // Only allow numbers and dot as decimal separator
+                                        const val = e.target.value.replace(/[^0-9.]/g, '');
+                                        setFormData(prev => ({ ...prev, average_score: val }));
+                                    }}
                                 />
+                                <span className="text-xs text-gray-500">Usa punto (.) como separador decimal. Ejemplo: 8.5</span>
                             </div>
                             {/* Bi Diploma */}
                             <div>
@@ -395,8 +462,6 @@ export default function ProfileCompletionForm() {
                                         <SelectValue placeholder="Selecciona" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Carrera/ Licenciatura">Carrera/ Licenciatura</SelectItem>
-                                        <SelectItem value="Maestria/Posgrado">Maestría/Posgrado</SelectItem>
                                         <SelectItem value="Curso de Idiomas en el exterior">Curso de Idiomas en el exterior</SelectItem>
                                         <SelectItem value="Summer Camp">Campamento de verano</SelectItem>
                                         <SelectItem value="Preparacion TOEF/ IELTS o similar">Preparación TOEFL/ IELTS o similar</SelectItem>
@@ -404,16 +469,7 @@ export default function ProfileCompletionForm() {
                                     </SelectContent>
                                 </Select>
                             </div>
-                            {/* Area Interest */}
-                            <div>
-                                <Label htmlFor="area_of_interest">Área de interés (opcional)</Label>
-                                <Input
-                                    id="area_of_interest"
-                                    name="area_of_interest"
-                                    value={formData.area_of_interest}
-                                    onChange={handleChange}
-                                />
-                            </div>
+
                             {/* Interest Slider */}
                             <div>
                                 <Label htmlFor="motivation">¿Del 1 al 10 que tan decidido/a estás por el programa mencionado?
@@ -529,6 +585,42 @@ export default function ProfileCompletionForm() {
                                         <SelectItem value="Ya se en qué ciudad estudiar y eso no es negociable">Ya sé en qué ciudad estudiar y eso no es negociable</SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+                                                        {/* Area Interest */}
+                                                        <div className="col-span-2">
+                                <div className="flex justify-between mb-2">
+                                    <Label className="text-base font-medium">Areas de interés</Label>
+                                    <Badge variant="outline">
+                                        {formData.area_of_interest.length}/2 seleccionadas
+                                    </Badge>
+                                </div>
+                                <div className="border rounded-md p-4 bg-gray-50 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {knowledgeareas.map((option) => (
+                                            <div key={option} className="flex items-center space-x-2">
+                                                <Checkbox 
+                                                    id={`area-${option}`}
+                                                    checked={formData.area_of_interest.includes(option)}
+                                                    onCheckedChange={() => {
+                                                        if (
+                                                            !formData.area_of_interest.includes(option) &&
+                                                            formData.area_of_interest.length >= 2
+                                                        ) return;
+                                                        handleCheckboxChange("area_of_interest", option);
+                                                    }}
+                                                    disabled={!formData.area_of_interest.includes(option) && formData.area_of_interest.length >= 2}
+                                                />
+                                                <Label 
+                                                    htmlFor={`area-${option}`}
+                                                    className="text-sm font-normal"
+                                                >
+                                                    {option}
+                                                </Label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Puedes seleccionar hasta 2 opciones.</p>
                             </div>
                             {/* Five Characteristics - IMPROVED WITH SHADCN CHECKBOXES */}
                             <div className="col-span-2">

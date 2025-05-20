@@ -108,7 +108,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route
             path="/test_home"
             element={
+              <ProtectedRoute>
                 <TestHome />
+              </ProtectedRoute>
             }
           />
           {/* Add more routes as needed */}
