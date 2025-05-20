@@ -84,6 +84,28 @@ export default function SpatialReasoningTest() {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-50">
       <h1 className="text-2xl font-bold mb-6 text-center">Test de Razonamiento Espacial</h1>
+      {/* Instruction Section */}
+<div className="mb-8">
+  {/* First text block */}
+  <div className="mb-4 text-center text-base">
+  En cada ejercicio se presenta un modelo o patrón en el que algunas zonas están sombreadas y en otras aparecen pequeños dibujos. A la derecha de cada modelo se ofrecen cuatro figuras de tres dimensiones. Su tarea consiste en averiguar cuál de esas figuras es la única que ha podido formarse a partir del modelo. Éste siempre presenta la parte exterior de la figura.
+  </div>
+  {/* Image block */}
+  <div className="flex justify-center mb-4">
+    <img
+      src="/spatial/questions/instrucciones_espacial.png" // Ajusta la ruta según tu estructura
+      alt="Ejemplo de instrucciones"
+      className="w-full max-w-xl rounded shadow"
+    />
+  </div>
+  {/* Second text block */}
+  <div className="text-center text-base">
+  En el Ejemplo E1 el modelo formará un caja rectangular con las dos caras mayores y una de las pequeñas laterales sombreadas. Fíjese en las respuestas A, B, C y D. Las respuestas A y C son incorrectas porque la cara superior no está sombreada. La respuesta B, tampoco es correcta porque tiene sombreados uno de los laterales largos. La respuesta correcta es D porque la cara superior y uno de los laterales cortos están sombreados. La cara inferior está oculta a la vista
+    <br />
+    <strong>¡Buena suerte!</strong>
+  </div>
+</div>
+      
       <div className="flex justify-between mb-4">
         <div className="text-lg font-medium">Página {currentPage + 1} de {totalPages}</div>
         <div className="text-lg font-medium">Preguntas contestadas: {Object.keys(answers).length} de {testQuestions.length}</div>
@@ -99,7 +121,7 @@ export default function SpatialReasoningTest() {
             <img
               src={question.problem}
               alt={`Problema ${question.id}`}
-              className="w-64 h-64 object-contain"
+              className="w-full h-full object-contain"
             />
           </Card>
 

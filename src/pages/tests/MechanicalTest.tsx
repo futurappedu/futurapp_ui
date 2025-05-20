@@ -17,9 +17,10 @@ const MechanicalTestApp = () => {
   const [testResults, setTestResults] = useState<TestResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const { user, isLoading: authLoading, logout } = useAuth0();
   
+
   const questionsPerPage = 5;
   const totalPages = Math.ceil(testQuestions.length / questionsPerPage);
   
@@ -86,7 +87,7 @@ const MechanicalTestApp = () => {
   // Get current questions for pagination
   const indexOfLastQuestion = currentPage * questionsPerPage;
   const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
-  const currentQuestions = testQuestions.slice(indexOfFirstQuestion, indexOfLastQuestion);
+  const currentQuestions = currentPage === 0 ? [] : testQuestions.slice(indexOfFirstQuestion, indexOfLastQuestion);
   
   return (
     <div className="container mx-auto p-4 max-w-2xl">
@@ -107,9 +108,38 @@ const MechanicalTestApp = () => {
             Página {currentPage} de {totalPages}
           </div>
         </CardHeader>
-        
+        {currentPage === 0 && (
+  <Card className="mb-8 p-6 bg-white">
+    <h2 className="text-xl font-semibold mb-4 text-center">Instrucciones</h2>
+    <p className="mb-4 text-center">
+     En esta prueba hay un cierto número de dibujos sobre los cuales se hacen algunas preguntas.
+     Lea atentamente cada pregunta, observe la figura o figuras y elija cúal de las tres preguntas A, B, C,
+     es la mejor respuesta
+     <br />
+     Una vez haya elegido su respuesta, debe marcar, en la Hoja de respuestas, el espacio correspondiente a 
+     la contestación elegida. Fíjese en el ejemplo:
+    </p>
+    <div className="flex justify-center">
+      <img
+        src="/mechanical/questions/instrucciones_mecanico.png" // Coloca aquí la ruta de tu imagen de instrucciones
+        alt="Ejemplo de instrucciones"
+        className="max-w-lg rounded shadow"
+      />
+      </div>
+      <div className="w-full flex justify-center mt-4">
+        <p className="text-sm text-center max-w-md">
+          El ejemplo E1 presenta dos dibujos que parecen similares; pero tienen una pequeña diferencia:
+          en el dibujo A la pala golpea la parte inferior de la pelota y en el B, la parte superior.
+          <br />
+          La pelota A subirá más porque la pala la golpea desde abajo. La respuesta correcta es la A.
+          <br />
+          <strong>¡Buena suerte!</strong>
+        </p>
+      </div>
+  </Card>
+  )}
         <CardContent>
-          {currentQuestions.map((q) => (
+          {currentPage > 0 && currentQuestions.map((q) => (
             <div key={q.id} className="mb-8 pb-6 border-b border-gray-200">
               <p className="font-semibold mb-3">{q.id}. {q.question}</p>
               
@@ -146,7 +176,7 @@ const MechanicalTestApp = () => {
           <div className="flex justify-between mt-6">
             <Button 
               onClick={handlePrevPage} 
-              disabled={currentPage === 1 || submitted}
+              disabled={currentPage === 0 || submitted}
               variant="outline"
             >
               Anterior

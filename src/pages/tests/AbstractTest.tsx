@@ -88,7 +88,35 @@ export default function AbstractReasoningTest() {
         <div className="text-lg font-medium">Página {currentPage + 1} de {totalPages}</div>
         <div className="text-lg font-medium">Preguntas contestadas: {Object.keys(answers).length} de {testQuestions.length}</div>
       </div>
-      
+      {currentPage === 0 && (
+  <Card className="mb-8 p-6 bg-white">
+    <h2 className="text-xl font-semibold mb-4 text-center">Instrucciones</h2>
+    <p className="mb-4 text-center">
+     En esta prueba se trata de apreciar la capacidad de razonar con figuras o dibujos. En cada fila hay cuatro figuras llamadas PROBLEMAS
+     y cinco llamadas RESPUESTA. Las figuras PROBLEMA forman una serie porque estan ordenadas siguiendo una ley. Su tarea consiste en elegir,
+     entre las figuras RESPUESTA, la que debería ir a continuación de las figuras PROBLEMA.
+     <br/>
+     Fíjese en el ejemplo:
+    </p>
+    <div className="flex justify-center">
+      <img
+        src="/abstract/questions/instrucciones_abstracto.png" // Coloca aquí la ruta de tu imagen de instrucciones
+        alt="Ejemplo de instrucciones"
+        className="max-w-lg rounded shadow"
+      />
+      </div>
+      <div className="w-full flex justify-center mt-4">
+        <p className="text-sm text-center max-w-md">
+          En el ejemplo E1, puede ver que la flecha gira 90 grados, en el sentido de las agujas del reloj, de un
+          recuadro a otro. ¿Cual debería ser la proxima figura de la serie? La respuesta correcta es la A
+          porque la posición siguiente de la flecha debería ser vertical hacia arriba.
+          <br />
+          <strong>¡Buena suerte!</strong>
+        </p>
+      </div>
+  </Card>
+  )}
+
       {visibleQuestions.map((question) => (
         <Card key={question.id} className="mb-12 p-6">
           <h2 className="text-xl font-semibold mb-4">Pregunta {question.id}</h2>
