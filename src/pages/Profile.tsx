@@ -120,7 +120,7 @@ export default function ProfileCompletionForm() {
         five_characteristics: "Cinco características más importantes",
       };
       
-    console.log(formData);
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         // Check for empty required fields (strings, arrays, numbers)

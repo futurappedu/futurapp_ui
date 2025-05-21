@@ -6,15 +6,19 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user } = useAuth0();
+  const { user, isLoading, isAuthenticated, loginWithRedirect } = useAuth0();
   const [loading, setLoading] = useState(false);
 
 
   const handleStart = async () => {
-    if (!user?.email) {
-      navigate("/profile");
+
+     // If not authenticated, force login first
+     if (!isAuthenticated) {
+      await loginWithRedirect({ appState: { returnTo: "/" } });
       return;
     }
+    if (!user?.email) return;
+    
     setLoading(true);
     try {
       const res = await fetch("https://futurappapi-staging.up.railway.app/check-profile", {
@@ -72,9 +76,9 @@ export default function Home() {
                 size="lg"
                 className="w-full"
                 onClick={handleStart}
-                disabled={loading}
-              >
-        {loading ? "Verificando..." : "Comenzar"}
+                disabled={loading || isLoading}
+    >
+      {loading || isLoading ? "Verificando..." : "Comenzar"}
         <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
