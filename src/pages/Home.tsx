@@ -1,44 +1,10 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart, BookOpen, Briefcase, Users } from "lucide-react";
-import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user, isLoading, isAuthenticated, loginWithRedirect } = useAuth0();
-  const [loading, setLoading] = useState(false);
 
-
-  const handleStart = async () => {
-
-     // If not authenticated, force login first
-     if (!isAuthenticated) {
-      await loginWithRedirect({ appState: { returnTo: "/" } });
-      return;
-    }
-    if (!user?.email) return;
-    
-    setLoading(true);
-    try {
-      const res = await fetch("https://futurappapi-staging.up.railway.app/check-profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email }),
-      });
-      const data = await res.json();
-      if (data.completed) {
-        navigate("/test_home");
-      } else {
-        navigate("/profile");
-      }
-    } catch (err) {
-      // fallback: go to profile if error
-      navigate("/profile");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -75,10 +41,9 @@ export default function Home() {
                 type="button"
                 size="lg"
                 className="w-full"
-                onClick={handleStart}
-                disabled={loading || isLoading}
+                onClick={() =>navigate("/login")}
     >
-      {loading || isLoading ? "Verificando..." : "Comenzar"}
+      Comenzar
         <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
