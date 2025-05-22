@@ -16,7 +16,7 @@ import {
 import Profile from "./pages/Profile";
 import Login from "./pages/Login"; // optional login page if you want a custom login view
 import ProtectedRoute from "./pages/ProtectedRoute";
-import { Auth0Provider, AppState } from "@auth0/auth0-react";
+import { Auth0Provider } from "@auth0/auth0-react";
 import About from "./pages/About";
 
 const domain = "dev-cw4j08ldhb6pgkzs.us.auth0.com"; // e.g. dev-abc123.us.auth0.com
@@ -25,8 +25,8 @@ const clientId = "FOHKg168YFW90b7jRMF2k4K49Jb1vjXF"; // Your Auth0 Client ID
 const Auth0ProviderWithNavigate = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
-  const onRedirectCallback = (appState?: AppState) => {
-    navigate(appState?.returnTo || "/career_recommender", { replace: true });
+  const onRedirectCallback = () => {
+    navigate("/login", { replace: true });
   };
 
   return (
