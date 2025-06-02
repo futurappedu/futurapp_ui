@@ -163,6 +163,7 @@ export default function UserProfile() {
     { id: 3, name: "numeric", label: "Razonamiento numérico", url: "/numerical_test"},
     { id: 4, name: "abstract", label: "Razonamiento abstracto", url: "/abstract_test"},
     { id: 5, name: "spatial", label: "Razonamiento espacial", url: "/spatial_test"},
+    { id: 6, name: "Realista", label: "Test de personalidad", url: "/personality_test" }
   ];
 
   const [tests, setTests] = useState<Test[]>([]);
@@ -284,15 +285,21 @@ export default function UserProfile() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        {isCompleted ? (
-                          <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-                            Puntaje: {test.score}%
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
-                            Empieza el test
-                          </Badge>
-                        )}
+                      {isCompleted ? (
+  test.name !== "Realista" ? (
+    <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+      Puntaje: {test.score}%
+    </Badge>
+  ) : (
+    <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+      Completado
+    </Badge>
+  )
+) : (
+  <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
+    Empieza el test
+  </Badge>
+)}
                         <ArrowRight
                           size={16}
                           className={`text-muted-foreground ${isCompleted ? "opacity-40 pointer-events-none" : ""}`}

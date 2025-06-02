@@ -1,0 +1,303 @@
+[
+  {
+    "id": 1,
+    "question": "Me gusta realizar pequeñas reparaciones de equipos electrodomésticos.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 2,
+    "question": "El trabajo científico me parece muy interesante.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 3,
+    "question": "Sé tocar un instrumento musical o me gustaría aprender.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 4,
+    "question": "Me gustaría cuidar personas con enfermedades mentales.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 5,
+    "question": "Me siento bien y me las arreglo cuando tengo que organizar el trabajo de mis compañeros y compañeras. Fijarles tareas y comprobar si han sido realizadas.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 6,
+    "question": "Me gusta llevar mis cuadernos de manera ordenada y limpia.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 7,
+    "question": "Me gustaría trabajar en el servicio técnico de una empresa.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 8,
+    "question": "Me gustaría trabajar en un centro de investigación o en un laboratorio.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 9,
+    "question": "En el futuro me gustaría escribir poemas, guiones de películas o de juegos de vídeo.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 10,
+    "question": "Me gusta mucho participar en organizaciones no gubernamentales como la Cruz Roja o una organización de jóvenes exploradores.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 11,
+    "question": "A veces en la escuela soluciono conflictos de mis compañeros y compañeras.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 12,
+    "question": "En mi puesto de trabajo me gustaría trabajar según normas estrictamente definidas.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 13,
+    "question": "Me interesan los aspectos técnicos de la industria automotriz.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 14,
+    "question": "Me interesan los descubrimientos científicos y las nuevas invenciones.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 15,
+    "question": "Me gusta ver exposiciones de esculturas, pintura o fotografía.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 16,
+    "question": "Me gusta participar en labores sociales.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 17,
+    "question": "En las actividades de grupo fomento el liderazgo y la coordinación.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 18,
+    "question": "Me gustaría tener un trabajo donde tenga que realizar tareas muy precisas.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 19,
+    "question": "Dibujar esquemas o proyectos de equipos es una tarea interesante y agradable para mí.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 20,
+    "question": "Me gusta hacer experimentos y observar cómo se hacen.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 21,
+    "question": "Me gusta participar en clases de arte, música o de literatura.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 22,
+    "question": "Me sentiría bien ayudando a las demás personas a comprenderse.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 23,
+    "question": "Me gusta tomar la palabra en diferentes discusiones y convencer a la gente.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 24,
+    "question": "Me gusta respetar y cumplir las fechas límites.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 25,
+    "question": "En el futuro me gustaría trabajar con herramientas y equipos técnicos.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 26,
+    "question": "Me gusta ver los programas de televisión dedicados a las novedades científicas.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 27,
+    "question": "Me interesan las revistas dedicadas al arte, a los muebles y a la arquitectura.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 28,
+    "question": "Con muchas ganas y gran dedicación enseñaría a jóvenes cómo evitar ciertas adicciones.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 29,
+    "question": "Me gustaría liderar un grupo de mis compañeros y compañeras para organizar una fiesta escolar.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 30,
+    "question": "Me gustaría tener un trabajo tranquilo, con reglas o instrucciones claras.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 31,
+    "question": "Conozco el diseño y el funcionamiento del computador.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 32,
+    "question": "Cuando paseo en las montañas o en un bosque me detengo para ver de cerca plantas y árboles que no conozco.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 33,
+    "question": "Me gustaría tocar en un grupo musical o en una orquesta.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 34,
+    "question": "En el futuro me gustaría trabajar con niños y niñas.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 35,
+    "question": "Sé dar instrucciones y consejos claros a las demás personas.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 36,
+    "question": "Por las tardes me gusta planear el trabajo que tengo que hacer al día siguiente.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 37,
+    "question": "Me gustaría trabajar en un taller de mecánica automotriz.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 38,
+    "question": "Me interesan nuevas ramas de la ciencia, como la genética o la biotecnología.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 39,
+    "question": "Me gustaría crear o componer algún tipo de música.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  {
+    "id": 40,
+    "question": "Me gustaría ayudar a la gente a resolver sus problemas sociales.",
+    "options": ["1", "2", "3", "4", "5"]
+  },
+  
+    {
+      "id": 41,
+      "question": "Me gustaría desempeñar la presidencia de mi clase.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 42,
+      "question": "En mi mesa de estudios me gusta tener todo perfectamente ordenado.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 43,
+      "question": "Me gustaría aprender a hacer dibujos técnicos.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 44,
+      "question": "Me gustaría realizar estudios y descubrir la vacuna contra una enfermedad grave.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 45,
+      "question": "Me gustaría hacer dibujos para libros o crear carteles.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 46,
+      "question": "En mi futuro trabajo me gustaría ayudar a personas con discapacidades.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 47,
+      "question": "Me gustaría tener un trabajo donde pudiera tomar decisiones y planear acciones para otras personas.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 48,
+      "question": "Me gusta planificar y controlar bien mis gastos.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 49,
+      "question": "Me gusta aprender cómo funcionan los equipos técnicos.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 50,
+      "question": "Me gustaría realizar estudios sobre el funcionamiento del cerebro.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 51,
+      "question": "En el futuro me gustaría expresarme mediante una actividad creativa como: la pintura, el dibujo, la escultura, el baile o el canto.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 52,
+      "question": "Me gustaría trabajar en un centro de ayuda telefónica para jóvenes.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 53,
+      "question": "Me gustaría aprender a liderar a la gente para gestionar sus acciones.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 54,
+      "question": "Me gusta tener ordenada mi habitación y mi mesa de estudios.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 55,
+      "question": "Me gustaría diseñar o arreglar máquinas y equipos modernos.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 56,
+      "question": "Me interesan nuevas ramas de la ciencia y la tecnología.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 57,
+      "question": "Me gustaría actuar en un escenario: bailar, cantar e interpretar papeles.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 58,
+      "question": "Me sentiría bien ayudando a personas nerviosas o tristes por algún motivo.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 59,
+      "question": "Me gusta dirigir el trabajo de las demás personas.",
+      "options": ["1", "2", "3", "4", "5"]
+    },
+    {
+      "id": 60,
+      "question": "Me gusta organizar mi trabajo día a día y para la semana.",
+      "options": ["1", "2", "3", "4", "5"]
+    } 
+]
