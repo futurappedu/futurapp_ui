@@ -12,6 +12,7 @@ import {
   SpatialReasoningTest,
   VerbalTestApp,
   AbstractTestApp,
+  PersonalityTest
 } from "./pages/tests";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login"; // optional login page if you want a custom login view
@@ -95,6 +96,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             path="/abstract_test"
             element={
                 <AbstractTestApp />
+            }
+          />
+          <Route
+            path="/personality_test"
+            element={
+                <PersonalityTest />
             }
           />
           <Route
