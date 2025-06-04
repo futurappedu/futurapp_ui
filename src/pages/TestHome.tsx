@@ -11,7 +11,29 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Svg, Polygon, G, Text as PdfText } from '@react-pdf/renderer';
 
+
+function getHexagonPoints(scores: Record<string, number>, maxScore = 30, radius = 70, cx = 100, cy = 100) {
+  const labels = ['R', 'I', 'A', 'S', 'E', 'C'];
+  return labels.map((label, i) => {
+    const angle = (Math.PI / 3) * i - Math.PI / 2;
+    const score = scores[label] || 0;
+    const r = (score / maxScore) * radius;
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    return `${x},${y}`;
+  }).join(' ');
+}
+
+function getHexagonBasePoints(radius = 70, cx = 100, cy = 100) {
+  return Array.from({ length: 6 }).map((_, i) => {
+    const angle = (Math.PI / 3) * i - Math.PI / 2;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
+    return `${x},${y}`;
+  }).join(' ');
+}
 // PDF Styles
 const styles = StyleSheet.create({
   page: {
@@ -122,6 +144,58 @@ const ScoreReport = ({ userData, tests, completedTests }: ScoreReportProps) => (
           </View>
         ))}
         
+        {/* RIASEC Hexagon */}
+{(() => {
+  // Find the RIASEC scores (assuming you store them in the Realista test)
+  const riasecTest = tests.find(t => t.name === "Realista" && t.score && typeof t.score === "object");
+  const riasecScores = riasecTest?.score as Record<string, number> | undefined;
+  if (!riasecScores) return null;
+
+  const labels = ['R', 'I', 'A', 'S', 'E', 'C'];
+  const labelNames: Record<string, string> = {
+    R: "Realista", I: "Investigativo", A: "Artistico", S: "Social", E: "Emprendedor", C: "Convencional"
+  };
+
+  return (
+    <View style={{ marginTop: 30, alignItems: 'center' }}>
+      <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>Perfil RIASEC</Text>
+      <Svg width="200" height="200" viewBox="0 0 200 200">
+        {/* Hexagon base */}
+        <Polygon
+          points={getHexagonBasePoints(70, 100, 100)}
+          stroke="#999"
+          strokeWidth={2}
+          fill="none"
+        />
+        {/* Profile polygon */}
+        <Polygon
+          points={getHexagonPoints(riasecScores, 30, 70, 100, 100)}
+          fill="rgba(30,144,255,0.4)"
+          stroke="#1e90ff"
+          strokeWidth={2}
+        />
+        {/* Labels */}
+        {labels.map((label, i) => {
+          const angle = (Math.PI / 3) * i - Math.PI / 2;
+          const x = 100 + 85 * Math.cos(angle);
+          const y = 100 + 85 * Math.sin(angle);
+          return (
+            <G key={label}>
+              <PdfText x={x - 10} y={y + 5} >{labelNames[label]}</PdfText>
+            </G>
+          );
+        })}
+      </Svg>
+      <View style={{ marginTop: 8 }}>
+        {labels.map(label => (
+          <Text key={label} style={{ fontSize: 10 }}>
+            {labelNames[label]}: {riasecScores[label] ?? 0}
+          </Text>
+        ))}
+      </View>
+    </View>
+  );
+})()}
         <Text style={styles.completionInfo}>
           Tests completados: {completedTests} de {tests.length} ({Math.round((completedTests / tests.length) * 100)}%)
         </Text>
@@ -155,6 +229,7 @@ export default function UserProfile() {
     url: string;
     score?: number;
     status?: "completed" | "pending";
+    hideInTable?: boolean; 
   }
 
   const availableTests = [
@@ -163,7 +238,12 @@ export default function UserProfile() {
     { id: 3, name: "numeric", label: "Razonamiento numérico", url: "/numerical_test"},
     { id: 4, name: "abstract", label: "Razonamiento abstracto", url: "/abstract_test"},
     { id: 5, name: "spatial", label: "Razonamiento espacial", url: "/spatial_test"},
-    { id: 6, name: "Realista", label: "Test de personalidad", url: "/personality_test" }
+    { id: 6, name: "Realista", label: "Test de personalidad", url: "/personality_test" },
+    { id: 7, name: "Investigativo", label: "Investigativa", url: "/personality_test", hideInTable: true },
+  { id: 8, name: "Artistico", label: "Artística", url: "/personality_test", hideInTable: true },
+  { id: 9, name: "Social", label: "Social", url: "/personality_test" , hideInTable: true },
+  { id: 10, name: "Emprendedor", label: "Emprendedora", url: "/personality_test", hideInTable: true },
+  { id: 11, name: "Convencional", label: "Convencional", url: "/personality_test", hideInTable: true }
   ];
 
   const [tests, setTests] = useState<Test[]>([]);
@@ -251,7 +331,9 @@ export default function UserProfile() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {tests.map((test) => {
+                  {tests
+                  .filter(test => !test.hideInTable)
+                  .map((test) => {
                     const isCompleted = test.status === "completed";
                     return (
                       <div
