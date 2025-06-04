@@ -13,15 +13,6 @@ export default function Home() {
           <Briefcase className="h-6 w-6 mr-2" />
           <span className="font-bold">Futurapp</span>
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            to="/login"
-            state={{ returnTo: "/test_home" }}
-          >
-            Test
-          </Link>
-        </nav>
       </header>
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
