@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import {  CheckCircle2, Clock, ArrowRight, FileDown } from 'lucide-react';
+import {  CheckCircle2, Clock, ArrowRight, FileDown, Search } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -231,6 +231,27 @@ export default function UserProfile() {
         {/* Tests Column */}
         
         <div className="md:col-span-2">
+          {/* Programs Explorer Card */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Explorador de programas y becas</CardTitle>
+              <CardDescription>
+                Descubre programas académicos y oportunidades de becas que se adapten a tu perfil.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button 
+                variant="default" 
+                className="w-full flex items-center justify-center"
+                onClick={() => window.location.href = "https://futurappapi-staging.up.railway.app/filter"}
+                >
+                <Search size={16} className="mr-2" />
+                Explorar programas y becas
+                </Button>
+            </CardContent>
+          </Card>
+
+          {/* Tests Card */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
