@@ -10,30 +10,50 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
-import { Svg, Polygon, G, Text as PdfText } from '@react-pdf/renderer';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Svg, Polygon } from '@react-pdf/renderer';
 
-
-function getHexagonPoints(scores: Record<string, number>, maxScore = 30, radius = 70, cx = 100, cy = 100) {
-  const labels = ['R', 'I', 'A', 'S', 'E', 'C'];
-  return labels.map((label, i) => {
-    const angle = (Math.PI / 3) * i - Math.PI / 2;
-    const score = scores[label] || 0;
-    const r = (score / maxScore) * radius;
-    const x = cx + r * Math.cos(angle);
-    const y = cy + r * Math.sin(angle);
+// Helper for RIASEC hexagon points and label positions
+function getHexagonPointsRIASEC(
+  scores: Record<string, number>,
+  maxScore = 50,
+  radius = 120,
+  cx = 200,
+  cy = 170
+) {
+  const categories = [
+    { key: 'R', angle: -90 },
+    { key: 'I', angle: -30 },
+    { key: 'A', angle: 30 },
+    { key: 'S', angle: 90 },
+    { key: 'E', angle: 150 },
+    { key: 'C', angle: 210 }
+  ];
+  return categories.map(cat => {
+    const value = scores[cat.key] ?? 0;
+    const normalized = Math.min(value / maxScore, 1);
+    const dist = normalized * radius;
+    const x = cx + Math.cos((cat.angle - 90) * Math.PI / 180) * dist;
+    const y = cy + Math.sin((cat.angle - 90) * Math.PI / 180) * dist;
     return `${x},${y}`;
   }).join(' ');
 }
 
-function getHexagonBasePoints(radius = 70, cx = 100, cy = 100) {
-  return Array.from({ length: 6 }).map((_, i) => {
-    const angle = (Math.PI / 3) * i - Math.PI / 2;
-    const x = cx + radius * Math.cos(angle);
-    const y = cy + radius * Math.sin(angle);
+function getHexagonOutlinePoints(radius = 120, cx = 200, cy = 170) {
+  const categories = [
+    { angle: -90 },
+    { angle: -30 },
+    { angle: 30 },
+    { angle: 90 },
+    { angle: 150 },
+    { angle: 210 }
+  ];
+  return categories.map(cat => {
+    const x = cx + Math.cos((cat.angle - 90) * Math.PI / 180) * radius;
+    const y = cy + Math.sin((cat.angle - 90) * Math.PI / 180) * radius;
     return `${x},${y}`;
   }).join(' ');
 }
+
 // PDF Styles
 const styles = StyleSheet.create({
   page: {
@@ -94,6 +114,27 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     fontSize: 10,
   },
+  hexagonContainer: {
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  hexagonTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  scoresContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  scoreItem: {
+    fontSize: 10,
+    margin: 3,
+    width: '45%',
+  },
 });
 
 // PDF Document Component
@@ -118,95 +159,147 @@ interface ScoreReportProps {
   completedTests: number;
 }
 
-const ScoreReport = ({ userData, tests, completedTests }: ScoreReportProps) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Reporte de Tests</Text>
-        <Text style={styles.subtitle}>{userData.name} ({userData.email})</Text>
-        {userData.title && <Text style={styles.subtitle}>{userData.title} at {userData.company || 'N/A'}</Text>}
-      </View>
-      
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Resultados</Text>
-        
-        <View style={styles.row}>
-          <Text style={[styles.testName, { fontWeight: 'bold' }]}>Nombre del test</Text>
-          <Text style={[styles.testScore, { fontWeight: 'bold' }]}>Puntaje</Text>
-        </View>
-        
-        {tests.map((test) => (
-          <View key={test.id} style={styles.row}>
-            <Text style={styles.testName}>{test.label}</Text>
-            <Text style={styles.testScore}>
-              {test.status === "completed" ? `${test.score}%` : "Pending"}
-            </Text>
-          </View>
-        ))}
-        
-        {/* RIASEC Hexagon */}
-{(() => {
-  // Find the RIASEC scores (assuming you store them in the Realista test)
-  const riasecTest = tests.find(t => t.name === "Realista" && t.score && typeof t.score === "object");
-  const riasecScores = riasecTest?.score as Record<string, number> | undefined;
-  if (!riasecScores) return null;
-
-  const labels = ['R', 'I', 'A', 'S', 'E', 'C'];
-  const labelNames: Record<string, string> = {
-    R: "Realista", I: "Investigativo", A: "Artistico", S: "Social", E: "Emprendedor", C: "Convencional"
+const ScoreReport = ({ userData, tests, completedTests }: ScoreReportProps) => {
+  // Find the RIASEC scores
+  const riasecScores = {
+    R: tests.find(t => t.name === "Realista")?.score ?? 0,
+    I: tests.find(t => t.name === "Investigativo")?.score ?? 0,
+    A: tests.find(t => t.name === "Artistico" || t.name === "Artístico")?.score ?? 0,
+    S: tests.find(t => t.name === "Social")?.score ?? 0,
+    E: tests.find(t => t.name === "Emprendedor" || t.name === "Emprendedora")?.score ?? 0,
+    C: tests.find(t => t.name === "Convencional")?.score ?? 0,
   };
 
   return (
-    <View style={{ marginTop: 30, alignItems: 'center' }}>
-      <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>Perfil RIASEC</Text>
-      <Svg width="200" height="200" viewBox="0 0 200 200">
-        {/* Hexagon base */}
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Reporte de Tests</Text>
+          <Text style={styles.subtitle}>{userData.name} ({userData.email})</Text>
+          {userData.title && <Text style={styles.subtitle}>{userData.title} at {userData.company || 'N/A'}</Text>}
+        </View>
+        
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Resultados</Text>
+          
+          <View style={styles.row}>
+            <Text style={[styles.testName, { fontWeight: 'bold' }]}>Nombre del test</Text>
+            <Text style={[styles.testScore, { fontWeight: 'bold' }]}>Puntaje</Text>
+          </View>
+          
+          {tests.map((test) => (
+            <View key={test.id} style={styles.row}>
+              <Text style={styles.testName}>{test.label}</Text>
+              <Text style={styles.testScore}>
+                {test.status === "completed" ? `${test.score}%` : "Pending"}
+              </Text>
+            </View>
+          ))}
+          
+          {riasecScores && (
+  <View style={{ alignItems: 'center', marginVertical: 20 }}>
+    <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' }}>Perfil RIASEC</Text>
+    
+    {/* Container for SVG and labels */}
+    <View style={{ position: 'relative', width: 400, height: 340 }}>
+      <Svg width="400" height="340" viewBox="0 0 400 340">
+        {/* Hexagon outline */}
         <Polygon
-          points={getHexagonBasePoints(70, 100, 100)}
-          stroke="#999"
+          points={getHexagonOutlinePoints(120, 200, 170)}
+          stroke="#ccc"
           strokeWidth={2}
           fill="none"
         />
-        {/* Profile polygon */}
+        {/* Data polygon */}
         <Polygon
-          points={getHexagonPoints(riasecScores, 30, 70, 100, 100)}
-          fill="rgba(30,144,255,0.4)"
-          stroke="#1e90ff"
-          strokeWidth={2}
+          points={getHexagonPointsRIASEC(riasecScores, 50, 120, 200, 170)}
+          fill="rgba(102,126,234,0.3)"
+          stroke="#667eea"
+          strokeWidth={3}
         />
-        {/* Labels */}
-        {labels.map((label, i) => {
-          const angle = (Math.PI / 3) * i - Math.PI / 2;
-          const x = 100 + 85 * Math.cos(angle);
-          const y = 100 + 85 * Math.sin(angle);
-          return (
-            <G key={label}>
-              <PdfText x={x - 10} y={y + 5} >{labelNames[label]}</PdfText>
-            </G>
-          );
-        })}
       </Svg>
-      <View style={{ marginTop: 8 }}>
-        {labels.map(label => (
-          <Text key={label} style={{ fontSize: 10 }}>
-            {labelNames[label]}: {riasecScores[label] ?? 0}
-          </Text>
-        ))}
-      </View>
-    </View>
-  );
-})()}
-        <Text style={styles.completionInfo}>
-          Tests completados: {completedTests} de {tests.length} ({Math.round((completedTests / tests.length) * 100)}%)
-        </Text>
-      </View>
       
-      <View style={styles.footer}>
-        <Text>Reporte generado {new Date().toLocaleDateString()}</Text>
-      </View>
-    </Page>
-  </Document>
-);
+      {/* Labels positioned around the hexagon */}
+      <Text style={{ position: 'absolute', left: 175, top: 20, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Realista
+      </Text>
+      <Text style={{ position: 'absolute', left: 310, top: 80, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Investigativo
+      </Text>
+      <Text style={{ position: 'absolute', left: 310, top: 230, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Artístico
+      </Text>
+      <Text style={{ position: 'absolute', left: 175, top: 290, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Social
+      </Text>
+      <Text style={{ position: 'absolute', left: 40, top: 230, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Emprendedor
+      </Text>
+      <Text style={{ position: 'absolute', left: 40, top: 80, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Convencional
+      </Text>
+
+      {/* Value labels */}
+      {([
+        { key: 'R', angle: -90, offsetX: 0, offsetY: -15 },
+        { key: 'I', angle: -30, offsetX: 15, offsetY: -5 },
+        { key: 'A', angle: 30, offsetX: 15, offsetY: 5 },
+        { key: 'S', angle: 90, offsetX: 0, offsetY: 15 },
+        { key: 'E', angle: 150, offsetX: -15, offsetY: 5 },
+        { key: 'C', angle: 210, offsetX: -15, offsetY: -5 }
+      ] as { key: keyof typeof riasecScores; angle: number; offsetX: number; offsetY: number }[]).map(cat => {
+        const value = riasecScores[cat.key] ?? 0;
+        if (value === 0) return null;
+        
+        const normalized = Math.min(value / 50, 1);
+        const dist = normalized * 120;
+        const x = 200 + Math.cos((cat.angle - 90) * Math.PI / 180) * dist + cat.offsetX;
+        const y = 170 + Math.sin((cat.angle - 90) * Math.PI / 180) * dist + cat.offsetY;
+        
+        return (
+          <Text
+            key={cat.key}
+            style={{
+              position: 'absolute',
+              left: x - 10,
+              top: y - 8,
+              fontSize: 10,
+              fontWeight: 'bold',
+              color: '#667eea',
+              textAlign: 'center',
+              width: 20
+            }}
+          >
+            {value}
+          </Text>
+        );
+      })}
+    </View>
+
+    {/* Scores summary below the hexagon */}
+    <View style={{ marginTop: 15, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
+      {Object.entries(riasecScores).map(([key, value]) => (
+        <Text key={key} style={{ fontSize: 10, margin: 5, width: '30%', textAlign: 'center' }}>
+          {key}: {value}
+        </Text>
+      ))}
+    </View>
+  </View>
+)}
+
+          
+          <Text style={styles.completionInfo}>
+            Tests completados: {completedTests} de {tests.length} ({Math.round((completedTests / tests.length) * 100)}%)
+          </Text>
+        </View>
+        
+        <View style={styles.footer}>
+          <Text>Reporte generado {new Date().toLocaleDateString()}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+};
 
 export default function UserProfile() {
   const { user, logout } = useAuth0(); 
@@ -240,17 +333,17 @@ export default function UserProfile() {
     { id: 5, name: "spatial", label: "Razonamiento espacial", url: "/spatial_test"},
     { id: 6, name: "Realista", label: "Test de personalidad", url: "/personality_test" },
     { id: 7, name: "Investigativo", label: "Investigativa", url: "/personality_test", hideInTable: true },
-  { id: 8, name: "Artistico", label: "Artística", url: "/personality_test", hideInTable: true },
-  { id: 9, name: "Social", label: "Social", url: "/personality_test" , hideInTable: true },
-  { id: 10, name: "Emprendedor", label: "Emprendedora", url: "/personality_test", hideInTable: true },
-  { id: 11, name: "Convencional", label: "Convencional", url: "/personality_test", hideInTable: true }
+    { id: 8, name: "Artistico", label: "Artística", url: "/personality_test", hideInTable: true },
+    { id: 9, name: "Social", label: "Social", url: "/personality_test" , hideInTable: true },
+    { id: 10, name: "Emprendedor", label: "Emprendedora", url: "/personality_test", hideInTable: true },
+    { id: 11, name: "Convencional", label: "Convencional", url: "/personality_test", hideInTable: true }
   ];
 
   const [tests, setTests] = useState<Test[]>([]);
 
   useEffect(() => {
     if (!user?.email) return;
-    setIsLoadingTests(true); // Start loading
+    setIsLoadingTests(true);
     Promise.all(
       availableTests.map(async (test) => {
         const res = await fetch('https://futurappapi-staging.up.railway.app/scores-tests', {
@@ -269,12 +362,11 @@ export default function UserProfile() {
         };
       })
     ).then(setTests)
-     .finally(() => setIsLoadingTests(false)); // Stop loading
+     .finally(() => setIsLoadingTests(false));
   }, [user?.email, user?.name]);
 
   const completedTests = tests.filter(test => test.status === "completed").length;
   const completionPercentage = (completedTests / tests.length) * 100;
-
 
   const handleTestClick = (testId: number) => {
     const test = tests.find(t => t.id === testId);
@@ -282,8 +374,6 @@ export default function UserProfile() {
       navigate(test.url);
     }
   };
-
-  // Handle PDF generation
 
   return (
     <div className="container max-w-6xl py-8">
@@ -306,10 +396,9 @@ export default function UserProfile() {
               <Separator />              
             </CardContent>
           </Card>
-          
         </div>
+
         {/* Tests Column */}
-        
         <div className="md:col-span-2">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -368,20 +457,20 @@ export default function UserProfile() {
                       </div>
                       <div className="flex items-center gap-3">
                       {isCompleted ? (
-  test.name !== "Realista" ? (
-    <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-      Puntaje: {test.score}%
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-      Completado
-    </Badge>
-  )
-) : (
-  <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
-    Empieza el test
-  </Badge>
-)}
+                        test.name !== "Realista" ? (
+                          <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+                            Puntaje: {test.score}%
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+                            Completado
+                          </Badge>
+                        )
+                      ) : (
+                        <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
+                          Empieza el test
+                        </Badge>
+                      )}
                         <ArrowRight
                           size={16}
                           className={`text-muted-foreground ${isCompleted ? "opacity-40 pointer-events-none" : ""}`}
@@ -426,17 +515,17 @@ export default function UserProfile() {
                   </Button>
                 )}
                 {/* Recomendador IA Button */}
-  {completedTests === tests.length && (
-    <Button
-      variant="default"
-      className="w-full mt-4"
-      onClick={() => {
-        navigate("/career_recommender");
-      }}
-    >
-      Recomendador IA
-    </Button>
-  )}
+                {completedTests === tests.length && (
+                  <Button
+                    variant="default"
+                    className="w-full mt-4"
+                    onClick={() => {
+                      navigate("/career_recommender");
+                    }}
+                  >
+                    Recomendador IA
+                  </Button>
+                )}
               </div>
           </Card>
           {/* Basic Information Card */}
