@@ -10,7 +10,49 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Svg, Polygon } from '@react-pdf/renderer';
+
+// Helper for RIASEC hexagon points and label positions
+function getHexagonPointsRIASEC(
+  scores: Record<string, number>,
+  maxScore = 50,
+  radius = 120,
+  cx = 200,
+  cy = 170
+) {
+  const categories = [
+    { key: 'R', angle: -90 },
+    { key: 'I', angle: -30 },
+    { key: 'A', angle: 30 },
+    { key: 'S', angle: 90 },
+    { key: 'E', angle: 150 },
+    { key: 'C', angle: 210 }
+  ];
+  return categories.map(cat => {
+    const value = scores[cat.key] ?? 0;
+    const normalized = Math.min(value / maxScore, 1);
+    const dist = normalized * radius;
+    const x = cx + Math.cos((cat.angle - 90) * Math.PI / 180) * dist;
+    const y = cy + Math.sin((cat.angle - 90) * Math.PI / 180) * dist;
+    return `${x},${y}`;
+  }).join(' ');
+}
+
+function getHexagonOutlinePoints(radius = 120, cx = 200, cy = 170) {
+  const categories = [
+    { angle: -90 },
+    { angle: -30 },
+    { angle: 30 },
+    { angle: 90 },
+    { angle: 150 },
+    { angle: 210 }
+  ];
+  return categories.map(cat => {
+    const x = cx + Math.cos((cat.angle - 90) * Math.PI / 180) * radius;
+    const y = cy + Math.sin((cat.angle - 90) * Math.PI / 180) * radius;
+    return `${x},${y}`;
+  }).join(' ');
+}
 
 // PDF Styles
 const styles = StyleSheet.create({
@@ -51,11 +93,11 @@ const styles = StyleSheet.create({
   },
   testName: {
     width: '70%',
-    fontSize: 12,
+    fontSize: 10,
   },
   testScore: {
     width: '30%',
-    fontSize: 12,
+    fontSize: 10,
     textAlign: 'right',
   },
   completionInfo: {
@@ -71,6 +113,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#9ca3af',
     fontSize: 10,
+  },
+  hexagonContainer: {
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  hexagonTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  scoresContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  scoreItem: {
+    fontSize: 10,
+    margin: 3,
+    width: '45%',
   },
 });
 
@@ -92,47 +155,150 @@ interface ScoreReportProps {
     url: string;
     score?: number;
     status?: "completed" | "pending";
+    hideInTable?: boolean;
   }[];
   completedTests: number;
 }
 
-const ScoreReport = ({ userData, tests, completedTests }: ScoreReportProps) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Reporte de Tests</Text>
-        <Text style={styles.subtitle}>{userData.name} ({userData.email})</Text>
-        {userData.title && <Text style={styles.subtitle}>{userData.title} at {userData.company || 'N/A'}</Text>}
-      </View>
-      
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Resultados</Text>
-        
-        <View style={styles.row}>
-          <Text style={[styles.testName, { fontWeight: 'bold' }]}>Nombre del test</Text>
-          <Text style={[styles.testScore, { fontWeight: 'bold' }]}>Puntaje</Text>
+const ScoreReport = ({ userData, tests }: ScoreReportProps) => {
+  // Find the RIASEC scores
+  const riasecScores = {
+    R: tests.find(t => t.name === "Realista")?.score ?? 0,
+    I: tests.find(t => t.name === "Investigativo")?.score ?? 0,
+    A: tests.find(t => t.name === "Artistico" || t.name === "Artístico")?.score ?? 0,
+    S: tests.find(t => t.name === "Social")?.score ?? 0,
+    E: tests.find(t => t.name === "Emprendedor" || t.name === "Emprendedora")?.score ?? 0,
+    C: tests.find(t => t.name === "Convencional")?.score ?? 0,
+  };
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Reporte de Tests</Text>
+          <Text style={styles.subtitle}>{userData.name} ({userData.email})</Text>
+          {userData.title && <Text style={styles.subtitle}>{userData.title} at {userData.company || 'N/A'}</Text>}
         </View>
         
-        {tests.map((test) => (
-          <View key={test.id} style={styles.row}>
-            <Text style={styles.testName}>{test.label}</Text>
-            <Text style={styles.testScore}>
-              {test.status === "completed" ? `${test.score}%` : "Pending"}
-            </Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Resultados</Text>
+          
+          <View style={styles.row}>
+            <Text style={[styles.testName, { fontWeight: 'bold' }]}>Nombre del test</Text>
+            <Text style={[styles.testScore, { fontWeight: 'bold' }]}>Puntaje</Text>
           </View>
-        ))}
-        
-        <Text style={styles.completionInfo}>
-          Tests completados: {completedTests} de {tests.length} ({Math.round((completedTests / tests.length) * 100)}%)
-        </Text>
-      </View>
+          
+            {tests
+              .filter(test => !test.hideInTable && test.name !== "Realista")
+              .map((test) => (
+              <View key={test.id} style={styles.row}>
+                <Text style={styles.testName}>{test.label}</Text>
+                <Text style={styles.testScore}>
+                {test.status === "completed" ? `${test.score}%` : "Pending"}
+                </Text>
+              </View>
+            ))}
+          
+          
+          {riasecScores && (
+  <View style={{ alignItems: 'center', marginVertical: 20 }}>
+    <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' }}>Perfil RIASEC</Text>
+    
+    {/* Container for SVG and labels */}
+    <View style={{ position: 'relative', width: 400, height: 340 }}>
+      <Svg width="400" height="340" viewBox="0 0 400 340">
+        {/* Hexagon outline */}
+        <Polygon
+          points={getHexagonOutlinePoints(120, 200, 170)}
+          stroke="#ccc"
+          strokeWidth={2}
+          fill="none"
+        />
+        {/* Data polygon */}
+        <Polygon
+          points={getHexagonPointsRIASEC(riasecScores, 50, 120, 200, 170)}
+          fill="rgba(102,126,234,0.3)"
+          stroke="#667eea"
+          strokeWidth={3}
+        />
+      </Svg>
       
-      <View style={styles.footer}>
-        <Text>Reporte generado {new Date().toLocaleDateString()}</Text>
-      </View>
-    </Page>
-  </Document>
-);
+      {/* Labels positioned around the hexagon */}
+      <Text style={{ position: 'absolute', left: 175, top: 20, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Realista
+      </Text>
+      <Text style={{ position: 'absolute', left: 310, top: 80, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Investigativo
+      </Text>
+      <Text style={{ position: 'absolute', left: 310, top: 230, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Artístico
+      </Text>
+      <Text style={{ position: 'absolute', left: 175, top: 290, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Social
+      </Text>
+      <Text style={{ position: 'absolute', left: 40, top: 230, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Emprendedor
+      </Text>
+      <Text style={{ position: 'absolute', left: 40, top: 80, fontSize: 10, fontWeight: 'bold', textAlign: 'center', width: 50 }}>
+        Convencional
+      </Text>
+
+      {/* Value labels */}
+      {([
+        { key: 'R', angle: -90, offsetX: 0, offsetY: -15 },
+        { key: 'I', angle: -30, offsetX: 15, offsetY: -5 },
+        { key: 'A', angle: 30, offsetX: 15, offsetY: 5 },
+        { key: 'S', angle: 90, offsetX: 0, offsetY: 15 },
+        { key: 'E', angle: 150, offsetX: -15, offsetY: 5 },
+        { key: 'C', angle: 210, offsetX: -15, offsetY: -5 }
+      ] as { key: keyof typeof riasecScores; angle: number; offsetX: number; offsetY: number }[]).map(cat => {
+        const value = riasecScores[cat.key] ?? 0;
+        if (value === 0) return null;
+        
+        const normalized = Math.min(value / 50, 1);
+        const dist = normalized * 120;
+        const x = 200 + Math.cos((cat.angle - 90) * Math.PI / 180) * dist + cat.offsetX;
+        const y = 170 + Math.sin((cat.angle - 90) * Math.PI / 180) * dist + cat.offsetY;
+        
+        return (
+          <Text
+            key={cat.key}
+            style={{
+              position: 'absolute',
+              left: x - 10,
+              top: y - 8,
+              fontSize: 10,
+              fontWeight: 'bold',
+              color: '#667eea',
+              textAlign: 'center',
+              width: 20
+            }}
+          >
+            {value}
+          </Text>
+        );
+      })}
+    </View>
+
+    {/* Scores summary below the hexagon */}
+    <View style={{ marginTop: 15, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
+      {Object.entries(riasecScores).map(([key, value]) => (
+        <Text key={key} style={{ fontSize: 10, margin: 5, width: '30%', textAlign: 'center' }}>
+          {key}: {value}
+        </Text>
+      ))}
+    </View>
+  </View>
+)}
+        </View>
+        
+        <View style={styles.footer}>
+          <Text>Reporte generado {new Date().toLocaleDateString()}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+};
 
 export default function UserProfile() {
   const { user, logout } = useAuth0(); 
@@ -155,6 +321,7 @@ export default function UserProfile() {
     url: string;
     score?: number;
     status?: "completed" | "pending";
+    hideInTable?: boolean; 
   }
 
   const availableTests = [
@@ -163,14 +330,19 @@ export default function UserProfile() {
     { id: 3, name: "numeric", label: "Razonamiento numérico", url: "/numerical_test"},
     { id: 4, name: "abstract", label: "Razonamiento abstracto", url: "/abstract_test"},
     { id: 5, name: "spatial", label: "Razonamiento espacial", url: "/spatial_test"},
-    { id: 6, name: "Realista", label: "Test de personalidad", url: "/personality_test" }
+    { id: 6, name: "Realista", label: "Test de personalidad", url: "/personality_test" },
+    { id: 7, name: "Investigativo", label: "Investigativa", url: "/personality_test", hideInTable: true },
+    { id: 8, name: "Artistico", label: "Artística", url: "/personality_test", hideInTable: true },
+    { id: 9, name: "Social", label: "Social", url: "/personality_test" , hideInTable: true },
+    { id: 10, name: "Emprendedor", label: "Emprendedora", url: "/personality_test", hideInTable: true },
+    { id: 11, name: "Convencional", label: "Convencional", url: "/personality_test", hideInTable: true }
   ];
 
   const [tests, setTests] = useState<Test[]>([]);
 
   useEffect(() => {
     if (!user?.email) return;
-    setIsLoadingTests(true); // Start loading
+    setIsLoadingTests(true);
     Promise.all(
       availableTests.map(async (test) => {
         const res = await fetch('https://futurappapi-staging.up.railway.app/scores-tests', {
@@ -189,12 +361,11 @@ export default function UserProfile() {
         };
       })
     ).then(setTests)
-     .finally(() => setIsLoadingTests(false)); // Stop loading
+     .finally(() => setIsLoadingTests(false));
   }, [user?.email, user?.name]);
 
   const completedTests = tests.filter(test => test.status === "completed").length;
   const completionPercentage = (completedTests / tests.length) * 100;
-
 
   const handleTestClick = (testId: number) => {
     const test = tests.find(t => t.id === testId);
@@ -202,8 +373,6 @@ export default function UserProfile() {
       navigate(test.url);
     }
   };
-
-  // Handle PDF generation
 
   return (
     <div className="container max-w-6xl py-8">
@@ -226,10 +395,9 @@ export default function UserProfile() {
               <Separator />              
             </CardContent>
           </Card>
-          
         </div>
+
         {/* Tests Column */}
-        
         <div className="md:col-span-2">
           {/* Programs Explorer Card */}
           <Card className="mb-6">
@@ -272,7 +440,9 @@ export default function UserProfile() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {tests.map((test) => {
+                  {tests
+                  .filter(test => !test.hideInTable)
+                  .map((test) => {
                     const isCompleted = test.status === "completed";
                     return (
                       <div
@@ -307,20 +477,20 @@ export default function UserProfile() {
                       </div>
                       <div className="flex items-center gap-3">
                       {isCompleted ? (
-  test.name !== "Realista" ? (
-    <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-      Puntaje: {test.score}%
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-      Completado
-    </Badge>
-  )
-) : (
-  <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
-    Empieza el test
-  </Badge>
-)}
+                        test.name !== "Realista" ? (
+                          <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+                            Puntaje: {test.score}%
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+                            Completado
+                          </Badge>
+                        )
+                      ) : (
+                        <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
+                          Empieza el test
+                        </Badge>
+                      )}
                         <ArrowRight
                           size={16}
                           className={`text-muted-foreground ${isCompleted ? "opacity-40 pointer-events-none" : ""}`}
@@ -365,17 +535,17 @@ export default function UserProfile() {
                   </Button>
                 )}
                 {/* Recomendador IA Button */}
-  {completedTests === tests.length && (
-    <Button
-      variant="default"
-      className="w-full mt-4"
-      onClick={() => {
-        navigate("/career_recommender");
-      }}
-    >
-      Recomendador IA
-    </Button>
-  )}
+                {completedTests === tests.length && (
+                  <Button
+                    variant="default"
+                    className="w-full mt-4"
+                    onClick={() => {
+                      navigate("/career_recommender");
+                    }}
+                  >
+                    Recomendador IA
+                  </Button>
+                )}
               </div>
           </Card>
           {/* Basic Information Card */}
