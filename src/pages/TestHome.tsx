@@ -93,11 +93,11 @@ const styles = StyleSheet.create({
   },
   testName: {
     width: '70%',
-    fontSize: 12,
+    fontSize: 10,
   },
   testScore: {
     width: '30%',
-    fontSize: 12,
+    fontSize: 10,
     textAlign: 'right',
   },
   completionInfo: {
@@ -155,11 +155,12 @@ interface ScoreReportProps {
     url: string;
     score?: number;
     status?: "completed" | "pending";
+    hideInTable?: boolean;
   }[];
   completedTests: number;
 }
 
-const ScoreReport = ({ userData, tests, completedTests }: ScoreReportProps) => {
+const ScoreReport = ({ userData, tests }: ScoreReportProps) => {
   // Find the RIASEC scores
   const riasecScores = {
     R: tests.find(t => t.name === "Realista")?.score ?? 0,
@@ -187,14 +188,17 @@ const ScoreReport = ({ userData, tests, completedTests }: ScoreReportProps) => {
             <Text style={[styles.testScore, { fontWeight: 'bold' }]}>Puntaje</Text>
           </View>
           
-          {tests.map((test) => (
-            <View key={test.id} style={styles.row}>
-              <Text style={styles.testName}>{test.label}</Text>
-              <Text style={styles.testScore}>
+            {tests
+              .filter(test => !test.hideInTable && test.name !== "Realista")
+              .map((test) => (
+              <View key={test.id} style={styles.row}>
+                <Text style={styles.testName}>{test.label}</Text>
+                <Text style={styles.testScore}>
                 {test.status === "completed" ? `${test.score}%` : "Pending"}
-              </Text>
-            </View>
-          ))}
+                </Text>
+              </View>
+            ))}
+          
           
           {riasecScores && (
   <View style={{ alignItems: 'center', marginVertical: 20 }}>
@@ -286,11 +290,6 @@ const ScoreReport = ({ userData, tests, completedTests }: ScoreReportProps) => {
     </View>
   </View>
 )}
-
-          
-          <Text style={styles.completionInfo}>
-            Tests completados: {completedTests} de {tests.length} ({Math.round((completedTests / tests.length) * 100)}%)
-          </Text>
         </View>
         
         <View style={styles.footer}>
