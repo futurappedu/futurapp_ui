@@ -2,17 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { useAuth0 } from "@auth0/auth0-react";
 import LogoutButton from "./Logout";
 import { useNavigate } from "react-router-dom";
 
 interface Recommendations {
-  preferences_recommendations: Array<{
+  recommendations: Array<{
     "Campo de Estudio": string;
     Razon: string;
   }>;
-  skills_recommendations: Array<{ "Campo de Estudio": string; Razon: string }>;
   university_recommendations: Array<{
     "Campo de Estudio": string;
     "Recomendacion Uno": string;
@@ -34,19 +32,12 @@ function Recommender() {
   });
 
   const [preferences, setPreferences] = useState({
-    commercial: 0,
-    legal: 0,
-    scientific: 0,
-    humanities_social: 0,
-    security: 0,
-    communication: 0,
-    environmental: 0,
-    technology: 0,
-    hospitality_tourism: 0,
-    mechanical: 0,
-    artistic: 0,
-    health: 0,
-    pedagogy: 0,
+    realista: 0,
+    investigativo: 0,
+    artistico: 0,
+    social: 0,
+    convencional: 0,
+    emprendedor: 0,
   });
 
   const [results, setResults] = useState<Recommendations | null>(null);
@@ -83,7 +74,15 @@ function Recommender() {
           numerical_aptitude: data.numeric ?? 0,
           spatial_aptitude: data.spatial ?? 0,
           abstract_reasoning: data.abstract ?? 0,
-          verbal_aptitude: data.verbal ?? 0,
+          verbal_aptitude: data.verbal ?? 0
+        });
+        setPreferences({
+          realista: data.Realista ?? 0,
+          convencional: data.Convencional ?? 0,
+          investigativo: data.Investigativo ?? 0, 
+          artistico: data.Artistico ?? 0,
+          social: data.Social ?? 0,
+          emprendedor: data.Emprendedor ?? 0,
         });
       } catch (err) {
         setError("No se pudieron obtener las habilidades del usuario.");
@@ -93,10 +92,6 @@ function Recommender() {
         };
         fetchSkills();
       }, [user?.email]);
-
-  const handlePreferenceChange = (key: string, value: number[]) => {
-    setPreferences((prev) => ({ ...prev, [key]: value[0] }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,30 +126,6 @@ function Recommender() {
     }
   };
 
-  const renderPreferenceInputs = () => {
-    return Object.entries(preferences).map(([key, value]) => (
-      <div key={key} className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <Label htmlFor={key} className="capitalize">
-            {key.replace("_", " ")}
-          </Label>
-          <span className="font-medium">{value * 10}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Slider
-            id={key}
-            name={key}
-            value={[value]}
-            onValueChange={(val) => handlePreferenceChange(key, val)}
-            max={10}
-            step={1}
-            className="w-full"
-          />
-        </div>
-      </div>
-    ));
-  };
-
   if (isLoading || loadingSkills) {
     return <div>Loading...</div>;
   }
@@ -175,19 +146,24 @@ function Recommender() {
             <div>
               <h2 className="text-xl font-semibold mb-4">Skills</h2>
               <div className="mb-4">
-                {Object.entries(skills).map(([key, value]) => (
+                {Object.entries(skills).map(([key, value]: [string, number]) => (
                   <div key={key} className="flex justify-between items-center mb-2">
                     <Label className="capitalize">{key.replace("_", " ")}</Label>
-                    <span className="font-medium">{value }</span>
+                    <span className="font-medium">{value}</span>
+                  </div>
+                ))}
+              </div>
+                <h2 className="text-lg font-semibold mt-6 mb-2">Riasec: Test Personalidad</h2>
+                <div className="mb-4">
+                {Object.entries(preferences).map(([key, value]: [string, number]) => (
+                  <div key={key} className="flex justify-between items-center mb-2">
+                    <Label className="capitalize">{key}</Label>
+                    <span className="font-medium">{value}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Preferences</h2>
-              {renderPreferenceInputs()}
-            </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Generating..." : "Generate Recommendations"}
             </Button>
@@ -204,7 +180,7 @@ function Recommender() {
           {/* Preferences Recommendations Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Preferences Recommendations</CardTitle>
+              <CardTitle>Recommendations</CardTitle>
             </CardHeader>
             <CardContent>
               <table className="w-full">
@@ -215,32 +191,7 @@ function Recommender() {
                   </tr>
                 </thead>
                 <tbody>
-                  {results.preferences_recommendations.map((item, index) => (
-                    <tr key={index}>
-                      <td className="border p-2">{item["Campo de Estudio"]}</td>
-                      <td className="border p-2">{item["Razon"]}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
-
-          {/* Skills Recommendations Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Skills Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th>Campo de Estudio</th>
-                    <th>Razón</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.skills_recommendations.map((item, index) => (
+                  {results.recommendations.map((item, index) => (
                     <tr key={index}>
                       <td className="border p-2">{item["Campo de Estudio"]}</td>
                       <td className="border p-2">{item["Razon"]}</td>
