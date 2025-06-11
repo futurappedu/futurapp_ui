@@ -7,11 +7,10 @@ import LogoutButton from "./Logout";
 import { useNavigate } from "react-router-dom";
 
 interface Recommendations {
-  preferences_recommendations: Array<{
+  recommendations: Array<{
     "Campo de Estudio": string;
     Razon: string;
   }>;
-  skills_recommendations: Array<{ "Campo de Estudio": string; Razon: string }>;
   university_recommendations: Array<{
     "Campo de Estudio": string;
     "Recomendacion Uno": string;
@@ -181,7 +180,7 @@ function Recommender() {
           {/* Preferences Recommendations Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Preferences Recommendations</CardTitle>
+              <CardTitle>Recommendations</CardTitle>
             </CardHeader>
             <CardContent>
               <table className="w-full">
@@ -192,32 +191,7 @@ function Recommender() {
                   </tr>
                 </thead>
                 <tbody>
-                  {results.preferences_recommendations.map((item, index) => (
-                    <tr key={index}>
-                      <td className="border p-2">{item["Campo de Estudio"]}</td>
-                      <td className="border p-2">{item["Razon"]}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
-
-          {/* Skills Recommendations Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Skills Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th>Campo de Estudio</th>
-                    <th>Razón</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.skills_recommendations.map((item, index) => (
+                  {results.recommendations.map((item, index) => (
                     <tr key={index}>
                       <td className="border p-2">{item["Campo de Estudio"]}</td>
                       <td className="border p-2">{item["Razon"]}</td>
