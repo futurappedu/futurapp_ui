@@ -101,7 +101,7 @@ function Recommender() {
     try {
       const token = await getAccessTokenSilently();
       const response = await fetch(
-        "https://futurappapi-production.up.railway.app/recommendations",
+        "https://futurappapi-staging.up.railway.app/recommendations",
         {
           method: "POST",
           headers: {
@@ -178,6 +178,7 @@ function Recommender() {
       {results && (
         <div className="mt-6 space-y-6">
           {/* Preferences Recommendations Table */}
+          {results.recommendations && results.recommendations.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>Recommendations</CardTitle>
@@ -201,8 +202,9 @@ function Recommender() {
               </table>
             </CardContent>
           </Card>
-
+          )}
           {/* University Recommendations Table */}
+          {results.university_recommendations && results.university_recommendations.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>University Recommendations</CardTitle>
@@ -236,6 +238,7 @@ function Recommender() {
               </table>
             </CardContent>
           </Card>
+          )}
         </div>
       )}
     </div>
