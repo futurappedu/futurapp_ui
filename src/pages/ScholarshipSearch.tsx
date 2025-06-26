@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent } from 'lucide-react';
+import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,6 @@ export default function UniversityPlanner() {
   const [visibleCount, setVisibleCount] = useState(20);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-
   const convenios = ['Erasmus+', 'Fulbright', 'DAAD', 'Chevening'];
   const countries = ['España', 'Reino Unido', 'Alemania', 'Francia', 'Estados Unidos'];
   const programTypes = ['Grado', 'Máster', 'Doctorado', 'MBA'];
@@ -37,42 +36,39 @@ export default function UniversityPlanner() {
     setVisibleCount(20);
   }, [programs]);
 
-
   useEffect(() => {
-  const handleScroll = () => {
+    const handleScroll = () => {
+      const el = scrollAreaRef.current;
+      if (!el) return;
+      if (
+        el.scrollTop + el.clientHeight >= el.scrollHeight - 100 &&
+        visibleCount < programs.length
+      ) {
+        setVisibleCount((prev) => Math.min(prev + 20, programs.length));
+      }
+    };
     const el = scrollAreaRef.current;
-    if (!el) return;
-    // Only load more if there are more programs to show
-    if (
-      el.scrollTop + el.clientHeight >= el.scrollHeight - 100 &&
-      visibleCount < programs.length
-    ) {
-      setVisibleCount((prev) => Math.min(prev + 20, programs.length));
-    }
-  };
-  const el = scrollAreaRef.current;
-  if (el) el.addEventListener('scroll', handleScroll);
-  return () => {
-    if (el) el.removeEventListener('scroll', handleScroll);
-  };
-}, [visibleCount, programs.length]);
+    if (el) el.addEventListener('scroll', handleScroll);
+    return () => {
+      if (el) el.removeEventListener('scroll', handleScroll);
+    };
+  }, [visibleCount, programs.length]);
   
   const searchPrograms = async () => {
     setLoading(true);
     try {
-      // Build filters from current state
       const filtros: Record<string, any> = {};
 
-if (searchProgram.trim()) filtros.nombre_programa = searchProgram.trim();
-if (searchUniversity.trim()) filtros.universidad = searchUniversity.trim();
-if (selectedConvenio && selectedConvenio !== 'all') filtros.convenio = selectedConvenio;
-if (selectedCountry && selectedCountry !== 'all') filtros.destino = selectedCountry;
-if (selectedProgramType && selectedProgramType !== 'all') filtros.tipo_programa = selectedProgramType;
-if (scholarshipOnly) filtros.beca = true;
-if (priceRange && priceRange.length === 2) {
-  filtros.min_cost = priceRange[0];
-  filtros.max_cost = priceRange[1];
-}
+      if (searchProgram.trim()) filtros.nombre_programa = searchProgram.trim();
+      if (searchUniversity.trim()) filtros.universidad = searchUniversity.trim();
+      if (selectedConvenio && selectedConvenio !== 'all') filtros.convenio = selectedConvenio;
+      if (selectedCountry && selectedCountry !== 'all') filtros.destino = selectedCountry;
+      if (selectedProgramType && selectedProgramType !== 'all') filtros.tipo_programa = selectedProgramType;
+      if (scholarshipOnly) filtros.beca = true;
+      if (priceRange && priceRange.length === 2) {
+        filtros.min_cost = priceRange[0];
+        filtros.max_cost = priceRange[1];
+      }
   
       const res = await fetch('https://futurappapi-staging.up.railway.app/filter_results', {
         method: 'POST',
@@ -89,13 +85,12 @@ if (priceRange && priceRange.length === 2) {
     } catch (err) {
       setPrograms([]);
       setResultCount(0);
-      // Optionally handle error (e.g., set an error state)
     } finally {
       setLoading(false);
     }
   };
 
-interface Program {
+  interface Program {
     id: number;
     nombre_programa: string;
     universidad: string;
@@ -104,9 +99,9 @@ interface Program {
     precio_min_anual: number;
     precio_max_anual: number;
     convenio: string;
-}
+  }
 
-interface Scholarship {
+  interface Scholarship {
     id: number;
     nombre_beca: string;
     tipo_beca: string;
@@ -117,30 +112,27 @@ interface Scholarship {
     porcentaje_beca_desde?: number;
     porcentaje_beca_hasta?: number;
     duracion_de_la_beca: string;
-}
+  }
 
-const loadScholarships = async (program: Program): Promise<void> => {
-    setScholarships([]); // Clear previous scholarships
+  const loadScholarships = async (program: Program): Promise<void> => {
+    setScholarships([]);
     try {
-        const params = new URLSearchParams({
-            programa_texto: program.nombre_programa,
-            universidad: program.universidad
-        });
-        const res = await fetch(`https://futurappapi-staging.up.railway.app/becas?${params.toString()}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const becas: Scholarship[] = await res.json();
+      const params = new URLSearchParams({
+        programa_texto: program.nombre_programa,
+        universidad: program.universidad
+      });
+      const res = await fetch(`https://futurappapi-staging.up.railway.app/becas?${params.toString()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const becas: Scholarship[] = await res.json();
 
-        setScholarships(becas || []);
-        // Optionally, you can also reset selectedScholarship if no becas
-        if (!becas.length) setSelectedScholarship(null);
+      setScholarships(becas || []);
+      if (!becas.length) setSelectedScholarship(null);
     } catch (e) {
-        setScholarships([]);
-        setSelectedScholarship(null);
-        // Optionally, handle error state here
+      setScholarships([]);
+      setSelectedScholarship(null);
     }
-};
+  };
 
-  // Investment calculation
   const calculateInvestment = () => {
     if (!selectedProgram || !selectedScholarship) return null;
 
@@ -151,11 +143,9 @@ const loadScholarships = async (program: Program): Promise<void> => {
     const pctMin = selectedScholarship.porcentaje_beca_desde || 0;
     const pctMax = selectedScholarship.porcentaje_beca_hasta || 0;
 
-    // Fixed amount coverage
     const residualFixedMin = Math.max(0, pMin - mMax);
     const residualFixedMax = Math.max(0, pMax - mMin);
 
-    // Percentage coverage
     const coveragePercentMin = pMin * (pctMin / 100);
     const coveragePercentMax = pMax * (pctMax / 100);
     const residualPercentMin = Math.max(0, pMin - coveragePercentMax);
@@ -174,27 +164,30 @@ const loadScholarships = async (program: Program): Promise<void> => {
   };
 
   const calculation = calculateInvestment();
-
-  // Show only the visible programs based on visibleCount
   const visiblePrograms = programs.slice(0, visibleCount);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-indigo-600" />
-            University Planner
-          </h1>
-          <p className="text-gray-600">Encuentra el programa universitario perfecto y calcula tu inversión</p>
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <GraduationCap className="h-8 w-8 text-indigo-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">University Planner</h1>
+              <p className="text-gray-600 mt-1">Encuentra el programa universitario perfecto y calcula tu inversión</p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-220px)]">
           {/* Filters Panel */}
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-1 shadow-sm">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Filter className="h-5 w-5 text-indigo-600" />
                 Filtros
               </CardTitle>
             </CardHeader>
@@ -206,7 +199,7 @@ const loadScholarships = async (program: Program): Promise<void> => {
                     placeholder="Buscar programa..."
                     value={searchProgram}
                     onChange={(e) => setSearchProgram(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 border-gray-200 focus:border-indigo-300"
                   />
                 </div>
                 
@@ -216,11 +209,15 @@ const loadScholarships = async (program: Program): Promise<void> => {
                     placeholder="Buscar universidad..."
                     value={searchUniversity}
                     onChange={(e) => setSearchUniversity(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 border-gray-200 focus:border-indigo-300"
                   />
                 </div>
 
-                <Button onClick={searchPrograms} className="w-full" disabled={loading}>
+                <Button 
+                  onClick={searchPrograms} 
+                  className="w-full bg-indigo-600 hover:bg-indigo-700" 
+                  disabled={loading}
+                >
                   {loading ? 'Buscando...' : 'Buscar'}
                 </Button>
               </div>
@@ -229,9 +226,9 @@ const loadScholarships = async (program: Program): Promise<void> => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Convenio</label>
+                  <label className="text-sm font-medium mb-2 block text-gray-700">Convenio</label>
                   <Select value={selectedConvenio} onValueChange={setSelectedConvenio}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-200">
                       <SelectValue placeholder="Todos los convenios" />
                     </SelectTrigger>
                     <SelectContent>
@@ -244,9 +241,9 @@ const loadScholarships = async (program: Program): Promise<void> => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">País</label>
+                  <label className="text-sm font-medium mb-2 block text-gray-700">País</label>
                   <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-200">
                       <SelectValue placeholder="Todos los países" />
                     </SelectTrigger>
                     <SelectContent>
@@ -259,9 +256,9 @@ const loadScholarships = async (program: Program): Promise<void> => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Tipo de programa</label>
+                  <label className="text-sm font-medium mb-2 block text-gray-700">Tipo de programa</label>
                   <Select value={selectedProgramType} onValueChange={setSelectedProgramType}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-200">
                       <SelectValue placeholder="Todos los tipos" />
                     </SelectTrigger>
                     <SelectContent>
@@ -274,7 +271,7 @@ const loadScholarships = async (program: Program): Promise<void> => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
+                  <label className="text-sm font-medium mb-2 block text-gray-700">
                     Rango de precio: €{priceRange[0].toLocaleString()} - €{priceRange[1].toLocaleString()}
                   </label>
                   <Slider
@@ -293,7 +290,7 @@ const loadScholarships = async (program: Program): Promise<void> => {
                     checked={scholarshipOnly}
                     onCheckedChange={checked => setScholarshipOnly(checked === true)}
                   />
-                  <label htmlFor="scholarship-only" className="text-sm font-medium">
+                  <label htmlFor="scholarship-only" className="text-sm font-medium text-gray-700">
                     Solo con beca
                   </label>
                 </div>
@@ -301,25 +298,43 @@ const loadScholarships = async (program: Program): Promise<void> => {
             </CardContent>
           </Card>
 
-          {/* Results Panel */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Resultados</CardTitle>
-              <CardDescription>
-                Mostrando {resultCount} programas
-              </CardDescription>
+          {/* Results Panel - Improved Layout */}
+          <Card className="lg:col-span-2 shadow-sm">
+            <CardHeader className="border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl">Programas Encontrados</CardTitle>
+                  <CardDescription className="mt-1">
+                    {resultCount > 0 ? `${resultCount} programa${resultCount !== 1 ? 's' : ''} disponible${resultCount !== 1 ? 's' : ''}` : 'Usa los filtros para buscar programas'}
+                  </CardDescription>
+                </div>
+                {resultCount > 0 && (
+                  <Badge variant="secondary" className="text-sm">
+                    {visibleCount} de {resultCount}
+                  </Badge>
+                )}
+              </div>
             </CardHeader>
-            <CardContent>
-            <div
-              ref={scrollAreaRef}
-              className="h-[600px] overflow-y-auto"
-            >
-                  <div className="space-y-4">
-                    {visiblePrograms.map(program => (
-                      <Card 
-                        key={program.id} 
-                        className={`cursor-pointer transition-all hover:shadow-md ${
-                          selectedProgram?.id === program.id ? 'ring-2 ring-indigo-500' : ''
+            <CardContent className="p-0">
+              <div
+                ref={scrollAreaRef}
+                className="h-[580px] overflow-y-auto"
+              >
+                {programs.length === 0 && !loading ? (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                    <Search className="h-12 w-12 mb-4 text-gray-300" />
+                    <p className="text-lg font-medium">No hay resultados</p>
+                    <p className="text-sm">Prueba ajustando los filtros de búsqueda</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {visiblePrograms.map((program) => (
+                      <div
+                        key={program.id}
+                        className={`p-6 cursor-pointer transition-all duration-200 hover:bg-gray-50 ${
+                          selectedProgram?.id === program.id 
+                            ? 'bg-indigo-50 border-l-4 border-indigo-500' 
+                            : 'hover:border-l-4 hover:border-gray-200'
                         }`}
                         onClick={() => {
                           setSelectedProgram(program);
@@ -327,41 +342,75 @@ const loadScholarships = async (program: Program): Promise<void> => {
                           setSelectedScholarship(null);
                         }}
                       >
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold text-lg mb-2">{program.nombre_programa}</h3>
-                          <div className="space-y-1 text-sm text-gray-600">
-                            <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4" />
-                              {program.universidad}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4" />
-                              {program.pais}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <GraduationCap className="h-4 w-4" />
-                              {program.tipo_programa}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <DollarSign className="h-4 w-4" />
-                              €{program.precio_min_anual.toLocaleString()} - €{program.precio_max_anual.toLocaleString()}
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900 mb-1 line-clamp-2">
+                              {program.nombre_programa}
+                            </h3>
+                            <div className="flex items-center gap-2 text-gray-600 mb-2">
+                              <Building2 className="h-4 w-4 flex-shrink-0" />
+                              <span className="font-medium">{program.universidad}</span>
                             </div>
                           </div>
-                          <div className="mt-2">
-                            <Badge variant="secondary">{program.convenio}</Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    {visibleCount >= programs.length && (
-      <div className="text-xs text-gray-500 text-center mt-2">
-        Todos los resultados cargados.
-      </div>
-    )}
-  
+                          <Badge 
+                            variant={selectedProgram?.id === program.id ? "default" : "secondary"}
+                            className="ml-4 flex-shrink-0"
+                          >
+                            {program.convenio}
+                          </Badge>
+                        </div>
 
+                        <div className="grid grid-cols-2 gap-4 mb-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <MapPin className="h-4 w-4 text-gray-400" />
+                            <span>{program.pais}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <GraduationCap className="h-4 w-4 text-gray-400" />
+                            <span>{program.tipo_programa}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-green-600" />
+                            <span className="font-semibold text-green-700">
+                              €{program.precio_min_anual.toLocaleString()} - €{program.precio_max_anual.toLocaleString()}
+                            </span>
+                            <span className="text-xs text-gray-500">/ año</span>
+                          </div>
+                          
+                          {selectedProgram?.id === program.id && (
+                            <div className="flex items-center gap-1 text-indigo-600 text-sm font-medium">
+                              <Star className="h-4 w-4 fill-current" />
+                              Seleccionado
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {visibleCount < programs.length && (
+                      <div className="p-4 text-center">
+                        <p className="text-sm text-gray-500 mb-2">
+                          Mostrando {visibleCount} de {programs.length} resultados
+                        </p>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-indigo-600 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${(visibleCount / programs.length) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+
+                    {visibleCount >= programs.length && programs.length > 0 && (
+                      <div className="p-4 text-center text-sm text-gray-500">
+                        ✨ Todos los resultados han sido cargados
+                      </div>
+                    )}
                   </div>
-                
+                )}
               </div>
             </CardContent>
           </Card>
@@ -369,45 +418,76 @@ const loadScholarships = async (program: Program): Promise<void> => {
           {/* Right Panel */}
           <div className="lg:col-span-1 space-y-6">
             {/* Scholarships */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Becas disponibles
+            <Card className="shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Award className="h-5 w-5 text-yellow-600" />
+                  Becas Disponibles
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[280px]">
-                  {scholarships.length === 0 ? (
-                    <p className="text-gray-500 text-sm">Selecciona un programa para ver las becas</p>
+                  {!selectedProgram ? (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                      <Award className="h-8 w-8 mb-2 text-gray-300" />
+                      <p className="text-sm text-center">Selecciona un programa para ver las becas disponibles</p>
+                    </div>
+                  ) : scholarships.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                      <Clock className="h-8 w-8 mb-2 text-gray-300" />
+                      <p className="text-sm text-center">No hay becas disponibles para este programa</p>
+                    </div>
                   ) : (
                     <div className="space-y-3">
                       {scholarships.map(scholarship => (
                         <Card 
                           key={scholarship.id}
-                          className={`cursor-pointer transition-all hover:shadow-sm ${
-                            selectedScholarship?.id === scholarship.id ? 'ring-2 ring-green-500' : ''
+                          className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                            selectedScholarship?.id === scholarship.id 
+                              ? 'ring-2 ring-yellow-400 bg-yellow-50' 
+                              : 'hover:bg-gray-50'
                           }`}
                           onClick={() => setSelectedScholarship(scholarship)}
                         >
-                          <CardContent className="p-3">
-                            <h4 className="font-medium text-sm mb-1">{scholarship.nombre_beca}</h4>
-                            <div className="space-y-1 text-xs text-gray-600">
-                              <p>{scholarship.tipo_beca}</p>
-                              <p>Para: {scholarship.tipo_de_estudiante}</p>
-                              <p>{scholarship.cobertura_de_la_beca}</p>
-                              <div className="flex items-center gap-1">
-                                <DollarSign className="h-3 w-3" />
-                                €{scholarship.monto_beca_desde?.toLocaleString()} - €{scholarship.monto_beca_hasta?.toLocaleString()}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Percent className="h-3 w-3" />
-                                {scholarship.porcentaje_beca_desde}% - {scholarship.porcentaje_beca_hasta}%
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="font-medium text-sm text-gray-900 line-clamp-2 flex-1">
+                                {scholarship.nombre_beca}
+                              </h4>
+                              {selectedScholarship?.id === scholarship.id && (
+                                <Star className="h-4 w-4 text-yellow-500 fill-current ml-2 flex-shrink-0" />
+                              )}
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Badge variant="outline" className="text-xs">
+                                {scholarship.tipo_beca}
+                              </Badge>
+                              
+                              <div className="space-y-1 text-xs text-gray-600">
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  <span>{scholarship.tipo_de_estudiante}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" />
+                                  <span>
+                                    €{scholarship.monto_beca_desde?.toLocaleString()} - €{scholarship.monto_beca_hasta?.toLocaleString()}
+                                  </span>
+                                </div>
+                                
+                                <div className="flex items-center gap-1">
+                                  <Percent className="h-3 w-3" />
+                                  <span>{scholarship.porcentaje_beca_desde}% - {scholarship.porcentaje_beca_hasta}%</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  <span>{scholarship.duracion_de_la_beca}</span>
+                                </div>
                               </div>
                             </div>
-                            <Badge variant="outline" className="mt-2 text-xs">
-                              {scholarship.duracion_de_la_beca}
-                            </Badge>
                           </CardContent>
                         </Card>
                       ))}
@@ -418,56 +498,63 @@ const loadScholarships = async (program: Program): Promise<void> => {
             </Card>
 
             {/* Investment Calculator */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="h-5 w-5" />
-                  Cálculo de inversión
+            <Card className="shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Calculator className="h-5 w-5 text-green-600" />
+                  Cálculo de Inversión
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[280px]">
                   {!calculation ? (
-                    <p className="text-gray-500 text-sm">Selecciona un programa y una beca para ver el cálculo</p>
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                      <Calculator className="h-8 w-8 mb-2 text-gray-300" />
+                      <p className="text-sm text-center">Selecciona un programa y una beca para ver el cálculo de inversión</p>
+                    </div>
                   ) : (
                     <div className="space-y-4 text-sm">
-                      <div>
-                        <h4 className="font-medium text-base mb-2">Programa seleccionado</h4>
-                        <p className="font-medium">{calculation.program.nombre_programa}</p>
-                        <p className="text-gray-600">{calculation.program.universidad}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <DollarSign className="h-3 w-3" />
-                          <span>Tuition anual: €{calculation.tuitionRange.min.toLocaleString()} - €{calculation.tuitionRange.max.toLocaleString()}</span>
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <h4 className="font-semibold text-blue-900 mb-1">Programa Seleccionado</h4>
+                        <p className="font-medium text-blue-800 text-xs mb-1">{calculation.program.nombre_programa}</p>
+                        <p className="text-blue-700 text-xs mb-2">{calculation.program.universidad}</p>
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="h-3 w-3 text-blue-600" />
+                          <span className="text-xs text-blue-800 font-medium">
+                            Matrícula anual: €{calculation.tuitionRange.min.toLocaleString()} - €{calculation.tuitionRange.max.toLocaleString()}
+                          </span>
                         </div>
                       </div>
 
-                      <Separator />
-
-                      <div>
-                        <h4 className="font-medium text-base mb-2">Beca seleccionada</h4>
-                        <p className="font-medium">{calculation.scholarship.nombre_beca}</p>
-                        <p className="text-gray-600">({calculation.scholarship.tipo_beca})</p>
+                      <div className="p-3 bg-yellow-50 rounded-lg">
+                        <h4 className="font-semibold text-yellow-900 mb-1">Beca Seleccionada</h4>
+                        <p className="font-medium text-yellow-800 text-xs mb-1">{calculation.scholarship.nombre_beca}</p>
+                        <p className="text-yellow-700 text-xs">({calculation.scholarship.tipo_beca})</p>
                       </div>
 
-                      <Separator />
+                      <div className="space-y-3">
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <h4 className="font-semibold text-green-900 mb-2 text-xs">Cobertura por Monto Fijo</h4>
+                          <p className="text-green-800 text-xs mb-1">
+                            Financia: €{calculation.fixedAmount.min.toLocaleString()} - €{calculation.fixedAmount.max.toLocaleString()}
+                          </p>
+                          <p className="font-semibold text-green-700 text-xs">
+                            💰 Tu inversión: €{calculation.residualFixed.min.toLocaleString()} - €{calculation.residualFixed.max.toLocaleString()} anuales
+                          </p>
+                        </div>
 
-                      <div>
-                        <h4 className="font-medium mb-2">Cobertura por monto fijo</h4>
-                        <p>La beca financia entre €{calculation.fixedAmount.min.toLocaleString()} y €{calculation.fixedAmount.max.toLocaleString()}</p>
-                        <p className="font-medium text-green-600 mt-1">
-                          Residual anual: €{calculation.residualFixed.min.toLocaleString()} - €{calculation.residualFixed.max.toLocaleString()}
-                        </p>
-                      </div>
-
-                      <Separator />
-
-                      <div>
-                        <h4 className="font-medium mb-2">Cobertura por porcentaje</h4>
-                        <p>La beca cubre entre {calculation.percentageRange.min}% y {calculation.percentageRange.max}% del tuition</p>
-                        <p>Valor monetario: €{calculation.coverageAmount.min.toLocaleString()} - €{calculation.coverageAmount.max.toLocaleString()}</p>
-                        <p className="font-medium text-green-600 mt-1">
-                          Residual anual: €{calculation.residualPercent.min.toLocaleString()} - €{calculation.residualPercent.max.toLocaleString()}
-                        </p>
+                        <div className="p-3 bg-purple-50 rounded-lg">
+                          <h4 className="font-semibold text-purple-900 mb-2 text-xs">Cobertura por Porcentaje</h4>
+                          <p className="text-purple-800 text-xs mb-1">
+                            Cubre: {calculation.percentageRange.min}% - {calculation.percentageRange.max}% de la matrícula
+                          </p>
+                          <p className="text-purple-700 text-xs mb-1">
+                            Valor: €{calculation.coverageAmount.min.toLocaleString()} - €{calculation.coverageAmount.max.toLocaleString()}
+                          </p>
+                          <p className="font-semibold text-purple-700 text-xs">
+                            💰 Tu inversión: €{calculation.residualPercent.min.toLocaleString()} - €{calculation.residualPercent.max.toLocaleString()} anuales
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -480,4 +567,3 @@ const loadScholarships = async (program: Program): Promise<void> => {
     </div>
   );
 }
-
