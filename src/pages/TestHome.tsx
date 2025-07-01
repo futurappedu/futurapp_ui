@@ -411,7 +411,9 @@ export default function UserProfile() {
                 <Button 
                 variant="default" 
                 className="w-full flex items-center justify-center"
-                onClick={() => window.location.href = "https://futurappapi-staging.up.railway.app/filter"}
+                onClick={() => {
+                  navigate("/scholarship_search");
+                }}
                 >
                 <Search size={16} className="mr-2" />
                 Explorar programas y becas

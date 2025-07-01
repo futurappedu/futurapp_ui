@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Label } from "@/components/ui/label"
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
@@ -14,9 +15,8 @@ export default function UniversityPlanner() {
   // State management
   const [searchProgram, setSearchProgram] = useState('');
   const [searchUniversity, setSearchUniversity] = useState('');
-  const [selectedConvenio, setSelectedConvenio] = useState('all');
-  const [selectedCountry, setSelectedCountry] = useState('all');
-  const [selectedProgramType, setSelectedProgramType] = useState('all');
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [selectedProgramTypes, setSelectedProgramTypes] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 100000]);
   const [scholarshipOnly, setScholarshipOnly] = useState(false);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -27,10 +27,11 @@ export default function UniversityPlanner() {
   const [loading, setLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(20);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  const convenios = ['Erasmus+', 'Fulbright', 'DAAD', 'Chevening'];
-  const countries = ['España', 'Reino Unido', 'Alemania', 'Francia', 'Estados Unidos'];
-  const programTypes = ['Grado', 'Máster', 'Doctorado', 'MBA'];
+  const [filtersLoading, setFiltersLoading] = useState(true);
+  const [countries, setCountries] = useState<string[]>([]);
+  const [programTypes, setProgramTypes] = useState<string[]>([]);
+  const [scholarshipTypes, setScholarshipTypes] = useState<string[]>([]);
+  const [selectedScholarshipType, setSelectedScholarshipType] = useState('all');
 
   useEffect(() => {
     setVisibleCount(20);
@@ -54,6 +55,26 @@ export default function UniversityPlanner() {
     };
   }, [visibleCount, programs.length]);
   
+  useEffect(() => {
+    const fetchFilters = async () => {
+      setFiltersLoading(true);
+      try {
+        const res = await fetch('http://127.0.0.1:8080/filter_options');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setCountries(data.paises || []);
+        setProgramTypes(data.tipos || []);
+        setScholarshipTypes(data.tipos_beca || []);
+      } catch (err) {
+        setCountries([]);
+        setProgramTypes([]);
+        setScholarshipTypes([]);
+      } finally {
+        setFiltersLoading(false);
+      }
+    };
+    fetchFilters();
+  }, []);
   const searchPrograms = async () => {
     setLoading(true);
     try {
@@ -61,16 +82,18 @@ export default function UniversityPlanner() {
 
       if (searchProgram.trim()) filtros.nombre_programa = searchProgram.trim();
       if (searchUniversity.trim()) filtros.universidad = searchUniversity.trim();
-      if (selectedConvenio && selectedConvenio !== 'all') filtros.convenio = selectedConvenio;
-      if (selectedCountry && selectedCountry !== 'all') filtros.destino = selectedCountry;
-      if (selectedProgramType && selectedProgramType !== 'all') filtros.tipo_programa = selectedProgramType;
+      if (selectedCountries.length > 0) filtros.destino = selectedCountries;
+      if (selectedScholarshipType && selectedScholarshipType !== 'all') {
+  filtros.tipo_beca = selectedScholarshipType;
+}
+if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramTypes;
       if (scholarshipOnly) filtros.beca = true;
       if (priceRange && priceRange.length === 2) {
         filtros.min_cost = priceRange[0];
         filtros.max_cost = priceRange[1];
       }
   
-      const res = await fetch('https://futurappapi-staging.up.railway.app/filter_results', {
+      const res = await fetch('http://127.0.0.1:8080/filter_results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(filtros),
@@ -78,7 +101,6 @@ export default function UniversityPlanner() {
   
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-  
       setPrograms(data);
       setVisibleCount(20);
       setResultCount(data.length);
@@ -98,7 +120,8 @@ export default function UniversityPlanner() {
     tipo_programa: string;
     precio_min_anual: number;
     precio_max_anual: number;
-    convenio: string;
+    moneda_de_importe: string;
+    enlace: string;
   }
 
   interface Scholarship {
@@ -214,61 +237,81 @@ export default function UniversityPlanner() {
                 </div>
 
                 <Button 
-                  onClick={searchPrograms} 
-                  className="w-full bg-indigo-600 hover:bg-indigo-700" 
-                  disabled={loading}
-                >
-                  {loading ? 'Buscando...' : 'Buscar'}
-                </Button>
+              onClick={searchPrograms} 
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              disabled={loading}
+            >
+              {loading ? 'Buscando...' : 'Buscar'}
+            </Button>
               </div>
 
               <Separator />
-
+              {filtersLoading ? (
+    <div className="py-8 flex flex-col items-center text-gray-400">
+      <svg className="animate-spin h-6 w-6 mb-2" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+      </svg>
+      <span className="text-sm">Cargando filtros...</span>
+    </div>
+  ) : (
               <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block text-gray-700">Convenio</label>
-                  <Select value={selectedConvenio} onValueChange={setSelectedConvenio}>
-                    <SelectTrigger className="border-gray-200">
-                      <SelectValue placeholder="Todos los convenios" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      {convenios.map(conv => (
-                        <SelectItem key={conv} value={conv}>{conv}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+           
 
-                <div>
-                  <label className="text-sm font-medium mb-2 block text-gray-700">País</label>
-                  <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                    <SelectTrigger className="border-gray-200">
-                      <SelectValue placeholder="Todos los países" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      {countries.map(country => (
-                        <SelectItem key={country} value={country}>{country}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block text-gray-700">Tipo de programa</label>
-                  <Select value={selectedProgramType} onValueChange={setSelectedProgramType}>
-                    <SelectTrigger className="border-gray-200">
-                      <SelectValue placeholder="Todos los tipos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      {programTypes.map(type => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div className="space-y-3">
+  <Label className="text-sm font-medium text-foreground">País</Label>
+  <ScrollArea className="h-40 w-full rounded-md border p-4">
+    <div className="space-y-3">
+      {countries.map(country => (
+        <div key={country} className="flex items-center space-x-2">
+          <Checkbox
+            id={`country-${country}`}
+            checked={selectedCountries.includes(country)}
+            onCheckedChange={checked => {
+              setSelectedCountries(checked
+                ? [...selectedCountries, country]
+                : selectedCountries.filter(c => c !== country)
+              );
+            }}
+          />
+          <Label 
+            htmlFor={`country-${country}`}
+            className="text-sm font-normal cursor-pointer"
+          >
+            {country}
+          </Label>
+        </div>
+      ))}
+    </div>
+  </ScrollArea>
+</div>
+<div className="space-y-3">
+  <Label className="text-sm font-medium text-foreground">Tipo de programa</Label>
+  <ScrollArea className="h-40 w-full rounded-md border p-4">
+    <div className="space-y-3">
+      {programTypes.map(type => (
+        <div key={type} className="flex items-center space-x-2">
+          <Checkbox
+            id={`type-${type}`}
+            checked={selectedProgramTypes.includes(type)}
+            onCheckedChange={checked => {
+              setSelectedProgramTypes(checked
+                ? [...selectedProgramTypes, type]
+                : selectedProgramTypes.filter(t => t !== type)
+              );
+            }}
+          />
+          <Label 
+            htmlFor={`type-${type}`}
+            className="text-sm font-normal cursor-pointer"
+          >
+            {type}
+          </Label>
+        </div>
+      ))}
+    </div>
+  </ScrollArea>
+</div>
 
                 <div>
                   <label className="text-sm font-medium mb-2 block text-gray-700">
@@ -294,7 +337,26 @@ export default function UniversityPlanner() {
                     Solo con beca
                   </label>
                 </div>
+              <div className="space-y-3">
+  <Label className="text-sm font-medium text-foreground">Tipo de beca</Label>
+  <Select
+    value={selectedScholarshipType}
+    onValueChange={setSelectedScholarshipType}
+  >
+    <SelectTrigger className="w-full">
+      <SelectValue placeholder="Selecciona tipo de beca" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="all">Todos los tipos</SelectItem>
+      {scholarshipTypes.map(type => (
+        <SelectItem key={type} value={type}>{type}</SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
               </div>
+  )}
+
             </CardContent>
           </Card>
 
@@ -356,8 +418,21 @@ export default function UniversityPlanner() {
                             variant={selectedProgram?.id === program.id ? "default" : "secondary"}
                             className="ml-4 flex-shrink-0"
                           >
-                            {program.convenio}
+                            {program.tipo_programa}
                           </Badge>
+                          <div className="mb-2">
+                          <a
+                            href={program.enlace}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-1.5 rounded bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition"
+                          >
+                            Ir al sitio del programa
+                            <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M17 7l-10 10M17 17V7H7" />
+                            </svg>
+                          </a>
+                        </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mb-3">
