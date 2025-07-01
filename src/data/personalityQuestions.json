@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "question": "Me gusta realizar pequeñas reparaciones de equipos electrodomésticos.",
+    "question": "Me gusta experimentar con equipos electrónicos.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -16,7 +16,7 @@
   },
   {
     "id": 4,
-    "question": "Me gustaría cuidar personas con enfermedades mentales.",
+    "question": "Me interesaría apoyar a personas que enfrentan desafíos emocionales o de salud mental.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -31,7 +31,7 @@
   },
   {
     "id": 7,
-    "question": "Me gustaría trabajar en el servicio técnico de una empresa.",
+    "question": "Me gustaría resolver problemas técnicos en equipos o sistemas tecnológicos.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -46,7 +46,7 @@
   },
   {
     "id": 10,
-    "question": "Me gusta mucho participar en organizaciones no gubernamentales como la Cruz Roja o una organización de jóvenes exploradores.",
+    "question": "Me gusta participar en actividades de voluntariado o proyectos que buscan ayudar a otras personas",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -61,7 +61,7 @@
   },
   {
     "id": 13,
-    "question": "Me interesan los aspectos técnicos de la industria automotriz.",
+    "question": "Me interesa entender cómo funcionan las máquinas, los motores o los sistemas mecánicos.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -121,12 +121,12 @@
   },
   {
     "id": 25,
-    "question": "En el futuro me gustaría trabajar con herramientas y equipos técnicos.",
+    "question": "Me gustaría trabajar con tecnologías o equipos que requieren habilidades prácticas y técnicas.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
     "id": 26,
-    "question": "Me gusta ver los programas de televisión dedicados a las novedades científicas.",
+    "question": "Me gusta ver videos o contenido en redes sobre descubrimientos científicos, avances tecnológicos o curiosidades del universo.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -136,12 +136,12 @@
   },
   {
     "id": 28,
-    "question": "Con muchas ganas y gran dedicación enseñaría a jóvenes cómo evitar ciertas adicciones.",
+    "question": "Me gustaría ayudar a otros jóvenes a tomar decisiones saludables y evitar problemas como las adicciones.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
     "id": 29,
-    "question": "Me gustaría liderar un grupo de mis compañeros y compañeras para organizar una fiesta escolar.",
+    "question": "Me gustaría liderar un grupo para organizar un evento o actividad creativa en el colegio.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -151,7 +151,7 @@
   },
   {
     "id": 31,
-    "question": "Conozco el diseño y el funcionamiento del computador.",
+    "question": "Me interesa entender cómo funcionan los dispositivos tecnológicos.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -161,7 +161,7 @@
   },
   {
     "id": 33,
-    "question": "Me gustaría tocar en un grupo musical o en una orquesta.",
+    "question": "Disfrutaría formar parte de un proyecto musical donde pueda compartir y crear con otras personas.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -181,7 +181,7 @@
   },
   {
     "id": 37,
-    "question": "Me gustaría trabajar en un taller de mecánica automotriz.",
+    "question": "Me atraería trabajar en el desarrollo de prototipos de vehículos eléctricos o autónomos.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -191,7 +191,7 @@
   },
   {
     "id": 39,
-    "question": "Me gustaría crear o componer algún tipo de música.",
+    "question": "Me gustaría crear o desarrollar algún tipo de arte o expresión creativa.",
     "options": ["1", "2", "3", "4", "5"]
   },
   {
@@ -202,7 +202,7 @@
   
     {
       "id": 41,
-      "question": "Me gustaría desempeñar la presidencia de mi clase.",
+      "question": "Me gustaría liderar el consejo estudiantil de mi institución educativa.",
       "options": ["1", "2", "3", "4", "5"]
     },
     {
@@ -222,12 +222,12 @@
     },
     {
       "id": 45,
-      "question": "Me gustaría hacer dibujos para libros o crear carteles.",
+      "question": "Me interesaría desarrollar ilustraciones digitales para publicaciones editoriales de prestigio.",
       "options": ["1", "2", "3", "4", "5"]
     },
     {
       "id": 46,
-      "question": "En mi futuro trabajo me gustaría ayudar a personas con discapacidades.",
+      "question": " Me gustaría crear una organización que genere impacto social sostenible para poblaciones con necesidades especiales.",
       "options": ["1", "2", "3", "4", "5"]
     },
     {
@@ -242,7 +242,7 @@
     },
     {
       "id": 49,
-      "question": "Me gusta aprender cómo funcionan los equipos técnicos.",
+      "question": "Me gusta analizar el funcionamiento de sistemas tecnológicos avanzados y dispositivos inteligentes.",
       "options": ["1", "2", "3", "4", "5"]
     },
     {
@@ -252,12 +252,12 @@
     },
     {
       "id": 51,
-      "question": "En el futuro me gustaría expresarme mediante una actividad creativa como: la pintura, el dibujo, la escultura, el baile o el canto.",
+      "question": "Me gustaría explorar formas de expresión artística que combinen técnicas tradicionales con tecnologías contemporáneas como: pintura digital, escultura 3D, danza contemporánea, producción musical, diseño de experiencias, artes plásticas, diseño de modas, arquitectura creativa, producción de eventos, desarrollo de marca personal, o similares. ",
       "options": ["1", "2", "3", "4", "5"]
     },
     {
       "id": 52,
-      "question": "Me gustaría trabajar en un centro de ayuda telefónica para jóvenes.",
+      "question": "Me interesaría dirigir programas de bienestar emocional y prevención para personas en situación de riesgo",
       "options": ["1", "2", "3", "4", "5"]
     },
     {
@@ -272,7 +272,7 @@
     },
     {
       "id": 55,
-      "question": "Me gustaría diseñar o arreglar máquinas y equipos modernos.",
+      "question": "Me gustaría desarrollar soluciones de ingeniería para tecnologías disruptivas como el internet de las cosas.",
       "options": ["1", "2", "3", "4", "5"]
     },
     {
