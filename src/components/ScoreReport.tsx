@@ -1,5 +1,17 @@
 import { Document, Page, Text, View, StyleSheet, Svg, Polygon } from '@react-pdf/renderer';
 
+function renderBoldText(text: string) {
+  // Split by ** and alternate between normal and bold
+  const parts = text.split(/\*\*(.*?)\*\*/g);
+  return parts.map((part, idx) =>
+    idx % 2 === 1 ? (
+      <Text key={idx} style={{ fontWeight: 'bold', color: '#1f2937' }}>{part}</Text>
+    ) : (
+      <Text key={idx}>{part}</Text>
+    )
+  );
+}
+
 function getHexagonPointsRIASEC(
     scores: Record<string, number>,
     maxScore = 50,
@@ -164,6 +176,97 @@ function getHexagonPointsRIASEC(
       lineHeight: 1.3,
       marginBottom: 5,
       textAlign: 'justify',
+    },
+    // New styles for improved tables
+    tableContainer: {
+      marginTop: 20,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
+      borderRadius: 8,
+    },
+    tableHeader: {
+      backgroundColor: '#f3f4f6',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderBottomWidth: 2,
+      borderBottomColor: '#d1d5db',
+    },
+    tableHeaderText: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      color: '#1f2937',
+      textAlign: 'center',
+    },
+    tableRow: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: '#e5e7eb',
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+    },
+    tableRowLast: {
+      flexDirection: 'row',
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+    },
+    tableCellField: {
+      fontSize: 10,
+      fontWeight: 'bold',
+      color: '#1f2937',
+      textAlign: 'left',
+      paddingRight: 8,
+    },
+    tableCellReason: {
+      fontSize: 9,
+      color: '#4b5563',
+      textAlign: 'justify',
+      lineHeight: 1.4,
+    },
+    // University recommendations table styles
+    universityTableRow: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: '#e5e7eb',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+    },
+    universityTableRowLast: {
+      flexDirection: 'row',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+    },
+    universityTableCellField: {
+      width: '25%',
+      fontSize: 10,
+      fontWeight: 'bold',
+      color: '#1f2937',
+      textAlign: 'left',
+      paddingRight: 8,
+    },
+    universityTableCell: {
+      width: '25%',
+      fontSize: 9,
+      color: '#4b5563',
+      textAlign: 'left',
+      paddingRight: 8,
+      lineHeight: 1.3,
+    },
+    universityTableHeaderRow: {
+      flexDirection: 'row',
+      backgroundColor: '#f3f4f6',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderBottomWidth: 2,
+      borderBottomColor: '#d1d5db',
+    },
+    universityTableHeaderCell: {
+      width: '25%',
+      fontSize: 10,
+      fontWeight: 'bold',
+      color: '#1f2937',
+      textAlign: 'center',
+      paddingRight: 8,
     },
   });
 
@@ -518,37 +621,59 @@ function getHexagonPointsRIASEC(
               ))}
             </View>
           </View>
+          </Page>
+          <Page size="A4" style={styles.page}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Tablas de Recomendaciones</Text>
+
+          {/* Improved Career Recommendations Table */}
           {recommendations && recommendations.length > 0 && (
-  <View style={{ marginTop: 16 }}>
-    <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Recomendaciones de Carrera</Text>
-    <View>
-      {recommendations.map((item, idx) => (
-        <View key={idx} style={{ flexDirection: 'row', marginBottom: 4 }}>
-          <Text style={{ width: 180 }}>{item["Campo de Estudio"]}</Text>
-          <Text>{item["Razon"]}</Text>
-        </View>
-      ))}
-    </View>
-  </View>
-)}
-{universityRecommendations && universityRecommendations.length > 0 && (
-  <View style={{ marginTop: 16 }}>
-    <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Recomendaciones de Universidad</Text>
-    <View>
-      {universityRecommendations.map((item, idx) => (
-        <View key={idx} style={{ flexDirection: 'row', marginBottom: 4 }}>
-          <Text style={{ width: 120 }}>{item["Campo de Estudio"]}</Text>
-          <Text style={{ width: 120 }}>{item["Recomendacion Uno"]}</Text>
-          <Text style={{ width: 120 }}>{item["Recomendacion Dos"]}</Text>
-          <Text style={{ width: 120 }}>{item["Recomendacion Tres"]}</Text>
-        </View>
-      ))}
-    </View>
-  </View>
-)}
-          <View style={styles.footer}>
-            <Text>Reporte generado el {new Date().toLocaleDateString()}</Text>
+            <View style={styles.tableContainer}>
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderText}>Recomendaciones de Carrera</Text>
+              </View>
+              {recommendations.map((item, idx) => (
+                <View key={idx} style={idx === recommendations.length - 1 ? styles.tableRowLast : styles.tableRow}>
+                  <View style={{ width: '35%' }}>
+                    <Text style={styles.tableCellField}>{item["Campo de Estudio"]}</Text>
+                  </View>
+                  <View style={{ width: '65%' }}>
+                  <Text style={styles.tableCellReason}>
+                  {renderBoldText(item["Razon"])}
+                  </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
           </View>
+          </Page>
+          <Page size="A4" style={styles.page}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Programas recomendados</Text>
+          {/* Improved University Recommendations Table */}
+          {universityRecommendations && universityRecommendations.length > 0 && (
+            <View style={styles.tableContainer}>
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderText}>Recomendaciones de Universidad</Text>
+              </View>
+              <View style={styles.universityTableHeaderRow}>
+                <Text style={styles.universityTableHeaderCell}>Campo de Estudio</Text>
+                <Text style={styles.universityTableHeaderCell}>Recomendación 1</Text>
+                <Text style={styles.universityTableHeaderCell}>Recomendación 2</Text>
+                <Text style={styles.universityTableHeaderCell}>Recomendación 3</Text>
+              </View>
+              {universityRecommendations.map((item, idx) => (
+                <View key={idx} style={idx === universityRecommendations.length - 1 ? styles.universityTableRowLast : styles.universityTableRow}>
+                  <Text style={styles.universityTableCellField}>{item["Campo de Estudio"]}</Text>
+                  <Text style={styles.universityTableCell}>{item["Recomendacion Uno"]}</Text>
+                  <Text style={styles.universityTableCell}>{item["Recomendacion Dos"]}</Text>
+                  <Text style={styles.universityTableCell}>{item["Recomendacion Tres"]}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
         </Page>
       </Document>
     );

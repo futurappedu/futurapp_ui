@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { useAuth0 } from "@auth0/auth0-react";
 import LogoutButton from "./Logout";
 import { useNavigate } from "react-router-dom";
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import ScoreReport from '@/components/ScoreReport';
 
 interface Recommendations {
   recommendations: Array<{
@@ -177,68 +179,100 @@ function Recommender() {
 
       {results && (
         <div className="mt-6 space-y-6">
-          {/* Preferences Recommendations Table */}
-          {results.recommendations && results.recommendations.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th>Campo de Estudio</th>
-                    <th>Razón</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.recommendations.map((item, index) => (
-                    <tr key={index}>
-                      <td className="border p-2">{item["Campo de Estudio"]}</td>
-                      <td className="border p-2">{item["Razon"]}</td>
+          <div className="mb-4">
+            <PDFDownloadLink
+              document={
+                <ScoreReport
+                  userData={user }
+                  skills={{
+                    verbal: skills.verbal_aptitude,
+                    abstracto: skills.abstract_reasoning,
+                    numerico: skills.numerical_aptitude,
+                    mecanico: skills.mechanical_reasoning,
+                    espacial: skills.spatial_aptitude
+                  }}
+                  preferences={preferences}
+                  recommendations={results.recommendations}
+                  universityRecommendations={results.university_recommendations}
+                // Provide actual tests data if available // Provide actual completedTests data if available
+                />
+              }
+              fileName={`score-report-${user?.email || 'usuario'}.pdf`}
+              className="inline-block"
+            >
+              {({ loading }) =>
+                loading ? (
+                  <Button disabled className="w-full mb-2">Generando PDF...</Button>
+                ) : (
+                  <Button className="w-full mb-2">Descargar reporte PDF</Button>
+                )
+              }
+            </PDFDownloadLink>
+          </div>
+          <div className="mt-6 space-y-6">
+            {/* Preferences Recommendations Table */}
+            {results.recommendations && results.recommendations.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Recommendations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th>Campo de Estudio</th>
+                      <th>Razón</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
-          )}
-          {/* University Recommendations Table */}
-          {results.university_recommendations && results.university_recommendations.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>University Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th>Campo de Estudio</th>
-                    <th>Recomendación Uno</th>
-                    <th>Recomendación Dos</th>
-                    <th>Recomendación Tres</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.university_recommendations.map((item, index) => (
-                    <tr key={index}>
-                      <td className="border p-2">{item["Campo de Estudio"]}</td>
-                      <td className="border p-2">
-                        {item["Recomendacion Uno"]}
-                      </td>
-                      <td className="border p-2">
-                        {item["Recomendacion Dos"]}
-                      </td>
-                      <td className="border p-2">
-                        {item["Recomendacion Tres"]}
-                      </td>
+                  </thead>
+                  <tbody>
+                    {results.recommendations.map((item, index) => (
+                      <tr key={index}>
+                        <td className="border p-2">{item["Campo de Estudio"]}</td>
+                        <td className="border p-2">{item["Razon"]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+            )}
+            {/* University Recommendations Table */}
+            {results.university_recommendations && results.university_recommendations.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>University Recommendations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th>Campo de Estudio</th>
+                      <th>Recomendación Uno</th>
+                      <th>Recomendación Dos</th>
+                      <th>Recomendación Tres</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
-          )}
+                  </thead>
+                  <tbody>
+                    {results.university_recommendations.map((item, index) => (
+                      <tr key={index}>
+                        <td className="border p-2">{item["Campo de Estudio"]}</td>
+                        <td className="border p-2">
+                          {item["Recomendacion Uno"]}
+                        </td>
+                        <td className="border p-2">
+                          {item["Recomendacion Dos"]}
+                        </td>
+                        <td className="border p-2">
+                          {item["Recomendacion Tres"]}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+            )}
+          </div>
         </div>
       )}
     </div>
