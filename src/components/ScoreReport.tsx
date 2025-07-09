@@ -280,14 +280,14 @@ function getHexagonPointsRIASEC(
       espacial?: number;
     };
     preferences: {
-      realista?: number;
-      investigativo?: number;
-      artistico?: number;
-      social?: number;
+      Realista?: number;
+      Investigador?: number;
+      Artistico?: number;
+      Social?: number;
       emprendedor?: number;
-      convencional?: number;
+      Convencional?: number;
     };
-    recommendations: Array<{ "Campo de Estudio": string; Razon: string; }>;
+    recommendations: Array<{ "Campo de Estudio": string; Compatibilidad:number; Razon: string; }>;
     universityRecommendations: Array<{
       "Campo de Estudio": string;
       "Recomendacion Uno": string;
@@ -316,12 +316,12 @@ function getHexagonPointsRIASEC(
     };
     
     const riasecScores = {
-      R: preferences?.realista ?? 0,
-      I: preferences?.investigativo ?? 0,
-      A: preferences?.artistico ?? 0,
-      S: preferences?.social ?? 0,
+      R: preferences?.Realista ?? 0,
+      I: preferences?.Investigador ?? 0,
+      A: preferences?.Artistico ?? 0,
+      S: preferences?.Social ?? 0,
       E: preferences?.emprendedor ?? 0,
-      C: preferences?.convencional ?? 0,
+      C: preferences?.Convencional ?? 0,
     };
     return (
       <Document>
@@ -623,30 +623,39 @@ function getHexagonPointsRIASEC(
           </View>
           </Page>
           <Page size="A4" style={styles.page}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tablas de Recomendaciones</Text>
-
-          {/* Improved Career Recommendations Table */}
-          {recommendations && recommendations.length > 0 && (
-            <View style={styles.tableContainer}>
-              <View style={styles.tableHeader}>
-                <Text style={styles.tableHeaderText}>Recomendaciones de Carrera</Text>
-              </View>
-              {recommendations.map((item, idx) => (
-                <View key={idx} style={idx === recommendations.length - 1 ? styles.tableRowLast : styles.tableRow}>
-                  <View style={{ width: '35%' }}>
-                    <Text style={styles.tableCellField}>{item["Campo de Estudio"]}</Text>
-                  </View>
-                  <View style={{ width: '65%' }}>
-                  <Text style={styles.tableCellReason}>
-                  {renderBoldText(item["Razon"])}
-                  </Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          )}
-          </View>
+          <View style={styles.tableContainer}>
+  <View style={styles.tableHeader}>
+    <Text style={styles.tableHeaderText}>Recomendaciones de Carrera</Text>
+  </View>
+  {/* Table header row */}
+  <View style={styles.tableRow}>
+    <View style={{ width: '30%' }}>
+      <Text style={styles.tableCellField}>Campo de Estudio</Text>
+    </View>
+    <View style={{ width: '15%' }}>
+      <Text style={styles.tableCellField}>Compatibilidad</Text>
+    </View>
+    <View style={{ width: '55%' }}>
+      <Text style={styles.tableCellField}>Razón</Text>
+    </View>
+  </View>
+  {/* Table body */}
+  {recommendations.map((item, idx) => (
+    <View key={idx} style={idx === recommendations.length - 1 ? styles.tableRowLast : styles.tableRow}>
+      <View style={{ width: '30%' }}>
+        <Text style={styles.tableCellField}>{item["Campo de Estudio"]}</Text>
+      </View>
+      <View style={{ width: '15%' }}>
+        <Text style={styles.tableCellField}>{item.Compatibilidad}%</Text>
+      </View>
+      <View style={{ width: '55%' }}>
+        <Text style={styles.tableCellReason}>
+          {renderBoldText(item["Razon"])}
+        </Text>
+      </View>
+    </View>
+  ))}
+</View>
           </Page>
           <Page size="A4" style={styles.page}>
         <View style={styles.section}>

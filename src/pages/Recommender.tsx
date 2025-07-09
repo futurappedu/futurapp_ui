@@ -11,6 +11,7 @@ import ScoreReport from '@/components/ScoreReport';
 interface Recommendations {
   recommendations: Array<{
     "Campo de Estudio": string;
+    Compatibilidad: number;
     Razon: string;
   }>;
   university_recommendations: Array<{
@@ -29,16 +30,16 @@ function Recommender() {
     mechanical_reasoning: 0,
     numerical_aptitude: 0,
     spatial_aptitude: 0,
-    abstract_reasoning: 0,
+    logical_reasoning: 0,
     verbal_aptitude: 0,
   });
 
   const [preferences, setPreferences] = useState({
-    realista: 0,
-    investigativo: 0,
-    artistico: 0,
-    social: 0,
-    convencional: 0,
+    Realista: 0,
+    Investigador: 0,
+    Artistico: 0,
+    Social: 0,
+    Convencional: 0,
     emprendedor: 0,
   });
 
@@ -75,15 +76,15 @@ function Recommender() {
           mechanical_reasoning: data.mechanical ?? 0,
           numerical_aptitude: data.numeric ?? 0,
           spatial_aptitude: data.spatial ?? 0,
-          abstract_reasoning: data.abstract ?? 0,
+          logical_reasoning: data.abstract ?? 0,
           verbal_aptitude: data.verbal ?? 0
         });
         setPreferences({
-          realista: data.Realista ?? 0,
-          convencional: data.Convencional ?? 0,
-          investigativo: data.Investigativo ?? 0, 
-          artistico: data.Artistico ?? 0,
-          social: data.Social ?? 0,
+          Realista: data.Realista ?? 0,
+          Convencional: data.Convencional ?? 0,
+          Investigador: data.Investigativo ?? 0, 
+          Artistico: data.Artistico ?? 0,
+          Social: data.Social ?? 0,
           emprendedor: data.Emprendedor ?? 0,
         });
       } catch (err) {
@@ -180,34 +181,37 @@ function Recommender() {
       {results && (
         <div className="mt-6 space-y-6">
           <div className="mb-4">
-            <PDFDownloadLink
-              document={
-                <ScoreReport
-                  userData={user }
-                  skills={{
-                    verbal: skills.verbal_aptitude,
-                    abstracto: skills.abstract_reasoning,
-                    numerico: skills.numerical_aptitude,
-                    mecanico: skills.mechanical_reasoning,
-                    espacial: skills.spatial_aptitude
-                  }}
-                  preferences={preferences}
-                  recommendations={results.recommendations}
-                  universityRecommendations={results.university_recommendations}
-                // Provide actual tests data if available // Provide actual completedTests data if available
-                />
-              }
-              fileName={`score-report-${user?.email || 'usuario'}.pdf`}
-              className="inline-block"
-            >
-              {({ loading }) =>
-                loading ? (
-                  <Button disabled className="w-full mb-2">Generando PDF...</Button>
-                ) : (
-                  <Button className="w-full mb-2">Descargar reporte PDF</Button>
-                )
-              }
-            </PDFDownloadLink>
+          {(() => {
+  const reportProps = {
+    userData: user,
+    skills: {
+      verbal: skills.verbal_aptitude,
+      abstracto: skills.logical_reasoning,
+      numerico: skills.numerical_aptitude,
+      mecanico: skills.mechanical_reasoning,
+      espacial: skills.spatial_aptitude
+    },
+    preferences,
+    recommendations:results.recommendations,
+    universityRecommendations: results.university_recommendations
+  };
+  console.log("ScoreReport props:", reportProps);
+  return (
+    <PDFDownloadLink
+      document={<ScoreReport {...reportProps} />}
+      fileName={`score-report-${user?.email || 'usuario'}.pdf`}
+      className="inline-block"
+    >
+      {({ loading }) =>
+        loading ? (
+          <Button disabled className="w-full mb-2">Generando PDF...</Button>
+        ) : (
+          <Button className="w-full mb-2">Descargar reporte PDF</Button>
+        )
+      }
+    </PDFDownloadLink>
+  );
+})()}
           </div>
           <div className="mt-6 space-y-6">
             {/* Preferences Recommendations Table */}
