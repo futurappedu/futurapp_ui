@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth0 } from '@auth0/auth0-react'; // Import Auth0 hook
 import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
 import numericalQuestions from '../../data/numericalQuestions.json'; // Import your questions data
+import { saveAnswersToBackend, loadAnswersFromBackend } from '@/utils/answerPersistence';
 
 interface TestResults {
     totalQuestions: number;
@@ -21,7 +22,38 @@ const NumericTestApp = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { user, isLoading: authLoading } = useAuth0(); // Get user info from Auth0
+    const answersRef = useRef(answers);
+
+    useEffect(() => {
+      answersRef.current = answers;
+    }, [answers]);
   
+    useEffect(() => {
+      const handleBeforeUnload = async () => {
+        if (user?.email && Object.keys(answersRef.current).length > 0 && !submitted) {
+          // Save answers synchronously (fire and forget)
+          saveAnswersToBackend(user.email, 'numeric', answersRef.current);
+        }
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [user?.email, submitted]);
+  
+    useEffect(() => {
+      if (user?.email) {
+        loadAnswersFromBackend(user.email, 'numeric').then(saved => {
+          if (saved && Object.keys(saved).length > 0) {
+            setAnswers(saved);
+          }
+        });
+      }
+    }, [user?.email]);
+  
+    useEffect(() => {
+      if (user?.email && Object.keys(answers).length > 0 && !submitted) {
+        saveAnswersToBackend(user.email, 'numeric', answers);
+      }
+    }, [answers, user?.email, submitted]);
     const handleAnswerChange = (questionId: string, selectedOption: string) => {
       setAnswers(prev => ({
         ...prev,
@@ -60,6 +92,10 @@ const NumericTestApp = () => {
         // Set test results from backend response
         setTestResults(data);
         setSubmitted(true);
+
+        if (user?.email) {
+          await saveAnswersToBackend(user.email, 'numeric', {});
+        }
       } catch (err) {
         setError('Failed to submit test. Please try again.');
         console.error('Test submission error:', err);
