@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth0 } from '@auth0/auth0-react';
 import abstractQuestions from '../../data/abstractQuestions.json';
+import { saveAnswersToBackend, loadAnswersFromBackend } from '@/utils/answerPersistence';
 
 export default function AbstractReasoningTest() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -15,7 +16,7 @@ export default function AbstractReasoningTest() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user} = useAuth0();
-
+  const answersRef = useRef(answers);
   const questionsPerPage = 3;
 
   const testQuestions = abstractQuestions;
@@ -24,6 +25,36 @@ export default function AbstractReasoningTest() {
   const startIndex = currentPage * questionsPerPage;
   const visibleQuestions = testQuestions.slice(startIndex, startIndex + questionsPerPage);
 
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      if (user?.email && Object.keys(answersRef.current).length > 0 && !submitted) {
+        // Save answers synchronously (fire and forget)
+        saveAnswersToBackend(user.email, 'abstract', answersRef.current);
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [user?.email, submitted]);
+
+  useEffect(() => {
+    if (user?.email) {
+      loadAnswersFromBackend(user.email, 'abstract').then(saved => {
+        if (saved && Object.keys(saved).length > 0) {
+          setAnswers(saved);
+        }
+      });
+    }
+  }, [user?.email]);
+
+  useEffect(() => {
+    if (user?.email && Object.keys(answers).length > 0 && !submitted) {
+      saveAnswersToBackend(user.email, 'abstract', answers);
+    }
+  }, [answers, user?.email, submitted]);
   const handleAnswerChange = (questionId: number, value: string) => {
     setAnswers((prev) => ({
       ...prev,
@@ -72,6 +103,10 @@ export default function AbstractReasoningTest() {
       const data = await response.json();
       setTestResults(data);
       setSubmitted(true);
+
+      if (user?.email) {
+        await saveAnswersToBackend(user.email, 'abstract', {});
+      }
     } catch (err) {
       setError('Failed to submit test. Please try again.');
       console.error('Test submission error:', err);
