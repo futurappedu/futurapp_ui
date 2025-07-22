@@ -248,16 +248,12 @@ export default function AbstractReasoningTest() {
       <div className="flex justify-center mt-8">
         {currentPage === totalPages - 1 && (
           <Button 
-            onClick={handleSubmit} 
-            className="w-48"
-            disabled={
-              Object.keys(answers).length < testQuestions.length || 
-              submitted || 
-              isLoading
-            }
-          >
-            {isLoading ? 'Submitting...' : 'Submit Test'}
-          </Button>
+          onClick={handleSubmit} 
+          className="w-48"
+          disabled={submitted || isLoading}
+        >
+          {isLoading ? 'Submitting...' : 'Submit Test'}
+        </Button>
         )}
       </div>
 
