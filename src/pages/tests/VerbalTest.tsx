@@ -152,8 +152,7 @@ const VerbalTestApp = () => {
             <Button 
               onClick={handleSubmit} 
               className="w-full mb-4"
-              disabled={
-                Object.keys(answers).length !== testQuestions.length || 
+              disabled={ 
                 submitted || 
                 isLoading
               }

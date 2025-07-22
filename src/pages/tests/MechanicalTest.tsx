@@ -245,10 +245,8 @@ const MechanicalTestApp = () => {
               <Button 
                 onClick={handleSubmit} 
                 className="w-48"
-                disabled={
-                  Object.keys(answers).length < testQuestions.length || 
-                  submitted || 
-                  isLoading
+                disabled={ 
+                  submitted || isLoading
                 }
               >
                 {isLoading ? 'Submitting...' : 'Submit Test'}

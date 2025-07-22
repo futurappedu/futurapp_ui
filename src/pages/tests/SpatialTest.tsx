@@ -245,8 +245,7 @@ export default function SpatialReasoningTest() {
           <Button 
             onClick={handleSubmit} 
             className="w-48"
-            disabled={
-              Object.keys(answers).length < testQuestions.length || 
+            disabled={ 
               submitted || 
               isLoading
             }
