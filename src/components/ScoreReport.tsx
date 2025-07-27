@@ -287,6 +287,11 @@ function getHexagonPointsRIASEC(
       emprendedor?: number;
       Convencional?: number;
     };
+    interests: Array<{
+      Compatibilidad: number;
+      "Intereses Profesionales": string;
+      Razon: string;
+    }>;
     recommendations: Array<{ "Campo de Estudio": string; Compatibilidad:number; Razon: string; }>;
     universityRecommendations: Array<{
       "Campo de Estudio": string;
@@ -305,7 +310,7 @@ function getHexagonPointsRIASEC(
     }[];
   }
   
-  const ScoreReport = ({ userData, skills, preferences, suggestedCareers, recommendations, universityRecommendations }: ScoreReportProps) => {
+  const ScoreReport = ({ userData, skills, preferences, suggestedCareers, recommendations, universityRecommendations, interests }: ScoreReportProps) => {
     // Find the RIASEC scores
     const cognitiveScores = {
       verbal: skills?.verbal ?? 0,
@@ -656,6 +661,45 @@ function getHexagonPointsRIASEC(
     </View>
   ))}
 </View>
+</Page>
+<Page size="A4" style={styles.page}>
+          <View style={styles.tableContainer}></View>
+{/* Interests Table */}
+        {interests && interests.length > 0 && (
+          <View style={styles.tableContainer}>
+            <View style={styles.tableHeader}>
+              <Text style={styles.tableHeaderText}>Intereses Profesionales</Text>
+            </View>
+            {/* Table header row */}
+            <View style={styles.tableRow}>
+              <View style={{ width: '30%' }}>
+                <Text style={styles.tableCellField}>Interés Profesional</Text>
+              </View>
+              <View style={{ width: '15%' }}>
+                <Text style={styles.tableCellField}>Compatibilidad</Text>
+              </View>
+              <View style={{ width: '55%' }}>
+                <Text style={styles.tableCellField}>Razón</Text>
+              </View>
+            </View>
+            {/* Table body */}
+            {interests.map((item, idx) => (
+              <View key={idx} style={idx === interests.length - 1 ? styles.tableRowLast : styles.tableRow}>
+                <View style={{ width: '30%' }}>
+                  <Text style={styles.tableCellField}>{item["Intereses Profesionales"]}</Text>
+                </View>
+                <View style={{ width: '15%' }}>
+                  <Text style={styles.tableCellField}>{item.Compatibilidad}%</Text>
+                </View>
+                <View style={{ width: '55%' }}>
+                  <Text style={styles.tableCellReason}>
+                    {renderBoldText(item["Razon"])}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
           </Page>
           <Page size="A4" style={styles.page}>
         <View style={styles.section}>
