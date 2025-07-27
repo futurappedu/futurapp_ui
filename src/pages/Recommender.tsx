@@ -9,6 +9,11 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import ScoreReport from '@/components/ScoreReport';
 
 interface Recommendations {
+  interests: Array<{
+    Compatibilidad: number;
+    "Intereses Profesionales": string;
+    Razon: string;
+  }>;
   recommendations: Array<{
     "Campo de Estudio": string;
     Compatibilidad: number;
@@ -111,7 +116,7 @@ function Recommender() {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ skills, preferences }),
+          body: JSON.stringify({ skills, preferences, email: user?.email || 'anonymous' }),
         }
       );
 
@@ -192,6 +197,7 @@ function Recommender() {
       espacial: skills.spatial_aptitude
     },
     preferences,
+    interests: results.interests,
     recommendations:results.recommendations,
     universityRecommendations: results.university_recommendations
   };
