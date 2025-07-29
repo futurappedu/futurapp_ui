@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Download, User, Brain, Target, GraduationCap, TrendingUp, Briefcase, ArrowRight, BarChart } from "lucide-react";
+import { Download, User, Brain, Target, TrendingUp, Briefcase, ArrowRight, BarChart } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import LogoutButton from "./Logout";
 import { useNavigate, Link } from "react-router-dom";
@@ -384,36 +384,67 @@ function Recommender() {
               </section>
             )}
 
-            {/* University Recommendations */}
+             {/* University Recommendations */}
             {results.university_recommendations && results.university_recommendations.length > 0 && (
               <section className="w-full py-12 md:py-24 lg:py-32">
                 <div className="container px-4 md:px-6">
                   <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
                     Recomendaciones Universitarias
                   </h2>
-                  <div className="grid gap-8 max-w-4xl mx-auto">
-                    {results.university_recommendations.map((item, index) => (
-                      <Card key={index} className="border border-gray-200 dark:border-gray-700 p-6">
-                        <div className="flex items-center gap-3 mb-6">
-                          <GraduationCap className="w-6 h-6 text-primary" />
-                          <h3 className="text-xl font-bold">{item["Campo de Estudio"]}</h3>
-                        </div>
-                        <div className="grid sm:grid-cols-3 gap-4">
-                          <div className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
-                            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2">Primera Opción</div>
-                            <div className="font-semibold">{item["Recomendacion Uno"]}</div>
-                          </div>
-                          <div className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
-                            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2">Segunda Opción</div>
-                            <div className="font-semibold">{item["Recomendacion Dos"]}</div>
-                          </div>
-                          <div className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
-                            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2">Tercera Opción</div>
-                            <div className="font-semibold">{item["Recomendacion Tres"]}</div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
+                  <div className="max-w-6xl mx-auto">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
+                        <thead>
+                          <tr className="bg-gray-100 dark:bg-gray-800">
+                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-bold">
+                              Campo de Estudio
+                            </th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-bold">
+                              Programa
+                            </th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-bold">
+                              Universidad
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {results.university_recommendations.map((item, index) => {
+                            // Parse the university recommendations to extract university and program info
+                            const recommendations = [
+                              item["Recomendacion Uno"],
+                              item["Recomendacion Dos"],
+                              item["Recomendacion Tres"]
+                            ];
+                            
+                            return recommendations.map((rec, recIndex) => {
+                              // Split by "Universidad:" and "Carrera:" to extract data
+                              const parts = rec.split(/Universidad:|Carrera:/);
+                              const universidad = parts[1]?.split('-')[0]?.trim() || '';
+                              const programa = parts[2]?.trim() || rec;
+                              
+                              return (
+                                <tr key={`${index}-${recIndex}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                  {recIndex === 0 && (
+                                    <td 
+                                      className="border border-gray-300 dark:border-gray-600 px-4 py-3 font-medium bg-yellow-100 dark:bg-yellow-900/20"
+                                      rowSpan={recommendations.length}
+                                    >
+                                      {item["Campo de Estudio"]}
+                                    </td>
+                                  )}
+                                  <td className="border border-gray-300 dark:border-gray-600 px-4 py-3">
+                                    {programa}
+                                  </td>
+                                  <td className="border border-gray-300 dark:border-gray-600 px-4 py-3">
+                                    {universidad}
+                                  </td>
+                                </tr>
+                              );
+                            });
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </section>
