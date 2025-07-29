@@ -246,6 +246,35 @@ function Recommender() {
               </CardContent>
             </Card>
             )}
+          {/* Interests Table */}
+            {results.interests && results.interests.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Professional Interests</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th>Área de Interés</th>
+                      <th>Compatibilidad</th>
+                      <th>Razón</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.interests.map((item, index) => (
+                      <tr key={index}>
+                        <td className="border p-2">{item["Intereses Profesionales"]}</td>
+                        <td className="border p-2">{item.Compatibilidad}%</td>
+                        <td className="border p-2">{item["Razon"]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+            )}
+
             {/* University Recommendations Table */}
             {results.university_recommendations && results.university_recommendations.length > 0 && (
             <Card>
