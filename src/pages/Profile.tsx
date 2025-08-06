@@ -462,6 +462,7 @@ export default function ProfileCompletionForm() {
                                         <SelectValue placeholder="Selecciona" />
                                     </SelectTrigger>
                                     <SelectContent>
+                                        <SelectItem value="Carrera">Carrera</SelectItem>
                                         <SelectItem value="Curso de Idiomas en el exterior">Curso de Idiomas en el exterior</SelectItem>
                                         <SelectItem value="Summer Camp">Campamento de verano</SelectItem>
                                         <SelectItem value="Preparacion TOEF/ IELTS o similar">Preparación TOEFL/ IELTS o similar</SelectItem>
@@ -470,26 +471,7 @@ export default function ProfileCompletionForm() {
                                 </Select>
                             </div>
 
-                            {/* Interest Slider */}
-                            <div>
-                                <Label htmlFor="motivation">¿Del 1 al 10 que tan decidido/a estás por el programa mencionado?
-(siendo 1 muy decidido y 10 completamente inseguro)</Label>
-                                <div className="flex items-center space-x-2">
-                                    <Input
-                                        id="motivation"
-                                        name="motivation"
-                                        type="range"
-                                        min="1"
-                                        max="10"
-                                        value={formData.motivation}
-                                        onChange={handleSliderChange}
-                                        className="w-full"
-                                    />
-                                    <Badge variant="outline" className="w-8 h-8 flex items-center justify-center">
-                                        {formData.motivation}
-                                    </Badge>
-                                </div>
-                            </div>
+                            
                             
                             {/* Destination Interest - IMPROVED WITH SHADCN CHECKBOXES */}
                             <div className="col-span-2">
@@ -622,6 +604,28 @@ export default function ProfileCompletionForm() {
                                 </div>
                                 <p className="text-xs text-gray-500 mt-1">Puedes seleccionar hasta 2 opciones.</p>
                             </div>
+
+                            {/* Interest Slider */}
+                            <div>
+                                <Label htmlFor="motivation">¿Del 1 al 10 que tan decidido/a estás por el programa mencionado?
+(siendo 1 muy decidido y 10 completamente inseguro)</Label>
+                                <div className="flex items-center space-x-2">
+                                    <Input
+                                        id="motivation"
+                                        name="motivation"
+                                        type="range"
+                                        min="1"
+                                        max="10"
+                                        value={formData.motivation}
+                                        onChange={handleSliderChange}
+                                        className="w-full"
+                                    />
+                                    <Badge variant="outline" className="w-8 h-8 flex items-center justify-center">
+                                        {formData.motivation}
+                                    </Badge>
+                                </div>
+                            </div>
+                            
                             {/* Five Characteristics - IMPROVED WITH SHADCN CHECKBOXES */}
                             <div className="col-span-2">
                                 <div className="flex justify-between mb-2">

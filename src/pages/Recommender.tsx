@@ -53,6 +53,8 @@ function Recommender() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingSkills, setLoadingSkills] = useState(false);
+  const [hasExistingRecommendations, setHasExistingRecommendations] = useState<boolean | null>(null);
+  const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -60,13 +62,47 @@ function Recommender() {
     }
   }, [isAuthenticated, isLoading, navigate]);
 
-  // Fetch skills from backend using user email
+  // Function to fetch university recommendations
+  const fetchUniversityRecommendations = async (careers: string[]) => {
+    try {
+      console.log("🔄 Querying careers:", careers);
+      
+      const response = await fetch(
+        "https://futurappapi-staging.up.railway.app/query-careers",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ careers }),
+        }
+      );
+
+      if (!response.ok) {
+        console.log("🚫 Query careers response not OK:", response.status, response.statusText);
+        throw new Error("Failed to fetch university recommendations");
+      }
+
+      const data = await response.json();
+      console.log("🏫 University data received:", data);
+      
+      // Return the recommendations array directly since it's already in the correct format
+      return data.recommendations || [];
+    } catch (error) {
+      console.error("❌ Error fetching university recommendations:", error);
+      return [];
+    }
+  };
+
+  // Fetch skills and check for existing recommendations
   useEffect(() => {
-    const fetchSkills = async () => {
+    const fetchSkillsAndRecommendations = async () => {
       if (!user?.email) return;
       setLoadingSkills(true);
+      
       try {
-        const response = await fetch(
+        // Fetch skills
+        const skillsResponse = await fetch(
           "https://futurappapi-staging.up.railway.app/all-scores",
           {
             method: "POST",
@@ -76,30 +112,101 @@ function Recommender() {
             body: JSON.stringify({ email: user.email }),
           }
         );
-        if (!response.ok) throw new Error("No se pudieron obtener las habilidades.");
-        const data = await response.json();
+        
+        if (!skillsResponse.ok) throw new Error("No se pudieron obtener las habilidades.");
+        
+        const skillsData = await skillsResponse.json();
         setSkills({
-          mechanical_reasoning: data.mechanical ?? 0,
-          numerical_aptitude: data.numeric ?? 0,
-          spatial_aptitude: data.spatial ?? 0,
-          logical_reasoning: data.abstract ?? 0,
-          verbal_aptitude: data.verbal ?? 0
+          mechanical_reasoning: skillsData.mechanical ?? 0,
+          numerical_aptitude: skillsData.numeric ?? 0,
+          spatial_aptitude: skillsData.spatial ?? 0,
+          logical_reasoning: skillsData.abstract ?? 0,
+          verbal_aptitude: skillsData.verbal ?? 0
         });
         setPreferences({
-          Realista: data.Realista ?? 0,
-          Convencional: data.Convencional ?? 0,
-          Investigador: data.Investigativo ?? 0, 
-          Artistico: data.Artistico ?? 0,
-          Social: data.Social ?? 0,
-          emprendedor: data.Emprendedor ?? 0,
+          Realista: skillsData.Realista ?? 0,
+          Convencional: skillsData.Convencional ?? 0,
+          Investigador: skillsData.Investigativo ?? 0, 
+          Artistico: skillsData.Artistico ?? 0,
+          Social: skillsData.Social ?? 0,
+          emprendedor: skillsData.Emprendedor ?? 0,
         });
+
+        // Check for existing recommendations
+        const recommendationsResponse = await fetch(
+          `https://futurappapi-staging.up.railway.app/get-recommendations?email=${encodeURIComponent(user.email)}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (recommendationsResponse.ok) {
+          const recommendationsData = await recommendationsResponse.json();
+          console.log("📊 Fetched recommendations data:", recommendationsData);
+          
+          // Check if there are actual recommendations
+          const hasRecommendations = recommendationsData && 
+            recommendationsData.recommendations && 
+            Array.isArray(recommendationsData.recommendations) && 
+            recommendationsData.recommendations.length > 0;
+          
+          if (hasRecommendations) {
+            console.log("✅ Found existing recommendations");
+            
+            // Set the recommendations data
+            setResults({
+              recommendations: recommendationsData.recommendations,
+              interests: recommendationsData.interests || [],
+              university_recommendations: [] // Will be populated later
+            });
+            setHasExistingRecommendations(true);
+            
+            // Automatically fetch university recommendations
+            const careerNames = recommendationsData.recommendations.map(
+              (rec: any) => rec["Campo de Estudio"]
+            );
+
+            const professionalInterests = recommendationsData.interests 
+      ? recommendationsData.interests.map((interest: any) => interest["Intereses Profesionales"])
+      : [];
+    
+    // Combine both arrays and remove duplicates
+    const allCareers = [...careerNames, ...professionalInterests].filter((career, index, self) => 
+      self.indexOf(career) === index
+    );
+            console.log("🎯 Career names to query:", allCareers);
+
+            setIsLoadingUniversities(true);
+            const universityData = await fetchUniversityRecommendations(allCareers);
+
+            if (universityData && universityData.length > 0) {
+              setResults(prev => prev ? {
+                ...prev,
+                university_recommendations: universityData
+              } : null);
+            }
+            setIsLoadingUniversities(false);
+          } else {
+            console.log("❌ No recommendations found");
+            setHasExistingRecommendations(false);
+          }
+        } else {
+          console.log("🚫 Recommendations response not OK:", recommendationsResponse.status);
+          setHasExistingRecommendations(false);
+        }
       } catch (err) {
+        console.error("Error fetching data:", err);
         setError("No se pudieron obtener las habilidades del usuario.");
+        setHasExistingRecommendations(false);
       } finally {
         setLoadingSkills(false);
       }
     };
-    fetchSkills();
+    
+    fetchSkillsAndRecommendations();
   }, [user?.email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,7 +233,9 @@ function Recommender() {
       }
 
       const data = await response.json();
+      console.log("🆕 New recommendations generated:", data);
       setResults(data);
+      setHasExistingRecommendations(true);
     } catch (error) {
       console.error("Error:", error);
       setError("Failed to fetch recommendations. Please try again.");
@@ -162,13 +271,13 @@ function Recommender() {
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
         <div 
           className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
-          style={{ width: `${value}%` }}
+          style={{ width: `${(value / 50) * 100}%` }}
         />
       </div>
     </div>
   );
 
-  if (isLoading || loadingSkills) {
+  if (isLoading || loadingSkills || hasExistingRecommendations === null) {
     return (
       <div className="flex flex-col min-h-screen">
         <header className="px-4 lg:px-6 h-16 flex items-center border-b">
@@ -201,6 +310,25 @@ function Recommender() {
       </header>
 
       <main className="flex-1">
+        {/* Hero Section - Only show if no existing recommendations */}
+        {!hasExistingRecommendations && (
+          <section className="w-full py-12 md:py-24 lg:py-32">
+            <div className="container px-4 md:px-6 flex flex-col items-center">
+              <div className="flex flex-col items-center space-y-4 text-center max-w-4xl">
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+                    Análisis de Carrera Profesional
+                  </h1>
+                  <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
+                    Basado en tu perfil de habilidades cognitivas y personalidad RIASEC, 
+                    genera recomendaciones personalizadas impulsadas por IA.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Assessment Section */}
         <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
           <div className="container px-4 md:px-6">
@@ -251,27 +379,29 @@ function Recommender() {
               </Card>
             </div>
 
-            {/* Generate Button */}
-            <div className="text-center">
-              <Button 
-                onClick={handleSubmit}
-                size="lg"
-                className="w-full max-w-md"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center gap-3">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Generando Tu Futuro...
-                  </div>
-                ) : (
-                  <>
-                    Generar Recomendaciones de Carrera
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </div>
+            {/* Generate Button - Only show if no existing recommendations */}
+            {!hasExistingRecommendations && (
+              <div className="text-center">
+                <Button 
+                  onClick={handleSubmit}
+                  size="lg"
+                  className="w-full max-w-md"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-3">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Generando Tu Futuro...
+                    </div>
+                  ) : (
+                    <>
+                      Generar Recomendaciones de Carrera
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         </section>
 
@@ -280,6 +410,18 @@ function Recommender() {
             <div className="container px-4 md:px-6">
               <div className="p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 rounded-lg text-center">
                 <p className="font-medium">{error}</p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Loading Universities Message */}
+        {isLoadingUniversities && (
+          <section className="w-full py-6">
+            <div className="container px-4 md:px-6 text-center">
+              <div className="flex items-center justify-center gap-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                <p className="text-gray-600 dark:text-gray-400">Cargando recomendaciones universitarias...</p>
               </div>
             </div>
           </section>
@@ -384,7 +526,7 @@ function Recommender() {
               </section>
             )}
 
-             {/* University Recommendations */}
+            {/* University Recommendations */}
             {results.university_recommendations && results.university_recommendations.length > 0 && (
               <section className="w-full py-12 md:py-24 lg:py-32">
                 <div className="container px-4 md:px-6">
@@ -409,15 +551,13 @@ function Recommender() {
                         </thead>
                         <tbody>
                           {results.university_recommendations.map((item, index) => {
-                            // Parse the university recommendations to extract university and program info
                             const recommendations = [
                               item["Recomendacion Uno"],
                               item["Recomendacion Dos"],
                               item["Recomendacion Tres"]
-                            ];
+                            ].filter(rec => rec); // Remove empty recommendations
                             
                             return recommendations.map((rec, recIndex) => {
-                              // Split by "Universidad:" and "Carrera:" to extract data
                               const parts = rec.split(/Universidad:|Carrera:/);
                               const universidad = parts[1]?.split('-')[0]?.trim() || '';
                               const programa = parts[2]?.trim() || rec;
