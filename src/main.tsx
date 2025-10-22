@@ -15,6 +15,7 @@ import {
   PersonalityTest
 } from "./pages/tests";
 import Profile from "./pages/Profile";
+import ScholarshipSearch from "./pages/ScholarshipSearch";
 import Login from "./pages/Login"; // optional login page if you want a custom login view
 import ProtectedRoute from "./pages/ProtectedRoute";
 import { Auth0Provider } from "@auth0/auth0-react";
@@ -110,6 +111,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <ProtectedRoute>
                 <Profile />  
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/scholarship_search"
+            element={
+                <ScholarshipSearch />
             }
           />
           <Route
