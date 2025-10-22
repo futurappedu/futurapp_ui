@@ -89,7 +89,7 @@ export default function ScholarshipSearch() {
     const fetchFilters = async () => {
       setFiltersLoading(true);
       try {
-        const res = await fetch('http://127.0.0.1:8080/filter_options');
+        const res = await fetch('https://futurappapi-staging.up.railway.app/filter_options');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setCountries(data.paises || []);
