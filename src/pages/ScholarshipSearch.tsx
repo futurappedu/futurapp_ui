@@ -1,23 +1,52 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, Users } from 'lucide-react';
+import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label";
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
+import { useNavigate } from 'react-router-dom';
 
-export default function UniversityPlanner() {
-  // State management
+interface Program {
+  id: number;
+  nombre_programa: string;
+  universidad: string;
+  pais: string;
+  tipo_programa: string;
+  precio_min_anual: number;
+  precio_max_anual: number;
+  moneda_de_importe: string;
+  enlace: string;
+}
+
+interface Scholarship {
+  id: number;
+  nombre_beca: string;
+  tipo_beca: string;
+  tipo_de_estudiante: string;
+  cobertura_de_la_beca: string;
+  universidad?: string;
+  monto_beca_desde?: number;
+  monto_beca_hasta?: number;
+  porcentaje_beca_desde?: number;
+  porcentaje_beca_hasta?: number;
+  duracion_de_la_beca: string;
+}
+
+export default function ScholarshipSearch() {
+  const navigate = useNavigate();
   const [searchProgram, setSearchProgram] = useState('');
   const [searchUniversity, setSearchUniversity] = useState('');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedProgramTypes, setSelectedProgramTypes] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 100000]);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(100000);
   const [scholarshipOnly, setScholarshipOnly] = useState(false);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
@@ -32,7 +61,11 @@ export default function UniversityPlanner() {
   const [programTypes, setProgramTypes] = useState<string[]>([]);
   const [scholarshipTypes, setScholarshipTypes] = useState<string[]>([]);
   const [selectedScholarshipType, setSelectedScholarshipType] = useState('all');
+  const [durationRange, setDurationRange] = useState([1, 10]); // Default max 10 years
+  const [maxDuration, setMaxDuration] = useState(10);
+  const [studentBudget, setStudentBudget] = useState<number>(0);
 
+  const isInitialMount = useRef(true);
   useEffect(() => {
     setVisibleCount(20);
   }, [programs]);
@@ -41,10 +74,7 @@ export default function UniversityPlanner() {
     const handleScroll = () => {
       const el = scrollAreaRef.current;
       if (!el) return;
-      if (
-        el.scrollTop + el.clientHeight >= el.scrollHeight - 100 &&
-        visibleCount < programs.length
-      ) {
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100 && visibleCount < programs.length) {
         setVisibleCount((prev) => Math.min(prev + 20, programs.length));
       }
     };
@@ -65,7 +95,24 @@ export default function UniversityPlanner() {
         setCountries(data.paises || []);
         setProgramTypes(data.tipos || []);
         setScholarshipTypes(data.tipos_beca || []);
+
+        // Set max duration from backend
+      if (data.duracion) {
+        setMaxDuration(data.duracion);
+        setDurationRange([1, data.duracion]);
+      }
+      
+       // Set price range from backend
+      if (data.min_price !== undefined && data.max_price !== undefined) {
+        setMinPrice(data.min_price);
+        setMaxPrice(data.max_price);
+        setPriceRange([data.min_price, data.max_price]);
+      }
+
+  
+
       } catch (err) {
+        console.error('Error loading filters:', err);
         setCountries([]);
         setProgramTypes([]);
         setScholarshipTypes([]);
@@ -75,67 +122,92 @@ export default function UniversityPlanner() {
     };
     fetchFilters();
   }, []);
+
+useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      searchPrograms(); // Load all programs on mount
+    }
+  }, []);
+
+  useEffect(() => {
+    // Skip the initial mount (already handled above)
+    if (isInitialMount.current) return;
+
+    // Debounce: wait 500ms after last filter change
+    const timeoutId = setTimeout(() => {
+      searchPrograms();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    selectedCountries,
+    selectedProgramTypes,
+    priceRange,
+    durationRange,
+    scholarshipOnly,
+    selectedScholarshipType,
+    // Note: searchProgram and searchUniversity are NOT here
+    // because those should only trigger on button click
+  ]);
+
   const searchPrograms = async () => {
     setLoading(true);
     try {
       const filtros: Record<string, any> = {};
-
       if (searchProgram.trim()) filtros.nombre_programa = searchProgram.trim();
       if (searchUniversity.trim()) filtros.universidad = searchUniversity.trim();
-      if (selectedCountries.length > 0) filtros.destino = selectedCountries;
+      if (selectedCountries.length > 0) filtros.destinos = selectedCountries.map((c) => c.toLowerCase());
       if (selectedScholarshipType && selectedScholarshipType !== 'all') {
-  filtros.tipo_beca = selectedScholarshipType;
-}
-if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramTypes;
+        filtros.tipo_beca = selectedScholarshipType;
+      }
+      if (selectedProgramTypes.length > 0) filtros.tipos_programa = selectedProgramTypes;
       if (scholarshipOnly) filtros.beca = true;
       if (priceRange && priceRange.length === 2) {
         filtros.min_cost = priceRange[0];
         filtros.max_cost = priceRange[1];
       }
-  
-      const res = await fetch('http://127.0.0.1:8080/filter_results', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(filtros),
-      });
-  
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setPrograms(data);
-      setVisibleCount(20);
-      setResultCount(data.length);
-    } catch (err) {
-      setPrograms([]);
-      setResultCount(0);
-    } finally {
-      setLoading(false);
+      if (durationRange && durationRange.length === 2) {
+      filtros.min_duracion = durationRange[0];
+      filtros.max_duracion = durationRange[1];
     }
-  };
+     
+    const res = await fetch('https://futurappapi-staging.up.railway.app/filter_results', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(filtros),
+    });
 
-  interface Program {
-    id: number;
-    nombre_programa: string;
-    universidad: string;
-    pais: string;
-    tipo_programa: string;
-    precio_min_anual: number;
-    precio_max_anual: number;
-    moneda_de_importe: string;
-    enlace: string;
-  }
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('Error response:', errorText);
+      throw new Error(`HTTP ${res.status}: ${errorText}`);
+    }
+    
+   
+    const data = await res.json();
 
-  interface Scholarship {
-    id: number;
-    nombre_beca: string;
-    tipo_beca: string;
-    tipo_de_estudiante: string;
-    cobertura_de_la_beca: string;
-    monto_beca_desde?: number;
-    monto_beca_hasta?: number;
-    porcentaje_beca_desde?: number;
-    porcentaje_beca_hasta?: number;
-    duracion_de_la_beca: string;
+    let filteredData = data;
+    if (studentBudget > 0) {
+      filteredData = data.filter((program: Program) => {
+        const bestCost = calculateBestProgramCost(program);
+        return bestCost <= studentBudget;
+      });
+      console.log(`Budget filter applied: ${data.length} → ${filteredData.length} programs`);
+    }
+
+    setPrograms(filteredData);
+    setVisibleCount(20);
+    setResultCount(filteredData.length);
+
+  } catch (err) {
+    console.error('Error details:', err);
+    setPrograms([]);
+    setResultCount(0);
+  } finally {
+    setLoading(false);
   }
+};
 
   const loadScholarships = async (program: Program): Promise<void> => {
     setScholarships([]);
@@ -147,14 +219,55 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
       const res = await fetch(`https://futurappapi-staging.up.railway.app/becas?${params.toString()}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const becas: Scholarship[] = await res.json();
-
       setScholarships(becas || []);
       if (!becas.length) setSelectedScholarship(null);
     } catch (e) {
+      console.error('Error loading scholarships:', e);
       setScholarships([]);
       setSelectedScholarship(null);
     }
   };
+
+const calculateBestProgramCost = (program: Program): number => {
+  const baseCost = parseFloat(String(program.precio_max_anual)) || 0;
+  
+  // Get scholarships for this program
+  const programScholarships = scholarships.filter(s => 
+    s.universidad?.toLowerCase() === program.universidad?.toLowerCase()
+  );
+  
+  if (programScholarships.length === 0) return baseCost;
+  
+  // Find the best (lowest) cost with scholarships
+  let bestCost = baseCost;
+  programScholarships.forEach(scholarship => {
+    const finalCost = calculateFinalCost(baseCost, scholarship);
+    if (finalCost < bestCost) {
+      bestCost = finalCost;
+    }
+  });
+  
+  return bestCost;
+};
+
+// Update the calculateFinalCost function to handle the scholarship interface (around line 216)
+const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
+  let finalCost = parseFloat(String(baseCost)) || 0;
+  const percentage = parseFloat(String(scholarship.porcentaje_beca_hasta)) || 
+                     parseFloat(String(scholarship.porcentaje_beca_desde)) || 0;
+  const amount = parseFloat(String(scholarship.monto_beca_hasta)) || 
+                 parseFloat(String(scholarship.monto_beca_desde)) || 0;
+
+  if (percentage && percentage > 0) {
+    const rate = percentage > 1 ? percentage / 100 : percentage;
+    finalCost = finalCost * (1 - rate);
+  }
+  if (amount && amount > 0) {
+    finalCost = Math.max(0, finalCost - amount);
+  }
+  return Math.max(0, finalCost);
+};
+
 
   const calculateInvestment = () => {
     if (!selectedProgram || !selectedScholarship) return null;
@@ -193,21 +306,26 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <GraduationCap className="h-8 w-8 text-indigo-600" />
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <GraduationCap className="h-6 w-6 text-indigo-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Buscador de Programas</h1>
+                <p className="text-sm text-gray-600">Encuentra el programa universitario perfecto y calcula tu inversión</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">University Planner</h1>
-              <p className="text-gray-600 mt-1">Encuentra el programa universitario perfecto y calcula tu inversión</p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-220px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Panel */}
-          <Card className="lg:col-span-1 shadow-sm">
+          <Card className="lg:col-span-1">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Filter className="h-5 w-5 text-indigo-600" />
@@ -222,7 +340,7 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
                     placeholder="Buscar programa..."
                     value={searchProgram}
                     onChange={(e) => setSearchProgram(e.target.value)}
-                    className="pl-10 border-gray-200 focus:border-indigo-300"
+                    className="pl-10"
                   />
                 </div>
                 
@@ -232,137 +350,202 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
                     placeholder="Buscar universidad..."
                     value={searchUniversity}
                     onChange={(e) => setSearchUniversity(e.target.value)}
-                    className="pl-10 border-gray-200 focus:border-indigo-300"
+                    className="pl-10"
                   />
                 </div>
 
                 <Button 
-              onClick={searchPrograms} 
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-              disabled={loading}
-            >
-              {loading ? 'Buscando...' : 'Buscar'}
-            </Button>
+                  onClick={searchPrograms} 
+                  className="w-full"
+                  disabled={loading}
+                >
+                  {loading ? 'Buscando...' : 'Buscar'}
+                </Button>
               </div>
 
               <Separator />
+
               {filtersLoading ? (
-    <div className="py-8 flex flex-col items-center text-gray-400">
-      <svg className="animate-spin h-6 w-6 mb-2" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-      </svg>
-      <span className="text-sm">Cargando filtros...</span>
-    </div>
-  ) : (
-              <div className="space-y-4">
-           
-
-                <div className="space-y-3">
-  <Label className="text-sm font-medium text-foreground">País</Label>
-  <ScrollArea className="h-40 w-full rounded-md border p-4">
-    <div className="space-y-3">
-      {countries.map(country => (
-        <div key={country} className="flex items-center space-x-2">
-          <Checkbox
-            id={`country-${country}`}
-            checked={selectedCountries.includes(country)}
-            onCheckedChange={checked => {
-              setSelectedCountries(checked
-                ? [...selectedCountries, country]
-                : selectedCountries.filter(c => c !== country)
-              );
-            }}
-          />
-          <Label 
-            htmlFor={`country-${country}`}
-            className="text-sm font-normal cursor-pointer"
-          >
-            {country}
-          </Label>
-        </div>
-      ))}
-    </div>
-  </ScrollArea>
-</div>
-<div className="space-y-3">
-  <Label className="text-sm font-medium text-foreground">Tipo de programa</Label>
-  <ScrollArea className="h-40 w-full rounded-md border p-4">
-    <div className="space-y-3">
-      {programTypes.map(type => (
-        <div key={type} className="flex items-center space-x-2">
-          <Checkbox
-            id={`type-${type}`}
-            checked={selectedProgramTypes.includes(type)}
-            onCheckedChange={checked => {
-              setSelectedProgramTypes(checked
-                ? [...selectedProgramTypes, type]
-                : selectedProgramTypes.filter(t => t !== type)
-              );
-            }}
-          />
-          <Label 
-            htmlFor={`type-${type}`}
-            className="text-sm font-normal cursor-pointer"
-          >
-            {type}
-          </Label>
-        </div>
-      ))}
-    </div>
-  </ScrollArea>
-</div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block text-gray-700">
-                    Rango de precio: €{priceRange[0].toLocaleString()} - €{priceRange[1].toLocaleString()}
-                  </label>
-                  <Slider
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    max={100000}
-                    min={0}
-                    step={1000}
-                    className="mt-2"
-                  />
+                <div className="py-8 flex flex-col items-center text-gray-400">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-2"></div>
+                  <span className="text-sm">Cargando filtros...</span>
                 </div>
+              ) : (
+                <ScrollArea className="h-[500px]">
+                  <div className="space-y-4 pr-4">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">País</Label>
+                      <div className="space-y-2">
+                        {countries.map(country => (
+                          <div key={country} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`country-${country}`}
+                              checked={selectedCountries.includes(country)}
+                              onCheckedChange={checked => {
+                                setSelectedCountries(checked
+                                  ? [...selectedCountries, country]
+                                  : selectedCountries.filter(c => c !== country)
+                                );
+                              }}
+                            />
+                            <Label 
+                              htmlFor={`country-${country}`}
+                              className="text-sm font-normal cursor-pointer"
+                            >
+                              {country}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="scholarship-only"
-                    checked={scholarshipOnly}
-                    onCheckedChange={checked => setScholarshipOnly(checked === true)}
-                  />
-                  <label htmlFor="scholarship-only" className="text-sm font-medium text-gray-700">
-                    Solo con beca
-                  </label>
-                </div>
-              <div className="space-y-3">
-  <Label className="text-sm font-medium text-foreground">Tipo de beca</Label>
-  <Select
-    value={selectedScholarshipType}
-    onValueChange={setSelectedScholarshipType}
-  >
-    <SelectTrigger className="w-full">
-      <SelectValue placeholder="Selecciona tipo de beca" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="all">Todos los tipos</SelectItem>
-      {scholarshipTypes.map(type => (
-        <SelectItem key={type} value={type}>{type}</SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
-              </div>
-  )}
+                    <Separator />
 
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Tipo de programa</Label>
+                      <div className="space-y-2">
+                        {programTypes.map(type => (
+                          <div key={type} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`type-${type}`}
+                              checked={selectedProgramTypes.includes(type)}
+                              onCheckedChange={checked => {
+                                setSelectedProgramTypes(checked
+                                  ? [...selectedProgramTypes, type]
+                                  : selectedProgramTypes.filter(t => t !== type)
+                                );
+                              }}
+                            />
+                            <Label 
+                              htmlFor={`type-${type}`}
+                              className="text-sm font-normal cursor-pointer"
+                            >
+                              {type}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                  <Separator />
+
+                  {/* Duration Slider - UPDATED */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">Duración</Label>
+                      <Badge variant="outline" className="text-xs">
+                        {durationRange[0]} - {durationRange[1]} años
+                      </Badge>
+                    </div>
+                    <Slider
+                      value={durationRange}
+                      onValueChange={setDurationRange}
+                      max={maxDuration}
+                      min={1}
+                      step={1}
+                      className="mt-2"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>1 año</span>
+                      <span>{maxDuration} años</span>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Price Range Slider - UPDATED */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">Precio del programa</Label>
+                      <Badge variant="outline" className="text-xs font-mono">
+                        €{priceRange[0].toLocaleString()} - €{priceRange[1].toLocaleString()}
+                      </Badge>
+                    </div>
+                    <Slider
+                      value={priceRange}
+                      onValueChange={setPriceRange}
+                      max={maxPrice}
+                      min={minPrice}
+                      step={1000}
+                      className="mt-2"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>€{minPrice.toLocaleString()}</span>
+                      <span>€{maxPrice.toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <Separator />
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="scholarship-only"
+                        checked={scholarshipOnly}
+                        onCheckedChange={checked => setScholarshipOnly(checked === true)}
+                      />
+                      <Label htmlFor="scholarship-only" className="text-sm font-normal cursor-pointer">
+                        Solo con beca
+                      </Label>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Tipo de beca</Label>
+                      <Select value={selectedScholarshipType} onValueChange={setSelectedScholarshipType}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecciona tipo de beca" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos los tipos</SelectItem>
+                          {scholarshipTypes.map(type => (
+                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </ScrollArea>
+              )}
             </CardContent>
           </Card>
 
-          {/* Results Panel - Improved Layout */}
-          <Card className="lg:col-span-2 shadow-sm">
-            <CardHeader className="border-b border-gray-100">
+          {/* Results Panel */}
+
+            <Card className="lg:col-span-2">
+  {/* Budget Filter - NEW LOCATION */}
+  <div className="p-4 border-b bg-gradient-to-r from-green-50 to-emerald-50">
+    <Label className="text-sm font-medium mb-2 block text-gray-700">
+      💰 Presupuesto Anual del Estudiante
+    </Label>
+    <div className="flex gap-2 items-center">
+      <div className="relative flex-1">
+        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+        <Input
+          type="number"
+          placeholder="Ingresa tu presupuesto anual (€)..."
+          value={studentBudget || ''}
+          onChange={(e) => {
+            const value = parseFloat(e.target.value) || 0;
+            setStudentBudget(value);
+          }}
+          className="pl-10"
+          min="0"
+          step="1000"
+        />
+      </div>
+      {studentBudget > 0 && (
+        <Badge variant="secondary" className="text-sm">
+          €{studentBudget.toLocaleString()}/año
+        </Badge>
+      )}
+    </div>
+    {studentBudget > 0 && (
+      <p className="text-xs text-gray-600 mt-2">
+        ✓ Mostrando solo programas dentro de tu presupuesto (costo - mejor beca)
+      </p>
+    )}
+  </div>
+            <CardHeader className="border-b">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl">Programas Encontrados</CardTitle>
@@ -371,17 +554,14 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
                   </CardDescription>
                 </div>
                 {resultCount > 0 && (
-                  <Badge variant="secondary" className="text-sm">
+                  <Badge variant="secondary">
                     {visibleCount} de {resultCount}
                   </Badge>
                 )}
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div
-                ref={scrollAreaRef}
-                className="h-[580px] overflow-y-auto"
-              >
+              <div ref={scrollAreaRef} className="h-[600px] overflow-y-auto">
                 {programs.length === 0 && !loading ? (
                   <div className="flex flex-col items-center justify-center h-full text-gray-500">
                     <Search className="h-12 w-12 mb-4 text-gray-300" />
@@ -389,14 +569,12 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
                     <p className="text-sm">Prueba ajustando los filtros de búsqueda</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-100">
+                  <div className="divide-y">
                     {visiblePrograms.map((program) => (
                       <div
                         key={program.id}
-                        className={`p-6 cursor-pointer transition-all duration-200 hover:bg-gray-50 ${
-                          selectedProgram?.id === program.id 
-                            ? 'bg-indigo-50 border-l-4 border-indigo-500' 
-                            : 'hover:border-l-4 hover:border-gray-200'
+                        className={`p-6 cursor-pointer transition-all hover:bg-gray-50 ${
+                          selectedProgram?.id === program.id ? 'bg-indigo-50 border-l-4 border-indigo-500' : ''
                         }`}
                         onClick={() => {
                           setSelectedProgram(program);
@@ -406,84 +584,41 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-lg text-gray-900 mb-1 line-clamp-2">
+                            <h3 className="font-semibold text-lg text-gray-900 mb-1">
                               {program.nombre_programa}
                             </h3>
                             <div className="flex items-center gap-2 text-gray-600 mb-2">
-                              <Building2 className="h-4 w-4 flex-shrink-0" />
+                              <Building2 className="h-4 w-4" />
                               <span className="font-medium">{program.universidad}</span>
                             </div>
                           </div>
-                          <Badge 
-                            variant={selectedProgram?.id === program.id ? "default" : "secondary"}
-                            className="ml-4 flex-shrink-0"
-                          >
+                          <Badge variant={selectedProgram?.id === program.id ? "default" : "secondary"}>
                             {program.tipo_programa}
                           </Badge>
-                          <div className="mb-2">
-                          <a
-                            href={program.enlace}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1.5 rounded bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition"
-                          >
-                            Ir al sitio del programa
-                            <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M17 7l-10 10M17 17V7H7" />
-                            </svg>
-                          </a>
-                        </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mb-3">
                           <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <MapPin className="h-4 w-4 text-gray-400" />
+                            <MapPin className="h-4 w-4" />
                             <span>{program.pais}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <GraduationCap className="h-4 w-4 text-gray-400" />
-                            <span>{program.tipo_programa}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 text-sm">
                             <DollarSign className="h-4 w-4 text-green-600" />
                             <span className="font-semibold text-green-700">
-                              €{program.precio_min_anual.toLocaleString()} - €{program.precio_max_anual.toLocaleString()}
+                              €{program.precio_min_anual.toLocaleString()} - €{program.precio_max_anual.toLocaleString()}/año
                             </span>
-                            <span className="text-xs text-gray-500">/ año</span>
                           </div>
-                          
-                          {selectedProgram?.id === program.id && (
-                            <div className="flex items-center gap-1 text-indigo-600 text-sm font-medium">
-                              <Star className="h-4 w-4 fill-current" />
-                              Seleccionado
-                            </div>
-                          )}
                         </div>
+
+                        {program.enlace && (
+                          <Button size="sm" variant="outline" asChild>
+                            <a href={program.enlace} target="_blank" rel="noopener noreferrer">
+                              Ver programa →
+                            </a>
+                          </Button>
+                        )}
                       </div>
                     ))}
-                    
-                    {visibleCount < programs.length && (
-                      <div className="p-4 text-center">
-                        <p className="text-sm text-gray-500 mb-2">
-                          Mostrando {visibleCount} de {programs.length} resultados
-                        </p>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-indigo-600 h-2 rounded-full transition-all duration-300" 
-                            style={{ width: `${(visibleCount / programs.length) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    )}
-
-                    {visibleCount >= programs.length && programs.length > 0 && (
-                      <div className="p-4 text-center text-sm text-gray-500">
-                        ✨ Todos los resultados han sido cargados
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -493,7 +628,7 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
           {/* Right Panel */}
           <div className="lg:col-span-1 space-y-6">
             {/* Scholarships */}
-            <Card className="shadow-sm">
+            <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Award className="h-5 w-5 text-yellow-600" />
@@ -505,62 +640,39 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
                   {!selectedProgram ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <Award className="h-8 w-8 mb-2 text-gray-300" />
-                      <p className="text-sm text-center">Selecciona un programa para ver las becas disponibles</p>
+                      <p className="text-sm text-center">Selecciona un programa</p>
                     </div>
                   ) : scholarships.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <Clock className="h-8 w-8 mb-2 text-gray-300" />
-                      <p className="text-sm text-center">No hay becas disponibles para este programa</p>
+                      <p className="text-sm text-center">No hay becas disponibles</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       {scholarships.map(scholarship => (
                         <Card 
                           key={scholarship.id}
-                          className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                            selectedScholarship?.id === scholarship.id 
-                              ? 'ring-2 ring-yellow-400 bg-yellow-50' 
-                              : 'hover:bg-gray-50'
+                          className={`cursor-pointer transition-all hover:shadow-md ${
+                            selectedScholarship?.id === scholarship.id ? 'ring-2 ring-yellow-400 bg-yellow-50' : ''
                           }`}
                           onClick={() => setSelectedScholarship(scholarship)}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-2">
-                              <h4 className="font-medium text-sm text-gray-900 line-clamp-2 flex-1">
-                                {scholarship.nombre_beca}
-                              </h4>
+                              <h4 className="font-medium text-sm flex-1">{scholarship.nombre_beca}</h4>
                               {selectedScholarship?.id === scholarship.id && (
-                                <Star className="h-4 w-4 text-yellow-500 fill-current ml-2 flex-shrink-0" />
+                                <Star className="h-4 w-4 text-yellow-500 fill-current" />
                               )}
                             </div>
-                            
-                            <div className="space-y-2">
-                              <Badge variant="outline" className="text-xs">
-                                {scholarship.tipo_beca}
-                              </Badge>
-                              
-                              <div className="space-y-1 text-xs text-gray-600">
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-3 w-3" />
-                                  <span>{scholarship.tipo_de_estudiante}</span>
-                                </div>
-                                
-                                <div className="flex items-center gap-1">
-                                  <DollarSign className="h-3 w-3" />
-                                  <span>
-                                    €{scholarship.monto_beca_desde?.toLocaleString()} - €{scholarship.monto_beca_hasta?.toLocaleString()}
-                                  </span>
-                                </div>
-                                
-                                <div className="flex items-center gap-1">
-                                  <Percent className="h-3 w-3" />
-                                  <span>{scholarship.porcentaje_beca_desde}% - {scholarship.porcentaje_beca_hasta}%</span>
-                                </div>
-                                
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  <span>{scholarship.duracion_de_la_beca}</span>
-                                </div>
+                            <Badge variant="outline" className="text-xs mb-2">{scholarship.tipo_beca}</Badge>
+                            <div className="space-y-1 text-xs text-gray-600">
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="h-3 w-3" />
+                                <span>€{scholarship.monto_beca_desde?.toLocaleString()} - €{scholarship.monto_beca_hasta?.toLocaleString()}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Percent className="h-3 w-3" />
+                                <span>{scholarship.porcentaje_beca_desde}% - {scholarship.porcentaje_beca_hasta}%</span>
                               </div>
                             </div>
                           </CardContent>
@@ -573,7 +685,7 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
             </Card>
 
             {/* Investment Calculator */}
-            <Card className="shadow-sm">
+            <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Calculator className="h-5 w-5 text-green-600" />
@@ -585,52 +697,45 @@ if (selectedProgramTypes.length > 0) filtros.tipo_programa = selectedProgramType
                   {!calculation ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <Calculator className="h-8 w-8 mb-2 text-gray-300" />
-                      <p className="text-sm text-center">Selecciona un programa y una beca para ver el cálculo de inversión</p>
+                      <p className="text-sm text-center">Selecciona programa y beca</p>
                     </div>
                   ) : (
                     <div className="space-y-4 text-sm">
-                      <div className="p-3 bg-blue-50 rounded-lg">
-                        <h4 className="font-semibold text-blue-900 mb-1">Programa Seleccionado</h4>
-                        <p className="font-medium text-blue-800 text-xs mb-1">{calculation.program.nombre_programa}</p>
-                        <p className="text-blue-700 text-xs mb-2">{calculation.program.universidad}</p>
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="h-3 w-3 text-blue-600" />
-                          <span className="text-xs text-blue-800 font-medium">
-                            Matrícula anual: €{calculation.tuitionRange.min.toLocaleString()} - €{calculation.tuitionRange.max.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-3">
+                          <h4 className="font-semibold text-blue-900 mb-1">Programa</h4>
+                          <p className="text-xs text-blue-800 mb-2">{calculation.program.nombre_programa}</p>
+                          <div className="flex items-center gap-1 text-xs">
+                            <DollarSign className="h-3 w-3" />
+                            <span>€{calculation.tuitionRange.min.toLocaleString()} - €{calculation.tuitionRange.max.toLocaleString()}/año</span>
+                          </div>
+                        </CardContent>
+                      </Card>
 
-                      <div className="p-3 bg-yellow-50 rounded-lg">
-                        <h4 className="font-semibold text-yellow-900 mb-1">Beca Seleccionada</h4>
-                        <p className="font-medium text-yellow-800 text-xs mb-1">{calculation.scholarship.nombre_beca}</p>
-                        <p className="text-yellow-700 text-xs">({calculation.scholarship.tipo_beca})</p>
-                      </div>
+                      <Card className="bg-yellow-50 border-yellow-200">
+                        <CardContent className="p-3">
+                          <h4 className="font-semibold text-yellow-900 mb-1">Beca</h4>
+                          <p className="text-xs text-yellow-800">{calculation.scholarship.nombre_beca}</p>
+                        </CardContent>
+                      </Card>
 
-                      <div className="space-y-3">
-                        <div className="p-3 bg-green-50 rounded-lg">
-                          <h4 className="font-semibold text-green-900 mb-2 text-xs">Cobertura por Monto Fijo</h4>
-                          <p className="text-green-800 text-xs mb-1">
-                            Financia: €{calculation.fixedAmount.min.toLocaleString()} - €{calculation.fixedAmount.max.toLocaleString()}
+                      <Card className="bg-green-50 border-green-200">
+                        <CardContent className="p-3">
+                          <h4 className="font-semibold text-green-900 mb-2 text-xs">Tu Inversión (Monto Fijo)</h4>
+                          <p className="font-semibold text-green-700 text-sm">
+                            €{calculation.residualFixed.min.toLocaleString()} - €{calculation.residualFixed.max.toLocaleString()}/año
                           </p>
-                          <p className="font-semibold text-green-700 text-xs">
-                            💰 Tu inversión: €{calculation.residualFixed.min.toLocaleString()} - €{calculation.residualFixed.max.toLocaleString()} anuales
-                          </p>
-                        </div>
+                        </CardContent>
+                      </Card>
 
-                        <div className="p-3 bg-purple-50 rounded-lg">
-                          <h4 className="font-semibold text-purple-900 mb-2 text-xs">Cobertura por Porcentaje</h4>
-                          <p className="text-purple-800 text-xs mb-1">
-                            Cubre: {calculation.percentageRange.min}% - {calculation.percentageRange.max}% de la matrícula
+                      <Card className="bg-purple-50 border-purple-200">
+                        <CardContent className="p-3">
+                          <h4 className="font-semibold text-purple-900 mb-2 text-xs">Tu Inversión (Porcentaje)</h4>
+                          <p className="font-semibold text-purple-700 text-sm">
+                            €{calculation.residualPercent.min.toLocaleString()} - €{calculation.residualPercent.max.toLocaleString()}/año
                           </p>
-                          <p className="text-purple-700 text-xs mb-1">
-                            Valor: €{calculation.coverageAmount.min.toLocaleString()} - €{calculation.coverageAmount.max.toLocaleString()}
-                          </p>
-                          <p className="font-semibold text-purple-700 text-xs">
-                            💰 Tu inversión: €{calculation.residualPercent.min.toLocaleString()} - €{calculation.residualPercent.max.toLocaleString()} anuales
-                          </p>
-                        </div>
-                      </div>
+                        </CardContent>
+                      </Card>
                     </div>
                   )}
                 </ScrollArea>
