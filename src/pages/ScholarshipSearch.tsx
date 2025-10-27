@@ -22,6 +22,11 @@ interface Program {
   precio_max_anual: number;
   moneda_de_importe: string;
   enlace: string;
+  min_monto_beca?: number;
+  max_monto_beca?: number;
+  min_porcentaje_beca?: number;
+  max_porcentaje_beca?: number;
+  tiene_beca_parseada?: boolean;
 }
 
 interface Scholarship {
@@ -36,6 +41,7 @@ interface Scholarship {
   porcentaje_beca_desde?: number;
   porcentaje_beca_hasta?: number;
   duracion_de_la_beca: string;
+  moneda_de_importe?: string;
 }
 
 export default function ScholarshipSearch() {
@@ -64,8 +70,11 @@ export default function ScholarshipSearch() {
   const [durationRange, setDurationRange] = useState([1, 10]); // Default max 10 years
   const [maxDuration, setMaxDuration] = useState(10);
   const [studentBudget, setStudentBudget] = useState<number>(0);
-
+  const [scholarshipAmountRange, setScholarshipAmountRange] = useState([0, 50000]);
+  const [maxScholarshipAmount, setMaxScholarshipAmount] = useState(50000);
+  const [scholarshipPercentageRange, setScholarshipPercentageRange] = useState([0, 100]);
   const isInitialMount = useRef(true);
+  
   useEffect(() => {
     setVisibleCount(20);
   }, [programs]);
@@ -109,19 +118,23 @@ export default function ScholarshipSearch() {
         setPriceRange([data.min_price, data.max_price]);
       }
 
-  
-
-      } catch (err) {
-        console.error('Error loading filters:', err);
-        setCountries([]);
-        setProgramTypes([]);
-        setScholarshipTypes([]);
-      } finally {
-        setFiltersLoading(false);
+      if (data.monto_beca) {
+        setMaxScholarshipAmount(data.monto_beca);
+        setScholarshipAmountRange([0, data.monto_beca]);
       }
-    };
-    fetchFilters();
-  }, []);
+
+
+    } catch (err) {
+      console.error('Error loading filters:', err);
+      setCountries([]);
+      setProgramTypes([]);
+      setScholarshipTypes([]);
+    } finally {
+      setFiltersLoading(false);
+    }
+  };
+  fetchFilters();
+}, []);
 
 useEffect(() => {
     if (isInitialMount.current) {
@@ -146,11 +159,27 @@ useEffect(() => {
     priceRange,
     durationRange,
     scholarshipOnly,
+    studentBudget,
+    scholarshipAmountRange,
+    scholarshipPercentageRange,
     selectedScholarshipType,
     // Note: searchProgram and searchUniversity are NOT here
     // because those should only trigger on button click
   ]);
 
+  const clearAllFilters = () => {
+  setSearchProgram('');
+  setSearchUniversity('');
+  setSelectedCountries([]);
+  setSelectedProgramTypes([]);
+  setPriceRange([minPrice, maxPrice]);
+  setDurationRange([1, maxDuration]);
+  setScholarshipOnly(false);
+  setSelectedScholarshipType('all');
+  setStudentBudget(0);
+  setScholarshipAmountRange([0, maxScholarshipAmount]);
+  setScholarshipPercentageRange([0, 100]);
+};
   const searchPrograms = async () => {
     setLoading(true);
     try {
@@ -171,7 +200,25 @@ useEffect(() => {
       filtros.min_duracion = durationRange[0];
       filtros.max_duracion = durationRange[1];
     }
-     
+
+    if (scholarshipAmountRange && scholarshipAmountRange.length === 2 && 
+        (scholarshipAmountRange[0] > 0 || scholarshipAmountRange[1] < maxScholarshipAmount)) {
+      filtros.min_beca_amount = scholarshipAmountRange[0];
+      filtros.max_beca_amount = scholarshipAmountRange[1];
+    }
+
+    if (scholarshipPercentageRange && scholarshipPercentageRange.length === 2 && 
+        (scholarshipPercentageRange[0] > 0 || scholarshipPercentageRange[1] < 100)) {
+      filtros.min_beca_percentage = scholarshipPercentageRange[0];
+      filtros.max_beca_percentage = scholarshipPercentageRange[1];
+       console.log('📊 Percentage filter:', scholarshipPercentageRange);
+    }
+    
+     if (studentBudget > 0) {
+      filtros.max_cost_with_scholarship = studentBudget;
+    }
+
+    console.log('📤 Final filters being sent:', JSON.stringify(filtros, null, 2));
     const res = await fetch('https://futurappapi-staging.up.railway.app/filter_results', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -373,6 +420,16 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
               ) : (
                 <ScrollArea className="h-[500px]">
                   <div className="space-y-4 pr-4">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={clearAllFilters}
+                  >
+                    <Filter className="h-4 w-4 mr-2" />
+                    Limpiar Filtros
+                  </Button>
+
+                  <Separator />
                     <div className="space-y-3">
                       <Label className="text-sm font-medium">País</Label>
                       <div className="space-y-2">
@@ -476,8 +533,56 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
                       <span>€{maxPrice.toLocaleString()}</span>
                     </div>
                   </div>
+                  
 
                   <Separator />
+
+                  <div className="space-y-3">
+  <div className="flex items-center justify-between">
+    <Label className="text-sm font-medium">Monto de beca</Label>
+    <Badge variant="outline" className="text-xs font-mono">
+      €{scholarshipAmountRange[0].toLocaleString()} - €{scholarshipAmountRange[1].toLocaleString()}
+    </Badge>
+  </div>
+  <Slider
+    value={scholarshipAmountRange}
+    onValueChange={setScholarshipAmountRange}
+    max={maxScholarshipAmount}
+    min={0}
+    step={1000}
+    className="mt-2"
+  />
+  <div className="flex justify-between text-xs text-gray-500">
+    <span>€0</span>
+    <span>€{maxScholarshipAmount.toLocaleString()}</span>
+  </div>
+</div>
+
+<Separator />
+
+{/* Scholarship Percentage Slider - NEW */}
+<div className="space-y-3">
+  <div className="flex items-center justify-between">
+    <Label className="text-sm font-medium">Porcentaje de beca</Label>
+    <Badge variant="outline" className="text-xs">
+      {scholarshipPercentageRange[0]}% - {scholarshipPercentageRange[1]}%
+    </Badge>
+  </div>
+  <Slider
+    value={scholarshipPercentageRange}
+    onValueChange={setScholarshipPercentageRange}
+    max={100}
+    min={0}
+    step={5}
+    className="mt-2"
+  />
+  <div className="flex justify-between text-xs text-gray-500">
+    <span>0%</span>
+    <span>100%</span>
+  </div>
+</div>
+
+<Separator />
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="scholarship-only"
@@ -550,7 +655,8 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
                 <div>
                   <CardTitle className="text-xl">Programas Encontrados</CardTitle>
                   <CardDescription className="mt-1">
-                    {resultCount > 0 ? `${resultCount} programa${resultCount !== 1 ? 's' : ''} disponible${resultCount !== 1 ? 's' : ''}` : 'Usa los filtros para buscar programas'}
+                    {loading ? 'Buscando programas...' : 
+                    resultCount > 0 ? `${resultCount} programa${resultCount !== 1 ? 's' : ''} disponible${resultCount !== 1 ? 's' : ''}` : 'Usa los filtros para buscar programas'}
                   </CardDescription>
                 </div>
                 {resultCount > 0 && (
@@ -561,68 +667,78 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div ref={scrollAreaRef} className="h-[600px] overflow-y-auto">
-                {programs.length === 0 && !loading ? (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                    <Search className="h-12 w-12 mb-4 text-gray-300" />
-                    <p className="text-lg font-medium">No hay resultados</p>
-                    <p className="text-sm">Prueba ajustando los filtros de búsqueda</p>
-                  </div>
-                ) : (
-                  <div className="divide-y">
-                    {visiblePrograms.map((program) => (
-                      <div
-                        key={program.id}
-                        className={`p-6 cursor-pointer transition-all hover:bg-gray-50 ${
-                          selectedProgram?.id === program.id ? 'bg-indigo-50 border-l-4 border-indigo-500' : ''
-                        }`}
-                        onClick={() => {
-                          setSelectedProgram(program);
-                          loadScholarships(program);
-                          setSelectedScholarship(null);
-                        }}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-lg text-gray-900 mb-1">
-                              {program.nombre_programa}
-                            </h3>
-                            <div className="flex items-center gap-2 text-gray-600 mb-2">
-                              <Building2 className="h-4 w-4" />
-                              <span className="font-medium">{program.universidad}</span>
-                            </div>
-                          </div>
-                          <Badge variant={selectedProgram?.id === program.id ? "default" : "secondary"}>
-                            {program.tipo_programa}
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 mb-3">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <MapPin className="h-4 w-4" />
-                            <span>{program.pais}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <DollarSign className="h-4 w-4 text-green-600" />
-                            <span className="font-semibold text-green-700">
-                              €{program.precio_min_anual.toLocaleString()} - €{program.precio_max_anual.toLocaleString()}/año
-                            </span>
-                          </div>
-                        </div>
-
-                        {program.enlace && (
-                          <Button size="sm" variant="outline" asChild>
-                            <a href={program.enlace} target="_blank" rel="noopener noreferrer">
-                              Ver programa →
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+  <div ref={scrollAreaRef} className="h-[600px] overflow-y-auto">
+    {/* Loading State - NEW */}
+    {loading ? (
+      <div className="flex flex-col items-center justify-center h-full text-gray-500">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600"></div>
+          <GraduationCap className="h-8 w-8 text-indigo-600 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+        </div>
+        <p className="text-lg font-medium mt-4">Buscando programas...</p>
+        <p className="text-sm text-gray-400 mt-1">Esto puede tomar unos segundos</p>
+      </div>
+    ) : programs.length === 0 ? (
+      <div className="flex flex-col items-center justify-center h-full text-gray-500">
+        <Search className="h-12 w-12 mb-4 text-gray-300" />
+        <p className="text-lg font-medium">No hay resultados</p>
+        <p className="text-sm">Prueba ajustando los filtros de búsqueda</p>
+      </div>
+    ) : (
+      <div className="divide-y">
+        {visiblePrograms.map((program) => (
+          <div
+            key={program.id}
+            className={`p-6 cursor-pointer transition-all hover:bg-gray-50 ${
+              selectedProgram?.id === program.id ? 'bg-indigo-50 border-l-4 border-indigo-500' : ''
+            }`}
+            onClick={() => {
+              setSelectedProgram(program);
+              loadScholarships(program);
+              setSelectedScholarship(null);
+            }}
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                  {program.nombre_programa}
+                </h3>
+                <div className="flex items-center gap-2 text-gray-600 mb-2">
+                  <Building2 className="h-4 w-4" />
+                  <span className="font-medium">{program.universidad}</span>
+                </div>
               </div>
-            </CardContent>
+              <Badge variant={selectedProgram?.id === program.id ? "default" : "secondary"}>
+                {program.tipo_programa}
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-3">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <MapPin className="h-4 w-4" />
+                <span>{program.pais}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <DollarSign className="h-4 w-4 text-green-600" />
+                <span className="font-semibold text-green-700">
+                   {program.moneda_de_importe || '€'}{program.precio_min_anual.toLocaleString()} - {program.moneda_de_importe || '€'}{program.precio_max_anual.toLocaleString()}/año
+                </span>
+              </div>
+            </div>
+
+            {program.enlace && (
+              <Button size="sm" variant="outline" asChild>
+                <a href={program.enlace} target="_blank" rel="noopener noreferrer">
+                  Ver programa →
+                </a>
+              </Button>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</CardContent>
           </Card>
 
           {/* Right Panel */}
@@ -668,11 +784,19 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
                             <div className="space-y-1 text-xs text-gray-600">
                               <div className="flex items-center gap-1">
                                 <DollarSign className="h-3 w-3" />
-                                <span>€{scholarship.monto_beca_desde?.toLocaleString()} - €{scholarship.monto_beca_hasta?.toLocaleString()}</span>
+                                <span>
+                                {scholarship.monto_beca_hasta && Number(scholarship.monto_beca_hasta) > 0
+                                ? `Hasta ${scholarship.moneda_de_importe || '€'}${Number(scholarship.monto_beca_hasta).toLocaleString()}`
+                                : 'Monto no especificado'}
+                              </span>
                               </div>
                               <div className="flex items-center gap-1">
-                                <Percent className="h-3 w-3" />
-                                <span>{scholarship.porcentaje_beca_desde}% - {scholarship.porcentaje_beca_hasta}%</span>
+                              <Percent className="h-3 w-3" />
+                              <span>
+                                {scholarship.porcentaje_beca_hasta && Number(scholarship.porcentaje_beca_hasta) > 0
+                                  ? `Hasta ${(Number(scholarship.porcentaje_beca_hasta) * 100).toFixed(0)}%`
+                                  : 'Porcentaje no especificado'}
+                              </span>
                               </div>
                             </div>
                           </CardContent>
