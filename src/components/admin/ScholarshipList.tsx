@@ -10,6 +10,7 @@ import ScholarshipForm from './ScholarshipForm';
 interface Scholarship {
   id_beca: number;
   id_universidad: number;
+  id_tipo_estudiante: number;
   universidad: string | null;
   nombre_beca: string;
   tipo_de_beca: string | null;
