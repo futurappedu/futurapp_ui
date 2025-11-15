@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, ArrowLeft } from 'lucide-react';
+import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, ArrowLeft, Heart } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
 import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+import { apiUrl } from '@/config/api';
 
 interface Program {
   id: number;
@@ -46,6 +48,7 @@ interface Scholarship {
 
 export default function ScholarshipSearch() {
   const navigate = useNavigate();
+  const { user } = useAuth0(); // Get user email, authentication already handled
   const [searchProgram, setSearchProgram] = useState('');
   const [searchUniversity, setSearchUniversity] = useState('');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -74,6 +77,10 @@ export default function ScholarshipSearch() {
   const [maxScholarshipAmount, setMaxScholarshipAmount] = useState(50000);
   const [scholarshipPercentageRange, setScholarshipPercentageRange] = useState([0, 100]);
   const isInitialMount = useRef(true);
+  const [favoriteProgramIds, setFavoriteProgramIds] = useState<Set<number>>(new Set());
+  const [favoritePrograms, setFavoritePrograms] = useState<Program[]>([]);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
   
   useEffect(() => {
     setVisibleCount(20);
@@ -83,8 +90,9 @@ export default function ScholarshipSearch() {
     const handleScroll = () => {
       const el = scrollAreaRef.current;
       if (!el) return;
-      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100 && visibleCount < programs.length) {
-        setVisibleCount((prev) => Math.min(prev + 20, programs.length));
+      const currentPrograms = showFavorites ? favoritePrograms : programs;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100 && visibleCount < currentPrograms.length) {
+        setVisibleCount((prev) => Math.min(prev + 20, currentPrograms.length));
       }
     };
     const el = scrollAreaRef.current;
@@ -92,13 +100,13 @@ export default function ScholarshipSearch() {
     return () => {
       if (el) el.removeEventListener('scroll', handleScroll);
     };
-  }, [visibleCount, programs.length]);
+  }, [visibleCount, programs.length, favoritePrograms.length, showFavorites]);
   
   useEffect(() => {
     const fetchFilters = async () => {
       setFiltersLoading(true);
       try {
-        const res = await fetch('https://futurappapi-staging.up.railway.app/filter_options');
+        const res = await fetch(apiUrl('filter_options'));
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setCountries(data.paises || []);
@@ -135,6 +143,38 @@ export default function ScholarshipSearch() {
   };
   fetchFilters();
 }, []);
+
+  // Favorites API functions
+  const loadFavorites = async () => {
+    if (!user?.email) return;
+    
+    setFavoritesLoading(true);
+    try {
+      const res = await fetch(
+        `${apiUrl('favorites')}?email=${encodeURIComponent(user.email)}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const favoriteIds = new Set<number>((data.favorites || []).map((fav: any) => fav.program_id || fav.id));
+        setFavoriteProgramIds(favoriteIds);
+        // Store full program data
+        const favoriteProgramsData = (data.favorites || []).map((fav: any) => fav.program_data || fav);
+        setFavoritePrograms(favoriteProgramsData);
+      }
+    } catch (err) {
+      console.error('Error loading favorites:', err);
+    } finally {
+      setFavoritesLoading(false);
+    }
+  };
+
+  // Load favorites on mount
+  useEffect(() => {
+    if (user?.email) {
+      loadFavorites();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.email]);
 
 useEffect(() => {
     if (isInitialMount.current) {
@@ -211,15 +251,13 @@ useEffect(() => {
         (scholarshipPercentageRange[0] > 0 || scholarshipPercentageRange[1] < 100)) {
       filtros.min_beca_percentage = scholarshipPercentageRange[0];
       filtros.max_beca_percentage = scholarshipPercentageRange[1];
-       console.log('📊 Percentage filter:', scholarshipPercentageRange);
     }
     
      if (studentBudget > 0) {
       filtros.max_cost_with_scholarship = studentBudget;
     }
 
-    console.log('📤 Final filters being sent:', JSON.stringify(filtros, null, 2));
-    const res = await fetch('https://futurappapi-staging.up.railway.app/filter_results', {
+    const res = await fetch(apiUrl('filter_results'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(filtros),
@@ -233,14 +271,30 @@ useEffect(() => {
     
    
     const data = await res.json();
-
-    let filteredData = data;
+    
+    const transformedData: Program[] = (data || []).map((item: any) => ({
+      id: item.id_programa || item.id, // Map id_programa to id
+      nombre_programa: item.nombre_programa || item.programa || '',
+      universidad: item.universidad || '',
+      pais: item.pais || '',
+      tipo_programa: item.tipo_programa || '',
+      precio_min_anual: item.precio_min_anual || 0,
+      precio_max_anual: item.precio_max_anual || 0,
+      moneda_de_importe: item.moneda_de_importe || '€',
+      enlace: item.enlace || '',
+      min_monto_beca: item.min_monto_beca,
+      max_monto_beca: item.max_monto_beca,
+      min_porcentaje_beca: item.min_porcentaje_beca,
+      max_porcentaje_beca: item.max_porcentaje_beca,
+      tiene_beca_parseada: item.tiene_beca_parseada,
+    }));
+    
+    let filteredData = transformedData;
     if (studentBudget > 0) {
-      filteredData = data.filter((program: Program) => {
+      filteredData = transformedData.filter((program: Program) => {
         const bestCost = calculateBestProgramCost(program);
         return bestCost <= studentBudget;
       });
-      console.log(`Budget filter applied: ${data.length} → ${filteredData.length} programs`);
     }
 
     setPrograms(filteredData);
@@ -263,7 +317,7 @@ useEffect(() => {
         programa_texto: program.nombre_programa,
         universidad: program.universidad
       });
-      const res = await fetch(`https://futurappapi-staging.up.railway.app/becas?${params.toString()}`);
+      const res = await fetch(`${apiUrl('becas')}?${params.toString()}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const becas: Scholarship[] = await res.json();
       setScholarships(becas || []);
@@ -272,6 +326,51 @@ useEffect(() => {
       console.error('Error loading scholarships:', e);
       setScholarships([]);
       setSelectedScholarship(null);
+    }
+  };
+
+  const toggleFavorite = async (program: Program, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent program selection when clicking favorite button
+    
+    if (!user?.email) {
+      console.error('User email not available');
+      return;
+    }
+
+    const isFavorite = favoriteProgramIds.has(program.id);
+    
+    try {
+      const url = apiUrl('favorites');
+      const method = isFavorite ? 'DELETE' : 'POST';
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user.email,
+          program_id: program.id,
+          program_data: program
+        }),
+      });
+
+      if (res.ok) {
+        if (isFavorite) {
+          setFavoriteProgramIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(program.id);
+            return newSet;
+          });
+          setFavoritePrograms(prev => prev.filter(p => p.id !== program.id));
+        } else {
+          setFavoriteProgramIds(prev => new Set(prev).add(program.id));
+          setFavoritePrograms(prev => [...prev, program]);
+        }
+      } else {
+        throw new Error('Failed to update favorite');
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+      alert('Error al guardar favorito. Por favor intenta de nuevo.');
     }
   };
 
@@ -347,7 +446,8 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
   };
 
   const calculation = calculateInvestment();
-  const visiblePrograms = programs.slice(0, visibleCount);
+  const displayPrograms = showFavorites ? favoritePrograms : programs;
+  const visiblePrograms = displayPrograms.slice(0, visibleCount);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
@@ -652,16 +752,43 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
   </div>
             <CardHeader className="border-b">
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">Programas Encontrados</CardTitle>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <CardTitle className="text-xl">
+                      {showFavorites ? 'Mis Favoritos' : 'Programas Encontrados'}
+                    </CardTitle>
+                    <Button
+                      variant={showFavorites ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setShowFavorites(!showFavorites);
+                        setVisibleCount(20);
+                      }}
+                      className="h-8"
+                    >
+                      <Heart className={`h-4 w-4 mr-2 ${showFavorites ? 'fill-white' : ''}`} />
+                      {showFavorites ? 'Ver Todos' : `Favoritos (${favoritePrograms.length})`}
+                    </Button>
+                  </div>
                   <CardDescription className="mt-1">
-                    {loading ? 'Buscando programas...' : 
-                    resultCount > 0 ? `${resultCount} programa${resultCount !== 1 ? 's' : ''} disponible${resultCount !== 1 ? 's' : ''}` : 'Usa los filtros para buscar programas'}
+                    {loading || favoritesLoading ? 'Cargando...' : 
+                    showFavorites 
+                      ? favoritePrograms.length > 0 
+                        ? `${favoritePrograms.length} programa${favoritePrograms.length !== 1 ? 's' : ''} guardado${favoritePrograms.length !== 1 ? 's' : ''}`
+                        : 'No tienes programas favoritos aún'
+                      : resultCount > 0 
+                        ? `${resultCount} programa${resultCount !== 1 ? 's' : ''} disponible${resultCount !== 1 ? 's' : ''}` 
+                        : 'Usa los filtros para buscar programas'}
                   </CardDescription>
                 </div>
-                {resultCount > 0 && (
+                {!showFavorites && resultCount > 0 && (
                   <Badge variant="secondary">
                     {visibleCount} de {resultCount}
+                  </Badge>
+                )}
+                {showFavorites && favoritePrograms.length > 0 && (
+                  <Badge variant="secondary">
+                    {Math.min(visibleCount, favoritePrograms.length)} de {favoritePrograms.length}
                   </Badge>
                 )}
               </div>
@@ -678,7 +805,13 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
         <p className="text-lg font-medium mt-4">Buscando programas...</p>
         <p className="text-sm text-gray-400 mt-1">Esto puede tomar unos segundos</p>
       </div>
-    ) : programs.length === 0 ? (
+    ) : showFavorites && favoritePrograms.length === 0 ? (
+      <div className="flex flex-col items-center justify-center h-full text-gray-500">
+        <Heart className="h-12 w-12 mb-4 text-gray-300" />
+        <p className="text-lg font-medium">No tienes favoritos aún</p>
+        <p className="text-sm">Haz clic en el corazón para guardar programas favoritos</p>
+      </div>
+    ) : !showFavorites && programs.length === 0 ? (
       <div className="flex flex-col items-center justify-center h-full text-gray-500">
         <Search className="h-12 w-12 mb-4 text-gray-300" />
         <p className="text-lg font-medium">No hay resultados</p>
@@ -708,9 +841,26 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
                   <span className="font-medium">{program.universidad}</span>
                 </div>
               </div>
-              <Badge variant={selectedProgram?.id === program.id ? "default" : "secondary"}>
-                {program.tipo_programa}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => toggleFavorite(program, e)}
+                  title={favoriteProgramIds.has(program.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                >
+                  <Heart
+                    className={`h-5 w-5 ${
+                      favoriteProgramIds.has(program.id)
+                        ? 'fill-red-500 text-red-500'
+                        : 'text-gray-400 hover:text-red-500'
+                    } transition-colors`}
+                  />
+                </Button>
+                <Badge variant={selectedProgram?.id === program.id ? "default" : "secondary"}>
+                  {program.tipo_programa}
+                </Badge>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-3">
