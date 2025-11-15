@@ -18,6 +18,8 @@ import Profile from "./pages/Profile";
 import ScholarshipSearch from "./pages/ScholarshipSearch";
 import Login from "./pages/Login"; // optional login page if you want a custom login view
 import ProtectedRoute from "./pages/ProtectedRoute";
+import AdminRoute from "./pages/AdminRoute";
+import Admin from "./pages/Admin";
 import { Auth0Provider } from "@auth0/auth0-react";
 import About from "./pages/About";
 
@@ -125,6 +127,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <ProtectedRoute>
                 <TestHome />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <Admin />
+              </AdminRoute>
             }
           />
           {/* Add more routes as needed */}
