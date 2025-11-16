@@ -20,7 +20,14 @@ export const adminApi = {
     const response = await fetch(`${apiUrl(`v1/admin/users`)}?${params}`, {
       headers: await getAuthHeaders(getAccessTokenSilently),
     });
-    if (!response.ok) throw new Error('Failed to fetch users');
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error:', response.status, errorText);
+      const error = new Error(`Failed to fetch users: ${response.status} ${errorText}`);
+      (error as any).status = response.status;
+      throw error;
+    }
     return response.json();
   },
 
