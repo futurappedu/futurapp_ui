@@ -22,9 +22,8 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
 
       try {
         // Try to get token silently, but handle errors
-        let token;
         try {
-          token = await getAccessTokenSilently({
+          await getAccessTokenSilently({
             authorizationParams: {
               audience: "https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/",
             },
