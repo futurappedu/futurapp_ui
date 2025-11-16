@@ -22,14 +22,9 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
 
       try {
         // Try to get token silently, but handle errors
+        // Use the default audience from Auth0Provider
         try {
-          await getAccessTokenSilently({
-            authorizationParams: {
-              audience: "https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/",
-            },
-            // Don't use silent auth if it fails - let it throw
-            cacheMode: 'off' // Force fresh token
-          });
+          await getAccessTokenSilently();
         } catch (tokenError: any) {
           console.error('Token error:', tokenError);
           
@@ -41,9 +36,6 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
             loginWithRedirect({
               appState: {
                 returnTo: window.location.pathname
-              },
-              authorizationParams: {
-                audience: "https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/",
               }
             });
             return;
