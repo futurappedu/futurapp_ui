@@ -8,7 +8,7 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, isLoading, getAccessTokenSilently, loginWithRedirect } = useAuth0();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
@@ -21,15 +21,54 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
       }
 
       try {
-        // Try to access an admin endpoint to verify admin status
+        // Try to get token silently, but handle errors
+        try {
+          await getAccessTokenSilently({
+            authorizationParams: {
+              audience: "https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/",
+            },
+            // Don't use silent auth if it fails - let it throw
+            cacheMode: 'off' // Force fresh token
+          });
+        } catch (tokenError: any) {
+          console.error('Token error:', tokenError);
+          
+          // If silent auth fails, it might be a session issue
+          // Try redirecting to login
+          if (tokenError.error === 'login_required' || 
+              tokenError.error === 'consent_required' ||
+              tokenError.error === 'interaction_required') {
+            loginWithRedirect({
+              appState: {
+                returnTo: window.location.pathname
+              },
+              authorizationParams: {
+                audience: "https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/",
+              }
+            });
+            return;
+          }
+          
+          // For other errors, deny access
+          console.error('Failed to get token:', tokenError);
+          setIsAdmin(false);
+          setCheckingAdmin(false);
+          return;
+        }
+
+        // Now check admin status
         await adminApi.getUsers(1, 1, '', getAccessTokenSilently);
         setIsAdmin(true);
       } catch (error: any) {
-        // If we get a 403, user is not admin
-        if (error.message?.includes('403') || error.message?.includes('Admin')) {
+        console.error('Admin check error:', error);
+        
+        // Check if it's a 403 (forbidden) vs other errors
+        if (error.message?.includes('403') || 
+            error.message?.includes('Admin') ||
+            error.message?.includes('insufficient_permissions')) {
           setIsAdmin(false);
         } else {
-          // Other errors might be network issues, assume not admin for safety
+          console.error('Network error checking admin status:', error);
           setIsAdmin(false);
         }
       } finally {
@@ -38,7 +77,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     };
 
     checkAdminStatus();
-  }, [isAuthenticated, isLoading, getAccessTokenSilently]);
+  }, [isAuthenticated, isLoading, getAccessTokenSilently, loginWithRedirect]);
 
   if (isLoading || checkingAdmin) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
@@ -65,8 +104,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
 
-  return isAdmin ? children : null;
+  return isAdmin === true ? children : null;
 };
 
 export default AdminRoute;
-
