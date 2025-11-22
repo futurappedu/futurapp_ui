@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, ArrowLeft, Heart } from 'lucide-react';
+import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, ArrowLeft, Heart, Trash2, Download } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -371,6 +371,28 @@ useEffect(() => {
     } catch (err) {
       console.error('Error toggling favorite:', err);
       alert('Error al guardar favorito. Por favor intenta de nuevo.');
+    }
+  };
+
+  const handleDownloadReport = async () => {
+    if (!user?.email) return;
+    
+    try {
+      const res = await fetch(`${apiUrl('favorites/report')}?email=${encodeURIComponent(user.email)}`);
+      if (!res.ok) throw new Error('Download failed');
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `favoritos_reporte.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Error downloading report:', err);
+      alert('Error al descargar el reporte.');
     }
   };
 
@@ -769,6 +791,17 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
                       <Heart className={`h-4 w-4 mr-2 ${showFavorites ? 'fill-white' : ''}`} />
                       {showFavorites ? 'Ver Todos' : `Favoritos (${favoritePrograms.length})`}
                     </Button>
+                    {showFavorites && favoritePrograms.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDownloadReport}
+                        className="h-8"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Descargar Reporte
+                      </Button>
+                    )}
                   </div>
                   <CardDescription className="mt-1">
                     {loading || favoritesLoading ? 'Cargando...' : 
@@ -849,13 +882,17 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
                   onClick={(e) => toggleFavorite(program, e)}
                   title={favoriteProgramIds.has(program.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
-                  <Heart
-                    className={`h-5 w-5 ${
-                      favoriteProgramIds.has(program.id)
-                        ? 'fill-red-500 text-red-500'
-                        : 'text-gray-400 hover:text-red-500'
-                    } transition-colors`}
-                  />
+                  {showFavorites ? (
+                    <Trash2 className="h-5 w-5 text-gray-400 hover:text-red-500 transition-colors" />
+                  ) : (
+                    <Heart
+                      className={`h-5 w-5 ${
+                        favoriteProgramIds.has(program.id)
+                          ? 'fill-red-500 text-red-500'
+                          : 'text-gray-400 hover:text-red-500'
+                      } transition-colors`}
+                    />
+                  )}
                 </Button>
                 <Badge variant={selectedProgram?.id === program.id ? "default" : "secondary"}>
                   {program.tipo_programa}
