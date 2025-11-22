@@ -48,7 +48,7 @@ interface Scholarship {
 
 export default function ScholarshipSearch() {
   const navigate = useNavigate();
-  const { user } = useAuth0(); // Get user email, authentication already handled
+  const { user, getAccessTokenSilently } = useAuth0(); // Get user email, authentication already handled
   const [searchProgram, setSearchProgram] = useState('');
   const [searchUniversity, setSearchUniversity] = useState('');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -326,6 +326,24 @@ useEffect(() => {
       console.error('Error loading scholarships:', e);
       setScholarships([]);
       setSelectedScholarship(null);
+    }
+  };
+
+  const trackProgramClick = async (programId: number, url: string) => {
+    if (!user?.email) return;
+
+    try {
+      const token = await getAccessTokenSilently();
+      await fetch(apiUrl(`v1/programas/${programId}/click`), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ url })
+      });
+    } catch (err) {
+      console.error('Error tracking click:', err);
     }
   };
 
@@ -878,7 +896,12 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
 
             {program.enlace && (
               <Button size="sm" variant="outline" asChild>
-                <a href={program.enlace} target="_blank" rel="noopener noreferrer">
+                <a 
+                  href={program.enlace} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={() => trackProgramClick(program.id, program.enlace)}
+                >
                   Ver programa →
                 </a>
               </Button>
