@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Users, GraduationCap, Award, X } from 'lucide-react';
 import UserList from '@/components/admin/UserList';
 import UserFavorites from '@/components/admin/UserFavorites';
+import UserHistory from '@/components/admin/UserHistory';
 import UniversityList from '@/components/admin/UniversityList';
 import ScholarshipList from '@/components/admin/ScholarshipList';
 import { adminApi } from '@/services/adminApi';
 import { useAuth0 } from '@auth0/auth0-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Tab = 'users' | 'universities' | 'scholarships';
 
@@ -39,9 +41,21 @@ export default function Admin() {
             <X className="h-4 w-4 mr-2" />
             Back to Users
           </Button>
-          <h1 className="text-3xl font-bold">User Details</h1>
+          <h1 className="text-3xl font-bold mb-6">User Details: {selectedUserName}</h1>
+          
+          <Tabs defaultValue="favorites" className="w-full">
+            <TabsList>
+              <TabsTrigger value="favorites">Favorites</TabsTrigger>
+              <TabsTrigger value="history">Activity History</TabsTrigger>
+            </TabsList>
+            <TabsContent value="favorites" className="mt-4">
+              <UserFavorites userId={selectedUserId} userName={selectedUserName} />
+            </TabsContent>
+            <TabsContent value="history" className="mt-4">
+              <UserHistory userId={selectedUserId} userName={selectedUserName} />
+            </TabsContent>
+          </Tabs>
         </div>
-        <UserFavorites userId={selectedUserId} userName={selectedUserName} />
       </div>
     );
   }
