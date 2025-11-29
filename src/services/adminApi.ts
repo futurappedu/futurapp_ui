@@ -12,160 +12,141 @@ const getAuthHeaders = async (getAccessTokenSilently: any) => {
 export const adminApi = {
   // Users
   async getUsers(page: number = 1, pageSize: number = 20, search: string = '', getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
     const params = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString(),
-      ...(search && { search }),
+      search,
     });
-    const response = await fetch(`${apiUrl(`v1/admin/users`)}?${params}`, {
-      headers: await getAuthHeaders(getAccessTokenSilently),
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error:', response.status, errorText);
-      const error = new Error(`Failed to fetch users: ${response.status} ${errorText}`);
-      (error as any).status = response.status;
-      throw error;
-    }
-    return response.json();
+    const res = await fetch(apiUrl(`v1/admin/users?${params}`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch users');
+    return res.json();
   },
 
   async getUser(userId: number, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl(`v1/admin/users/${userId}`), {
-      headers: await getAuthHeaders(getAccessTokenSilently),
-    });
-    if (!response.ok) throw new Error('Failed to fetch user');
-    return response.json();
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/users/${userId}`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch user');
+    return res.json();
   },
 
   async getUserFavorites(userId: number, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl(`v1/admin/users/${userId}/favorites`), {
-      headers: await getAuthHeaders(getAccessTokenSilently),
-    });
-    if (!response.ok) throw new Error('Failed to fetch user favorites');
-    return response.json();
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/users/${userId}/favorites`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch user favorites');
+    return res.json();
+  },
+
+  async getUserHistory(userId: number, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/users/${userId}/history`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch user history');
+    return res.json();
   },
 
   // Universities
   async getUniversities(page: number = 1, pageSize: number = 20, search: string = '', getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
     const params = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString(),
-      ...(search && { search }),
+      search,
     });
-    const response = await fetch(`${apiUrl(`v1/admin/universities`)}?${params}`, {
-      headers: await getAuthHeaders(getAccessTokenSilently),
-    });
-    if (!response.ok) throw new Error('Failed to fetch universities');
-    return response.json();
+    const res = await fetch(apiUrl(`v1/admin/universities?${params}`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch universities');
+    return res.json();
   },
 
-  async getUniversity(universityId: number, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl(`v1/admin/universities/${universityId}`), {
-      headers: await getAuthHeaders(getAccessTokenSilently),
-    });
-    if (!response.ok) throw new Error('Failed to fetch university');
-    return response.json();
+  async getUniversity(id: number, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/universities/${id}`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch university');
+    return res.json();
   },
 
   async createUniversity(data: any, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl('v1/admin/universities'), {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl('v1/admin/universities'), {
       method: 'POST',
-      headers: await getAuthHeaders(getAccessTokenSilently),
+      headers,
       body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create university');
-    }
-    return response.json();
+    if (!res.ok) throw new Error('Failed to create university');
+    return res.json();
   },
 
-  async updateUniversity(universityId: number, data: any, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl(`v1/admin/universities/${universityId}`), {
+  async updateUniversity(id: number, data: any, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/universities/${id}`), {
       method: 'PUT',
-      headers: await getAuthHeaders(getAccessTokenSilently),
+      headers,
       body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to update university');
-    }
-    return response.json();
+    if (!res.ok) throw new Error('Failed to update university');
+    return res.json();
   },
 
-  async deleteUniversity(universityId: number, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl(`v1/admin/universities/${universityId}`), {
+  async deleteUniversity(id: number, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/universities/${id}`), {
       method: 'DELETE',
-      headers: await getAuthHeaders(getAccessTokenSilently),
+      headers,
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to delete university');
-    }
-    return response.json();
+    if (!res.ok) throw new Error('Failed to delete university');
+    return res.json();
   },
 
   // Scholarships
-  async getScholarships(page: number = 1, pageSize: number = 20, search: string = '', universityId?: number, getAccessTokenSilently: any = null) {
+  async getScholarships(page: number = 1, pageSize: number = 20, search: string = '', universityId: number | undefined, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
     const params = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString(),
-      ...(search && { search }),
-      ...(universityId && { university_id: universityId.toString() }),
+      search,
     });
-    const response = await fetch(`${apiUrl(`v1/admin/scholarships`)}?${params}`, {
-      headers: await getAuthHeaders(getAccessTokenSilently),
-    });
-    if (!response.ok) throw new Error('Failed to fetch scholarships');
-    return response.json();
+    if (universityId) params.append('university_id', universityId.toString());
+    
+    const res = await fetch(apiUrl(`v1/admin/scholarships?${params}`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch scholarships');
+    return res.json();
   },
 
-  async getScholarship(scholarshipId: number, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl(`v1/admin/scholarships/${scholarshipId}`), {
-      headers: await getAuthHeaders(getAccessTokenSilently),
-    });
-    if (!response.ok) throw new Error('Failed to fetch scholarship');
-    return response.json();
+  async getScholarship(id: number, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/scholarships/${id}`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch scholarship');
+    return res.json();
   },
 
   async createScholarship(data: any, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl('v1/admin/scholarships'), {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl('v1/admin/scholarships'), {
       method: 'POST',
-      headers: await getAuthHeaders(getAccessTokenSilently),
+      headers,
       body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create scholarship');
-    }
-    return response.json();
+    if (!res.ok) throw new Error('Failed to create scholarship');
+    return res.json();
   },
 
-  async updateScholarship(scholarshipId: number, data: any, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl(`v1/admin/scholarships/${scholarshipId}`), {
+  async updateScholarship(id: number, data: any, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/scholarships/${id}`), {
       method: 'PUT',
-      headers: await getAuthHeaders(getAccessTokenSilently),
+      headers,
       body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to update scholarship');
-    }
-    return response.json();
+    if (!res.ok) throw new Error('Failed to update scholarship');
+    return res.json();
   },
 
-  async deleteScholarship(scholarshipId: number, getAccessTokenSilently: any) {
-    const response = await fetch(apiUrl(`v1/admin/scholarships/${scholarshipId}`), {
+  async deleteScholarship(id: number, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/scholarships/${id}`), {
       method: 'DELETE',
-      headers: await getAuthHeaders(getAccessTokenSilently),
+      headers,
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to delete scholarship');
-    }
-    return response.json();
+    if (!res.ok) throw new Error('Failed to delete scholarship');
+    return res.json();
   },
 };
-

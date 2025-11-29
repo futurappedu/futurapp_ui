@@ -131,6 +131,3 @@ export default function UserHistory({ userId, userName }: UserHistoryProps) {
     </Card>
   );
 }
-
-
-
