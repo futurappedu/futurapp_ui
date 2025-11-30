@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Users, GraduationCap, Award, X } from 'lucide-react';
+import { Users, GraduationCap, Award, X, Upload } from 'lucide-react';
 import UserList from '@/components/admin/UserList';
 import UserFavorites from '@/components/admin/UserFavorites';
 import UserHistory from '@/components/admin/UserHistory';
 import UniversityList from '@/components/admin/UniversityList';
 import ScholarshipList from '@/components/admin/ScholarshipList';
+import BulkImporterWizard from '@/components/admin/BulkImporter/BulkImporterWizard';
 import { adminApi } from '@/services/adminApi';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type Tab = 'users' | 'universities' | 'scholarships';
+type Tab = 'users' | 'universities' | 'scholarships' | 'import';
 
 export default function Admin() {
   const { getAccessTokenSilently } = useAuth0();
@@ -67,7 +68,7 @@ export default function Admin() {
         <p className="text-muted-foreground">Manage users, universities, and scholarships</p>
       </div>
 
-      <div className="flex gap-2 mb-6 border-b">
+      <div className="flex flex-wrap gap-2 mb-6 border-b">
         <Button
           variant={activeTab === 'users' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('users')}
@@ -92,11 +93,20 @@ export default function Admin() {
           <Award className="h-4 w-4 mr-2" />
           Scholarships
         </Button>
+        <Button
+          variant={activeTab === 'import' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('import')}
+          className="rounded-b-none"
+        >
+          <Upload className="h-4 w-4 mr-2" />
+          Bulk Import
+        </Button>
       </div>
 
       {activeTab === 'users' && <UserList onUserSelect={handleUserSelect} />}
       {activeTab === 'universities' && <UniversityList />}
       {activeTab === 'scholarships' && <ScholarshipList />}
+      {activeTab === 'import' && <BulkImporterWizard />}
     </div>
   );
 }
