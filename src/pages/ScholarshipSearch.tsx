@@ -158,7 +158,25 @@ export default function ScholarshipSearch() {
         const favoriteIds = new Set<number>((data.favorites || []).map((fav: any) => fav.program_id || fav.id));
         setFavoriteProgramIds(favoriteIds);
         // Store full program data
-        const favoriteProgramsData = (data.favorites || []).map((fav: any) => fav.program_data || fav);
+        const favoriteProgramsData = (data.favorites || []).map((fav: any) => {
+          const item = fav.program_data || fav;
+          return {
+            id: item.id_programa || item.id,
+            nombre_programa: item.nombre_programa || item.programa || '',
+            universidad: item.universidad || '',
+            pais: item.pais || '',
+            tipo_programa: item.tipo_programa || '',
+            precio_min_anual: item.precio_min_anual || 0,
+            precio_max_anual: item.precio_max_anual || 0,
+            moneda_de_importe: item.moneda_de_importe || '€',
+            enlace: item.enlace || '',
+            min_monto_beca: item.min_monto_beca,
+            max_monto_beca: item.max_monto_beca,
+            min_porcentaje_beca: item.min_porcentaje_beca,
+            max_porcentaje_beca: item.max_porcentaje_beca,
+            tiene_beca_parseada: item.tiene_beca_parseada,
+          } as Program;
+        });
         setFavoritePrograms(favoriteProgramsData);
       }
     } catch (err) {
