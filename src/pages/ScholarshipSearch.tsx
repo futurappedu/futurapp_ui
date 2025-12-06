@@ -81,7 +81,8 @@ export default function ScholarshipSearch() {
   const [favoritePrograms, setFavoritePrograms] = useState<Program[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
-  
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
     setVisibleCount(20);
   }, [programs]);
@@ -133,6 +134,7 @@ export default function ScholarshipSearch() {
 
 
     } catch (err) {
+      
       console.error('Error loading filters:', err);
       setCountries([]);
       setProgramTypes([]);
@@ -239,6 +241,11 @@ useEffect(() => {
   setScholarshipPercentageRange([0, 100]);
 };
   const searchPrograms = async () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
     setLoading(true);
     try {
       const filtros: Record<string, any> = {};
@@ -279,8 +286,9 @@ useEffect(() => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(filtros),
+      signal,
     });
-
+    if (signal.aborted) return;
     if (!res.ok) {
       const errorText = await res.text();
       console.error('Error response:', errorText);
@@ -320,6 +328,7 @@ useEffect(() => {
     setResultCount(filteredData.length);
 
   } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') return;
     console.error('Error details:', err);
     setPrograms([]);
     setResultCount(0);
