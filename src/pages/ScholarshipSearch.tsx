@@ -168,7 +168,7 @@ export default function ScholarshipSearch() {
             tipo_programa: item.tipo_programa || '',
             precio_min_anual: item.precio_min_anual || 0,
             precio_max_anual: item.precio_max_anual || 0,
-            moneda_de_importe: item.moneda_de_importe || '€',
+            moneda_de_importe: item.moneda || '€',
             enlace: item.enlace || '',
             min_monto_beca: item.min_monto_beca,
             max_monto_beca: item.max_monto_beca,
@@ -298,7 +298,7 @@ useEffect(() => {
       tipo_programa: item.tipo_programa || '',
       precio_min_anual: item.precio_min_anual || 0,
       precio_max_anual: item.precio_max_anual || 0,
-      moneda_de_importe: item.moneda_de_importe || '€',
+      moneda_de_importe: item.moneda || '€',
       enlace: item.enlace || '',
       min_monto_beca: item.min_monto_beca,
       max_monto_beca: item.max_monto_beca,
@@ -942,9 +942,8 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
                 <span>{program.pais}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <DollarSign className="h-4 w-4 text-green-600" />
                 <span className="font-semibold text-green-700">
-                   {program.moneda_de_importe || '€'}{program.precio_min_anual.toLocaleString()} - {program.moneda_de_importe || '€'}{program.precio_max_anual.toLocaleString()}/año
+                   {program.moneda_de_importe}{program.precio_min_anual.toLocaleString()} - {program.moneda_de_importe}{program.precio_max_anual.toLocaleString()}/año
                 </span>
               </div>
             </div>
