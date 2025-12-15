@@ -449,7 +449,7 @@ const calculateBestProgramCost = (program: Program): number => {
   
   // Get scholarships for this program
   const programScholarships = scholarships.filter(s => 
-    s.universidad?.toLowerCase() === program.universidad?.toLowerCase()
+    s.universidad_beca?.toLowerCase() === program.universidad?.toLowerCase()
   );
   
   if (programScholarships.length === 0) return baseCost;
