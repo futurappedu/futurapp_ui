@@ -33,17 +33,20 @@ interface Program {
 
 interface Scholarship {
   id: number;
+  id_beca: number;
   nombre_beca: string;
-  tipo_beca: string;
-  tipo_de_estudiante: string;
-  cobertura_de_la_beca: string;
-  universidad?: string;
+  tipo_beca?: string;
+  descripcion_beca?: string;
+  criterio_principal?: string;
+  status_estudiante?: string;
+  tipos_estudiante_elegibles?: string[];
+  universidad_beca?: string;
   monto_beca_desde?: number;
   monto_beca_hasta?: number;
   porcentaje_beca_desde?: number;
   porcentaje_beca_hasta?: number;
-  duracion_de_la_beca: string;
-  moneda_de_importe?: string;
+  duracion_de_la_beca?: string;
+  enlace?: string;
 }
 
 export default function ScholarshipSearch() {
@@ -446,7 +449,7 @@ const calculateBestProgramCost = (program: Program): number => {
   
   // Get scholarships for this program
   const programScholarships = scholarships.filter(s => 
-    s.universidad?.toLowerCase() === program.universidad?.toLowerCase()
+    s.universidad_beca?.toLowerCase() === program.universidad?.toLowerCase()
   );
   
   if (programScholarships.length === 0) return baseCost;
@@ -1016,13 +1019,15 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
                                 <Star className="h-4 w-4 text-yellow-500 fill-current" />
                               )}
                             </div>
-                            <Badge variant="outline" className="text-xs mb-2">{scholarship.tipo_beca}</Badge>
+                            {scholarship.tipo_beca && (
+                              <Badge variant="outline" className="text-xs mb-2">{scholarship.tipo_beca}</Badge>
+                            )}
                             <div className="space-y-1 text-xs text-gray-600">
                               <div className="flex items-center gap-1">
                                 <DollarSign className="h-3 w-3" />
                                 <span>
                                 {scholarship.monto_beca_hasta && Number(scholarship.monto_beca_hasta) > 0
-                                ? `Hasta ${scholarship.moneda_de_importe || '€'}${Number(scholarship.monto_beca_hasta).toLocaleString()}`
+                                ? `Hasta €${Number(scholarship.monto_beca_hasta).toLocaleString()}`
                                 : 'Monto no especificado'}
                               </span>
                               </div>
@@ -1030,7 +1035,7 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
                               <Percent className="h-3 w-3" />
                               <span>
                                 {scholarship.porcentaje_beca_hasta && Number(scholarship.porcentaje_beca_hasta) > 0
-                                  ? `Hasta ${(Number(scholarship.porcentaje_beca_hasta) * 100).toFixed(0)}%`
+                                  ? `Hasta ${Number(scholarship.porcentaje_beca_hasta).toFixed(0)}%`
                                   : 'Porcentaje no especificado'}
                               </span>
                               </div>
