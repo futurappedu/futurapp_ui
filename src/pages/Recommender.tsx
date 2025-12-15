@@ -8,6 +8,7 @@ import LogoutButton from "./Logout";
 import { useNavigate, Link } from "react-router-dom";
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import ScoreReport from '@/components/ScoreReport';
+import { apiUrl } from '@/config/api';
 
 interface Recommendations {
   interests: Array<{
@@ -68,7 +69,7 @@ function Recommender() {
       console.log("🔄 Querying careers:", careers);
       
       const response = await fetch(
-        "https://futurappapi-staging.up.railway.app/query-careers",
+        apiUrl('query-careers'),
         {
           method: "POST",
           headers: {
@@ -103,7 +104,7 @@ function Recommender() {
       try {
         // Fetch skills
         const skillsResponse = await fetch(
-          "https://futurappapi-staging.up.railway.app/all-scores",
+          apiUrl('all-scores'),
           {
             method: "POST",
             headers: {
@@ -134,7 +135,7 @@ function Recommender() {
 
         // Check for existing recommendations
         const recommendationsResponse = await fetch(
-          `https://futurappapi-staging.up.railway.app/get-recommendations?email=${encodeURIComponent(user.email)}`,
+          `${apiUrl('get-recommendations')}?email=${encodeURIComponent(user.email)}`,
           {
             method: "GET",
             headers: {
@@ -217,7 +218,7 @@ function Recommender() {
     try {
       const token = await getAccessTokenSilently();
       const response = await fetch(
-        "https://futurappapi-staging.up.railway.app/recommendations",
+        apiUrl('recommendations'),
         {
           method: "POST",
           headers: {
