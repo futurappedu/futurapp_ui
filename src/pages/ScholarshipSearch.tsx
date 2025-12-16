@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, ArrowLeft, Heart, Trash2, Download } from 'lucide-react';
+import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, ArrowLeft, Heart, Trash2, Download, Lock, UserCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -65,7 +65,7 @@ export default function ScholarshipSearch() {
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [selectedScholarship, setSelectedScholarship] = useState<Scholarship | null>(null);
   const [resultCount, setResultCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(20);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [filtersLoading, setFiltersLoading] = useState(true);
@@ -85,6 +85,8 @@ export default function ScholarshipSearch() {
   const [showFavorites, setShowFavorites] = useState(false);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const [profileCompleted, setProfileCompleted] = useState<boolean | null>(null);
+  const [profileCheckLoading, setProfileCheckLoading] = useState(true);
 
   useEffect(() => {
     setVisibleCount(20);
@@ -197,6 +199,39 @@ export default function ScholarshipSearch() {
       loadFavorites();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.email]);
+
+  // Check profile completion status on mount
+  useEffect(() => {
+    const checkProfileCompletion = async () => {
+      if (!user?.email) {
+        setProfileCheckLoading(false);
+        setProfileCompleted(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(apiUrl('check-profile'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setProfileCompleted(data.completed === true);
+        } else {
+          setProfileCompleted(false);
+        }
+      } catch (err) {
+        console.error('Error checking profile:', err);
+        setProfileCompleted(false);
+      } finally {
+        setProfileCheckLoading(false);
+      }
+    };
+
+    checkProfileCompletion();
   }, [user?.email]);
 
 useEffect(() => {
@@ -329,13 +364,16 @@ useEffect(() => {
     setPrograms(filteredData);
     setVisibleCount(20);
     setResultCount(filteredData.length);
+    setLoading(false);
 
   } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') return;
-    console.error('Error details:', err);
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      // Don't set loading to false here - let the new request handle it
+      return;
+    }
+    console.error('Error fetching programs:', err);
     setPrograms([]);
     setResultCount(0);
-  } finally {
     setLoading(false);
   }
 };
@@ -983,16 +1021,42 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
           {/* Right Panel */}
           <div className="lg:col-span-1 space-y-6">
             {/* Scholarships */}
-            <Card>
+            <Card className={profileCompleted === false ? 'border-2 border-amber-200' : ''}>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Award className="h-5 w-5 text-yellow-600" />
                   Becas Disponibles
+                  {profileCompleted === false && (
+                    <Lock className="h-4 w-4 text-amber-500 ml-auto" />
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[280px]">
-                  {!selectedProgram ? (
+                  {profileCheckLoading ? (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"></div>
+                      <p className="text-sm text-center">Verificando perfil...</p>
+                    </div>
+                  ) : profileCompleted === false ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                      <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-full mb-4">
+                        <Lock className="h-10 w-10 text-amber-500" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900 mb-2">Sección Bloqueada</h4>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Para ver las becas disponibles, completa tu perfil primero.
+                      </p>
+                      <Button 
+                        size="sm" 
+                        className="bg-amber-500 hover:bg-amber-600"
+                        onClick={() => navigate('/profile')}
+                      >
+                        <UserCircle className="h-4 w-4 mr-2" />
+                        Completar Perfil
+                      </Button>
+                    </div>
+                  ) : !selectedProgram ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <Award className="h-8 w-8 mb-2 text-gray-300" />
                       <p className="text-sm text-center">Selecciona un programa</p>
@@ -1050,16 +1114,29 @@ const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
             </Card>
 
             {/* Investment Calculator */}
-            <Card>
+            <Card className={profileCompleted === false ? 'border-2 border-amber-200' : ''}>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Calculator className="h-5 w-5 text-green-600" />
                   Cálculo de Inversión
+                  {profileCompleted === false && (
+                    <Lock className="h-4 w-4 text-amber-500 ml-auto" />
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[280px]">
-                  {!calculation ? (
+                  {profileCompleted === false ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                      <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-full mb-4">
+                        <Lock className="h-10 w-10 text-amber-500" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900 mb-2">Sección Bloqueada</h4>
+                      <p className="text-sm text-gray-600">
+                        Completa tu perfil para calcular tu inversión.
+                      </p>
+                    </div>
+                  ) : !calculation ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <Calculator className="h-8 w-8 mb-2 text-gray-300" />
                       <p className="text-sm text-center">Selecciona programa y beca</p>
