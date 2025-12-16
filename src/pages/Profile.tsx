@@ -158,7 +158,7 @@ export default function ProfileCompletionForm() {
                 throw new Error("Error al enviar los datos. Intenta nuevamente.");
             }
             
-            navigate("/test_home");
+            navigate("/scholarship_search");
 
             setFormState({
                 isSubmitting: false,
