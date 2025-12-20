@@ -123,7 +123,10 @@ export default function UniversityList() {
                           <GraduationCap className="h-5 w-5 text-primary" />
                         </div>
                         <div className="flex-1">
-                          <div className="font-medium">{university.universidad}</div>
+                          <div className="font-medium">
+                            <span className="text-muted-foreground text-sm mr-2">#{university.id_universidad}</span>
+                            {university.universidad}
+                          </div>
                           <div className="text-sm text-muted-foreground flex items-center gap-4 mt-1">
                             <span className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
