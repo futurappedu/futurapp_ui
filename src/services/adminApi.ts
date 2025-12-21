@@ -91,6 +91,13 @@ export const adminApi = {
     return res.json();
   },
 
+  async getAllUniversities(getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl('v1/admin/universities/all'), { headers });
+    if (!res.ok) throw new Error('Failed to fetch universities');
+    return res.json();
+  },
+
   async createUniversity(data: any, getAccessTokenSilently: any) {
     const headers = await getAuthHeaders(getAccessTokenSilently);
     const res = await fetch(apiUrl('v1/admin/universities'), {
@@ -174,6 +181,56 @@ export const adminApi = {
       headers,
     });
     if (!res.ok) throw new Error('Failed to delete scholarship');
+    return res.json();
+  },
+
+  // Programs
+  async getPrograms(page: number = 1, pageSize: number = 20, search: string = '', universityId: number | undefined, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      search,
+    });
+    if (universityId) params.append('university_id', universityId.toString());
+    
+    const res = await fetch(apiUrl(`v1/admin/programs?${params}`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch programs');
+    return res.json();
+  },
+
+  async getProgram(id: number, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/programs/${id}`), { headers });
+    if (!res.ok) throw new Error('Failed to fetch program');
+    return res.json();
+  },
+
+  async updateProgram(id: number, data: any, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/programs/${id}`), {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('Failed to update program');
+    return res.json();
+  },
+
+  async deleteProgram(id: number, getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl(`v1/admin/programs/${id}`), {
+      method: 'DELETE',
+      headers,
+    });
+    if (!res.ok) throw new Error('Failed to delete program');
+    return res.json();
+  },
+
+  async getProgramTypes(getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl('v1/admin/program-types'), { headers });
+    if (!res.ok) throw new Error('Failed to fetch program types');
     return res.json();
   },
 
