@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Users, GraduationCap, Award, X, Upload } from 'lucide-react';
+import { Users, GraduationCap, Award, X, Upload, BookOpen } from 'lucide-react';
 import UserList from '@/components/admin/UserList';
 import UserFavorites from '@/components/admin/UserFavorites';
 import UserHistory from '@/components/admin/UserHistory';
 import UniversityList from '@/components/admin/UniversityList';
 import ScholarshipList from '@/components/admin/ScholarshipList';
+import ProgramList from '@/components/admin/ProgramList';
 import BulkImporterWizard from '@/components/admin/BulkImporter/BulkImporterWizard';
 import { adminApi } from '@/services/adminApi';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type Tab = 'users' | 'universities' | 'scholarships' | 'import';
+type Tab = 'users' | 'universities' | 'programs' | 'scholarships' | 'import';
 
 export default function Admin() {
   const { getAccessTokenSilently } = useAuth0();
@@ -65,7 +66,7 @@ export default function Admin() {
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Manage users, universities, and scholarships</p>
+        <p className="text-muted-foreground">Manage users, universities, programs, and scholarships</p>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6 border-b">
@@ -84,6 +85,14 @@ export default function Admin() {
         >
           <GraduationCap className="h-4 w-4 mr-2" />
           Universities
+        </Button>
+        <Button
+          variant={activeTab === 'programs' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('programs')}
+          className="rounded-b-none"
+        >
+          <BookOpen className="h-4 w-4 mr-2" />
+          Programs
         </Button>
         <Button
           variant={activeTab === 'scholarships' ? 'default' : 'ghost'}
@@ -105,6 +114,7 @@ export default function Admin() {
 
       {activeTab === 'users' && <UserList onUserSelect={handleUserSelect} />}
       {activeTab === 'universities' && <UniversityList />}
+      {activeTab === 'programs' && <ProgramList />}
       {activeTab === 'scholarships' && <ScholarshipList />}
       {activeTab === 'import' && <BulkImporterWizard />}
     </div>
