@@ -98,6 +98,13 @@ export const adminApi = {
     return res.json();
   },
 
+  async getCountries(getAccessTokenSilently: any) {
+    const headers = await getAuthHeaders(getAccessTokenSilently);
+    const res = await fetch(apiUrl('v1/admin/universities/countries'), { headers });
+    if (!res.ok) throw new Error('Failed to fetch countries');
+    return res.json();
+  },
+
   async createUniversity(data: any, getAccessTokenSilently: any) {
     const headers = await getAuthHeaders(getAccessTokenSilently);
     const res = await fetch(apiUrl('v1/admin/universities'), {

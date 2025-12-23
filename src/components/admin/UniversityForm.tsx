@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { adminApi } from '@/services/adminApi';
 import { useAuth0 } from '@auth0/auth0-react';
 import { X } from 'lucide-react';
@@ -24,11 +25,27 @@ export default function UniversityForm({ university, onSuccess, onCancel }: Univ
   const { getAccessTokenSilently } = useAuth0();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [countries, setCountries] = useState<string[]>([]);
+  const [loadingCountries, setLoadingCountries] = useState(true);
   const [formData, setFormData] = useState({
     universidad: '',
     pais: '',
     contact_email: '',
   });
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const data = await adminApi.getCountries(getAccessTokenSilently);
+        setCountries(data.items);
+      } catch (err) {
+        console.error('Failed to load countries', err);
+      } finally {
+        setLoadingCountries(false);
+      }
+    };
+    fetchCountries();
+  }, [getAccessTokenSilently]);
 
   useEffect(() => {
     if (university) {
@@ -95,12 +112,22 @@ export default function UniversityForm({ university, onSuccess, onCancel }: Univ
 
             <div>
               <Label htmlFor="pais">Country *</Label>
-              <Input
-                id="pais"
+              <Select
                 value={formData.pais}
-                onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
+                onValueChange={(value) => setFormData({ ...formData, pais: value })}
                 required
-              />
+              >
+                <SelectTrigger id="pais">
+                  <SelectValue placeholder={loadingCountries ? "Loading..." : "Select country"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
