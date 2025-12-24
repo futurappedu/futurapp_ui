@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth0 } from '@auth0/auth0-react'; // Import Auth0 hook
@@ -6,6 +6,8 @@ import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
 import numericalQuestions from '../../data/numericalQuestions.json'; // Import your questions data
 import { saveAnswersToBackend, loadAnswersFromBackend } from '@/utils/answerPersistence';
+import { useTestTimer } from '@/hooks/useTestTimer';
+import { TestTimer } from '@/components/TestTimer';
 
 interface TestResults {
     totalQuestions: number;
@@ -60,6 +62,43 @@ const NumericTestApp = () => {
         [questionId]: selectedOption
       }));
     };
+
+    // Auto-submit function for timer
+    const handleAutoSubmit = useCallback(async () => {
+      const submitPayload = {
+        name: user?.name || 'anonymous',
+        email: user?.email || 'no-email',
+        test_name: 'numeric',
+        answers: answersRef.current
+      };
+
+      try {
+        const response = await fetch('https://futurappapi-staging.up.railway.app/grade_test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submitPayload)
+        });
+
+        if (!response.ok) {
+          throw new Error('Test submission failed');
+        }
+
+        if (user?.email) {
+          await saveAnswersToBackend(user.email, 'numeric', {});
+        }
+      } catch (err) {
+        console.error('Auto-submit error:', err);
+      }
+    }, [user?.name, user?.email]);
+
+    // Timer hook
+    const { formattedTime, percentageRemaining, isTimeUp } = useTestTimer({
+      durationInMinutes: 60,
+      onTimeUp: handleAutoSubmit,
+      submitted,
+    });
   
     const handleSubmit = async () => {
       // Prepare the payload for backend
@@ -177,6 +216,11 @@ const NumericTestApp = () => {
   
     return (
       <div className="container mx-auto p-4 max-w-2xl">
+        <TestTimer 
+          formattedTime={formattedTime} 
+          percentageRemaining={percentageRemaining} 
+          isTimeUp={isTimeUp} 
+        />
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl text-center">Test de Razonamiento Númerico</CardTitle>

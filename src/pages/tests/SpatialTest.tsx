@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
@@ -7,6 +7,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth0 } from '@auth0/auth0-react';
 import spatialQuestions from '../../data/spatialQuestions.json';
 import { saveAnswersToBackend, loadAnswersFromBackend } from '@/utils/answerPersistence';
+import { useTestTimer } from '@/hooks/useTestTimer';
+import { TestTimer } from '@/components/TestTimer';
 
 export default function SpatialReasoningTest() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -62,7 +64,43 @@ export default function SpatialReasoningTest() {
       [questionId]: value
     }));
   };
-  
+
+  // Auto-submit function for timer
+  const handleAutoSubmit = useCallback(async () => {
+    const submitPayload = {
+      name: user?.name || 'anonymous',
+      email: user?.email || 'no-email',
+      test_name: 'spatial',
+      answers: answersRef.current
+    };
+
+    try {
+      const response = await fetch('https://futurappapi-staging.up.railway.app/grade_test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submitPayload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Test submission failed');
+      }
+
+      if (user?.email) {
+        await saveAnswersToBackend(user.email, 'spatial', {});
+      }
+    } catch (err) {
+      console.error('Auto-submit error:', err);
+    }
+  }, [user?.name, user?.email]);
+
+  // Timer hook
+  const { formattedTime, percentageRemaining, isTimeUp } = useTestTimer({
+    durationInMinutes: 60,
+    onTimeUp: handleAutoSubmit,
+    submitted,
+  });
 
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -119,6 +157,11 @@ export default function SpatialReasoningTest() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-50">
+      <TestTimer 
+        formattedTime={formattedTime} 
+        percentageRemaining={percentageRemaining} 
+        isTimeUp={isTimeUp} 
+      />
       <h1 className="text-2xl font-bold mb-6 text-center">Test de Razonamiento Espacial</h1>
       {/* Instruction Section */}
 <div className="mb-8">
