@@ -1,11 +1,18 @@
+import { apiUrl } from '@/config/api';
+
 export async function saveAnswersToBackend(
     email: string,
     testName: string,
-    answers: Record<number, string>
+    answers: Record<number, string>,
+    token?: string
   ) {
-    await fetch('https://futurappapi-staging.up.railway.app/save-answers', {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    await fetch(apiUrl('save-answers'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ email, test_name: testName, answers }),
     });
   }
@@ -15,7 +22,7 @@ export async function saveAnswersToBackend(
     testName: string
   ): Promise<Record<number, string>> {
     const res = await fetch(
-      `https://futurappapi-staging.up.railway.app/get-answers?email=${encodeURIComponent(email)}&test_name=${encodeURIComponent(testName)}`
+      `${apiUrl('get-answers')}?email=${encodeURIComponent(email)}&test_name=${encodeURIComponent(testName)}`
     );
     if (res.ok) {
       const data = await res.json();

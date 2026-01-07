@@ -112,7 +112,12 @@ export default function ScholarshipSearch() {
     const fetchFilters = async () => {
       setFiltersLoading(true);
       try {
-        const res = await fetch(apiUrl('filter_options'));
+        const token = await getAccessTokenSilently();
+        const res = await fetch(apiUrl('filter_options'), {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setCountries(data.paises || []);
@@ -320,9 +325,13 @@ useEffect(() => {
       filtros.max_cost_with_scholarship = studentBudget;
     }
 
+    const token = await getAccessTokenSilently();
     const res = await fetch(apiUrl('filter_results'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(filtros),
       signal,
     });

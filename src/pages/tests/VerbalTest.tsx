@@ -6,6 +6,7 @@ import verbalQuestions from '../../data/verbalQuestions.json'; // Import your qu
 import { saveAnswersToBackend, loadAnswersFromBackend } from '@/utils/answerPersistence';
 import { useTestTimer } from '@/hooks/useTestTimer';
 import { TestTimer } from '@/components/TestTimer';
+import { apiUrl } from '@/config/api';
 
 
 interface TestResults {
@@ -22,7 +23,7 @@ const VerbalTestApp = () => {
     const [testResults, setTestResults] = useState<TestResults | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { user, isLoading: authLoading, logout } = useAuth0(); // Get user info from Auth0
+    const { user, isLoading: authLoading, logout, getAccessTokenSilently } = useAuth0(); // Get user info from Auth0
     const answersRef = useRef(answers);
 
 
@@ -34,12 +35,17 @@ const VerbalTestApp = () => {
       const handleBeforeUnload = async () => {
         if (user?.email && Object.keys(answersRef.current).length > 0 && !submitted) {
           // Save answers synchronously (fire and forget)
-          saveAnswersToBackend(user.email, 'verbal', answersRef.current);
+          try {
+            const token = await getAccessTokenSilently();
+            saveAnswersToBackend(user.email, 'verbal', answersRef.current, token);
+          } catch {
+            // Silently fail on unload
+          }
         }
       };
       window.addEventListener('beforeunload', handleBeforeUnload);
       return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [user?.email, submitted]);
+    }, [user?.email, submitted, getAccessTokenSilently]);
   
     useEffect(() => {
       if (user?.email) {
@@ -52,10 +58,18 @@ const VerbalTestApp = () => {
     }, [user?.email]);
   
     useEffect(() => {
-      if (user?.email && Object.keys(answers).length > 0 && !submitted) {
-        saveAnswersToBackend(user.email, 'verbal', answers);
-      }
-    }, [answers, user?.email, submitted]);
+      const saveAnswers = async () => {
+        if (user?.email && Object.keys(answers).length > 0 && !submitted) {
+          try {
+            const token = await getAccessTokenSilently();
+            saveAnswersToBackend(user.email, 'verbal', answers, token);
+          } catch {
+            // Silently fail
+          }
+        }
+      };
+      saveAnswers();
+    }, [answers, user?.email, submitted, getAccessTokenSilently]);
     const handleAnswerChange = (questionId: string, selectedOption: string) => {
       setAnswers(prev => ({
         ...prev,
@@ -73,10 +87,12 @@ const VerbalTestApp = () => {
       };
 
       try {
-        const response = await fetch('https://futurappapi-staging.up.railway.app/grade_test', {
+        const token = await getAccessTokenSilently();
+        const response = await fetch(apiUrl('grade_test'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(submitPayload)
         });
@@ -86,14 +102,14 @@ const VerbalTestApp = () => {
         }
 
         if (user?.email) {
-          await saveAnswersToBackend(user.email, 'verbal', {});
+          await saveAnswersToBackend(user.email, 'verbal', {}, token);
         }
         
         setSubmitted(true);
       } catch (err) {
         throw err;
       }
-    }, [user?.name, user?.email]);
+    }, [user?.name, user?.email, getAccessTokenSilently]);
 
     // Timer hook
     const { formattedTime, percentageRemaining, isTimeUp, isSubmitting: timerSubmitting } = useTestTimer({
@@ -115,11 +131,13 @@ const VerbalTestApp = () => {
       setError(null);
   
       try {
+        const token = await getAccessTokenSilently();
         // Fetch API call to submit test
-        const response = await fetch('https://futurappapi-staging.up.railway.app/grade_test', {
+        const response = await fetch(apiUrl('grade_test'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(submitPayload)
         });
@@ -135,7 +153,7 @@ const VerbalTestApp = () => {
         setSubmitted(true);
 
         if (user?.email) {
-          await saveAnswersToBackend(user.email, 'verbal', {});
+          await saveAnswersToBackend(user.email, 'verbal', {}, token);
         }
       } catch (err) {
         setError('Failed to submit test. Please try again.');

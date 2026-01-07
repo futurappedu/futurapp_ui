@@ -9,6 +9,7 @@ import abstractQuestions from '../../data/abstractQuestions.json';
 import { saveAnswersToBackend, loadAnswersFromBackend } from '@/utils/answerPersistence';
 import { useTestTimer } from '@/hooks/useTestTimer';
 import { TestTimer } from '@/components/TestTimer';
+import { apiUrl } from '@/config/api';
 
 export default function AbstractReasoningTest() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -17,7 +18,7 @@ export default function AbstractReasoningTest() {
   const [testResults, setTestResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user} = useAuth0();
+  const { user, getAccessTokenSilently } = useAuth0();
   const answersRef = useRef(answers);
   const questionsPerPage = 3;
 
@@ -34,13 +35,17 @@ export default function AbstractReasoningTest() {
   useEffect(() => {
     const handleBeforeUnload = async () => {
       if (user?.email && Object.keys(answersRef.current).length > 0 && !submitted) {
-        // Save answers synchronously (fire and forget)
-        saveAnswersToBackend(user.email, 'abstract', answersRef.current);
+        try {
+          const token = await getAccessTokenSilently();
+          saveAnswersToBackend(user.email, 'abstract', answersRef.current, token);
+        } catch {
+          // Silently fail on unload
+        }
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [user?.email, submitted]);
+  }, [user?.email, submitted, getAccessTokenSilently]);
 
   useEffect(() => {
     if (user?.email) {
@@ -53,10 +58,18 @@ export default function AbstractReasoningTest() {
   }, [user?.email]);
 
   useEffect(() => {
-    if (user?.email && Object.keys(answers).length > 0 && !submitted) {
-      saveAnswersToBackend(user.email, 'abstract', answers);
-    }
-  }, [answers, user?.email, submitted]);
+    const saveAnswers = async () => {
+      if (user?.email && Object.keys(answers).length > 0 && !submitted) {
+        try {
+          const token = await getAccessTokenSilently();
+          saveAnswersToBackend(user.email, 'abstract', answers, token);
+        } catch {
+          // Silently fail
+        }
+      }
+    };
+    saveAnswers();
+  }, [answers, user?.email, submitted, getAccessTokenSilently]);
   const handleAnswerChange = (questionId: number, value: string) => {
     setAnswers((prev) => ({
       ...prev,
@@ -74,10 +87,12 @@ export default function AbstractReasoningTest() {
     };
 
     try {
-      const response = await fetch('https://futurappapi-staging.up.railway.app/grade_test', {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(apiUrl('grade_test'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(submitPayload)
       });
@@ -87,12 +102,12 @@ export default function AbstractReasoningTest() {
       }
 
       if (user?.email) {
-        await saveAnswersToBackend(user.email, 'abstract', {});
+        await saveAnswersToBackend(user.email, 'abstract', {}, token);
       }
     } catch (err) {
       console.error('Auto-submit error:', err);
     }
-  }, [user?.name, user?.email]);
+  }, [user?.name, user?.email, getAccessTokenSilently]);
 
   // Timer hook
   const { formattedTime, percentageRemaining, isTimeUp } = useTestTimer({
@@ -127,10 +142,12 @@ export default function AbstractReasoningTest() {
     setError(null);
 
     try {
-      const response = await fetch('https://futurappapi-staging.up.railway.app/grade_test', {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(apiUrl('grade_test'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(submitPayload)
       });
@@ -144,7 +161,7 @@ export default function AbstractReasoningTest() {
       setSubmitted(true);
 
       if (user?.email) {
-        await saveAnswersToBackend(user.email, 'abstract', {});
+        await saveAnswersToBackend(user.email, 'abstract', {}, token);
       }
     } catch (err) {
       setError('Failed to submit test. Please try again.');
