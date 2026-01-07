@@ -6,6 +6,7 @@ import personalityQuestions from '../../data/personalityQuestions.json';
 import { saveAnswersToBackend, loadAnswersFromBackend } from '@/utils/answerPersistence';
 import { useTestTimer } from '@/hooks/useTestTimer';
 import { TestTimer } from '@/components/TestTimer';
+import { apiUrl } from '@/config/api';
 
 
 const testQuestions = personalityQuestions;
@@ -16,7 +17,7 @@ const PersonalityTestApp = () => {
     const [testResults, setTestResults] = useState<Record<string, number> | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { user, isLoading: authLoading, logout } = useAuth0();
+    const { user, isLoading: authLoading, logout, getAccessTokenSilently } = useAuth0();
     const answersRef = useRef(answers);
     
 
@@ -27,13 +28,17 @@ const PersonalityTestApp = () => {
       useEffect(() => {
         const handleBeforeUnload = async () => {
           if (user?.email && Object.keys(answersRef.current).length > 0 && !submitted) {
-            // Save answers synchronously (fire and forget)
-            saveAnswersToBackend(user.email, 'personality', answersRef.current);
+            try {
+              const token = await getAccessTokenSilently();
+              saveAnswersToBackend(user.email, 'personality', answersRef.current, token);
+            } catch {
+              // Silently fail on unload
+            }
           }
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-      }, [user?.email, submitted]);
+      }, [user?.email, submitted, getAccessTokenSilently]);
     
       useEffect(() => {
         if (user?.email) {
@@ -46,10 +51,18 @@ const PersonalityTestApp = () => {
       }, [user?.email]);
     
       useEffect(() => {
-        if (user?.email && Object.keys(answers).length > 0 && !submitted) {
-          saveAnswersToBackend(user.email, 'personality', answers);
-        }
-      }, [answers, user?.email, submitted]);
+        const saveAnswers = async () => {
+          if (user?.email && Object.keys(answers).length > 0 && !submitted) {
+            try {
+              const token = await getAccessTokenSilently();
+              saveAnswersToBackend(user.email, 'personality', answers, token);
+            } catch {
+              // Silently fail
+            }
+          }
+        };
+        saveAnswers();
+      }, [answers, user?.email, submitted, getAccessTokenSilently]);
     const handleAnswerChange = (questionId: string, selectedOption: string) => {
         setAnswers(prev => ({
             ...prev,
@@ -66,10 +79,12 @@ const PersonalityTestApp = () => {
       };
 
       try {
-        const response = await fetch('https://futurappapi-staging.up.railway.app/grade_riasec', {
+        const token = await getAccessTokenSilently();
+        const response = await fetch(apiUrl('grade_riasec'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(submitPayload)
         });
@@ -79,12 +94,12 @@ const PersonalityTestApp = () => {
         }
 
         if (user?.email) {
-          await saveAnswersToBackend(user.email, 'personality', {});
+          await saveAnswersToBackend(user.email, 'personality', {}, token);
         }
       } catch (err) {
         console.error('Auto-submit error:', err);
       }
-    }, [user?.name, user?.email]);
+    }, [user?.name, user?.email, getAccessTokenSilently]);
 
     // Timer hook
     const { formattedTime, percentageRemaining, isTimeUp } = useTestTimer({
@@ -116,10 +131,12 @@ const PersonalityTestApp = () => {
       setError(null);
   
       try {
-          const response = await fetch('https://futurappapi-staging.up.railway.app/grade_riasec', {
+          const token = await getAccessTokenSilently();
+          const response = await fetch(apiUrl('grade_riasec'), {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
               },
               body: JSON.stringify(submitPayload)
           });
@@ -133,7 +150,7 @@ const PersonalityTestApp = () => {
           setSubmitted(true);
 
           if (user?.email) {
-            await saveAnswersToBackend(user.email, 'personality', {});
+            await saveAnswersToBackend(user.email, 'personality', {}, token);
           }
       } catch (err) {
           setError('Failed to submit test. Please try again.');

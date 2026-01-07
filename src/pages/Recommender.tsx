@@ -68,12 +68,14 @@ function Recommender() {
     try {
       console.log("🔄 Querying careers:", careers);
       
+      const token = await getAccessTokenSilently();
       const response = await fetch(
         apiUrl('query-careers'),
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({ careers }),
         }
