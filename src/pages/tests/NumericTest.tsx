@@ -110,7 +110,7 @@ const NumericTestApp = () => {
 
     // Timer hook
     const { formattedTime, percentageRemaining, isTimeUp } = useTestTimer({
-      durationInMinutes: 60,
+      durationInMinutes: 30,
       onTimeUp: handleAutoSubmit,
       submitted,
     });

@@ -103,7 +103,7 @@ const PersonalityTestApp = () => {
 
     // Timer hook
     const { formattedTime, percentageRemaining, isTimeUp } = useTestTimer({
-      durationInMinutes: 60,
+      durationInMinutes: 10,
       onTimeUp: handleAutoSubmit,
       submitted,
     });
