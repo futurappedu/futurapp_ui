@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart, BookOpen, Briefcase, Users } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Home() {
   const navigate = useNavigate();
+  const { loginWithRedirect } = useAuth0();
 
 
   return (
@@ -32,10 +34,10 @@ export default function Home() {
                 type="button"
                 size="lg"
                 className="w-full"
-                onClick={() =>navigate("/login")}
-    >
-      Comenzar
-        <ArrowRight className="ml-2 h-4 w-4" />
+                onClick={() => loginWithRedirect()}
+              >
+                Comenzar
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Inicia tu viaje hoy. No se requiere tarjeta de crédito.
