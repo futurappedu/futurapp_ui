@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,44 +26,38 @@ export default function ProfileCompletionForm() {
         phone_number: string;
         date_of_birth: string;
         citizenship: string;
+        city_of_residence: string;
         school: string;
         average_score: string;
         bi_diploma: string;
         graduation_year: string;
         type_of_program: string;
         area_of_interest: string[];
-        motivation: number;
         destination: string[];
-        post_graduation_plan: string;
         english_level: string;
         study_budget: string;
-        need_work: string;
         sports: string;
-        accomadation: string;
-        campus: string;
         city_characteristics: string;
         five_characteristics: string[];
+        about_you: string;
     }>({
         phone_number: "",
         date_of_birth: "",
         citizenship: "",
+        city_of_residence: "",
         school: "",
         average_score: "",
         bi_diploma: "",
         graduation_year: "",
         type_of_program: "",
         area_of_interest: [],
-        motivation: 5,
         destination: [],
-        post_graduation_plan: "",
         english_level: "",
         study_budget: "",
-        need_work: "",
         sports: "",
-        accomadation: "",
-        campus: "",
         city_characteristics: "",
         five_characteristics: [],
+        about_you: "",
     });
 
   
@@ -75,10 +70,6 @@ export default function ProfileCompletionForm() {
                 return { ...prev, [name]: [...arr, value] };
             }
         });
-    };
-    
-    const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData((prev: any) => ({ ...prev, motivation: Number(e.target.value) }));
     };
 
     const [formState, setFormState] = useState<{
@@ -101,32 +92,32 @@ export default function ProfileCompletionForm() {
         phone_number: "Whatsapp",
         date_of_birth: "Fecha de nacimiento",
         citizenship: "Nacionalidad",
+        city_of_residence: "Ciudad de residencia",
         school: "Colegio",
         average_score: "Promedio",
         bi_diploma: "¿Bachillerato Internacional?",
         graduation_year: "Año de graduación",
-        type_of_program: "Programa de interés",
+        type_of_program: "Tipo de programa",
         area_of_interest: "Áreas de interés",
-        motivation: "Nivel de decisión",
         destination: "Destino de interés",
-        post_graduation_plan: "Interés después de graduarte",
         english_level: "Nivel de inglés",
         study_budget: "Presupuesto de estudios",
-        need_work: "¿Necesitas trabajar?",
         sports: "Deporte",
-        accomadation: "Interés de alojamiento",
-        campus: "Tipo de campus",
         city_characteristics: "Tipo de ciudad",
         five_characteristics: "Cinco características más importantes",
+        about_you: "Dinos más de ti",
       };
       
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         // Check for empty required fields (strings, arrays, numbers)
+        // about_you is optional, so exclude it from validation
+        const optionalFields = ['about_you'];
         const missingFields = Object.entries(formData)
-        .filter(([, value]) => {
-          if (typeof value === "number") return false; // motivation always has a default
+        .filter(([key, value]) => {
+          if (optionalFields.includes(key)) return false; // Skip optional fields
+          if (typeof value === "number") return false;
           if (Array.isArray(value)) return value.length === 0;
           return value === "" || value === null || value === undefined;
         })
@@ -173,7 +164,7 @@ export default function ProfileCompletionForm() {
             });
         }
     };
-    const destinationOptions = ["España", "Estados Unidos", "Reino Unido", "Canadá", "Alemania", "Holanda", "Italia", "No estoy seguro, quisiera varias opciones", "Otro"];
+    const destinationOptions = ["Alemania", "Australia", "Bulgaria", "Canadá", "Chipre", "Escocia", "España", "Estados Unidos", "Francia", "India", "Inglaterra", "Irlanda", "Italia", "Malaysia", "Nueva Zelanda", "Países Bajos", "Reino Unido", "Suiza", "UAE", "Otros"];
 
     const knowledgeareas =  [
         "Negocios y Emprendimiento",
@@ -319,6 +310,16 @@ export default function ProfileCompletionForm() {
                                     onChange={handleChange}
                                 />
                             </div>
+                            {/* City of Residence */}
+                            <div>
+                                <Label htmlFor="city_of_residence">Ciudad de residencia</Label>
+                                <Input
+                                    id="city_of_residence"
+                                    name="city_of_residence"
+                                    value={formData.city_of_residence}
+                                    onChange={handleChange}
+                                />
+                            </div>
                             {/* School */}
                             <div>
                                 <Label htmlFor="school">Colegio</Label>
@@ -426,24 +427,7 @@ export default function ProfileCompletionForm() {
                                         <SelectItem value="No cuento con presupuesto">No cuento con presupuesto</SelectItem>
                                     </SelectContent>
                                 </Select>
-                            </div>
-                            
-                            {/* Need Work */}
-                            <div>
-                                <Label htmlFor="need_work">¿Necesitas trabajar?</Label>
-                                <Select
-                                    value={formData.need_work}
-                                    onValueChange={value => setFormData(prev => ({ ...prev, need_work: value }))}
-                                >
-                                    <SelectTrigger id="need_work">
-                                        <SelectValue placeholder="Selecciona" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Sí, es indispensable poder trabajar para cubrir mis costos de vida">Sí, es indispensable poder trabajar para cubrir mis costos de vida</SelectItem>
-                                        <SelectItem value="No, cuento con presupuesto para concentrarme en mis estudios">No, cuento con presupuesto para concentrarme en mis estudios</SelectItem>
-                                        <SelectItem value="Quisiera hacer pasantías">Quisiera hacer pasantías</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <span className="text-xs text-gray-500">El presupuesto incluye tanto costo de estudios como costos de vida</span>
                             </div>
                         </div>
                         </div>
@@ -453,7 +437,7 @@ export default function ProfileCompletionForm() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                             {/* Program Interest */}
                             <div>
-                                <Label htmlFor="type_of_program">Programa de interés</Label>
+                                <Label htmlFor="type_of_program">Tipo de programa</Label>
                                 <Select
                                     value={formData.type_of_program}
                                     onValueChange={value => setFormData(prev => ({ ...prev, type_of_program: value }))}
@@ -462,11 +446,8 @@ export default function ProfileCompletionForm() {
                                         <SelectValue placeholder="Selecciona" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Carrera">Carrera</SelectItem>
-                                        <SelectItem value="Curso de Idiomas en el exterior">Curso de Idiomas en el exterior</SelectItem>
-                                        <SelectItem value="Summer Camp">Campamento de verano</SelectItem>
-                                        <SelectItem value="Preparacion TOEF/ IELTS o similar">Preparación TOEFL/ IELTS o similar</SelectItem>
-                                        <SelectItem value="Otro">Otro</SelectItem>
+                                        <SelectItem value="Pregrado">Pregrado (grado, doble grado, undergraduate...)</SelectItem>
+                                        <SelectItem value="Posgrado">Posgrado (maestría, postgraduate...)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -495,60 +476,6 @@ export default function ProfileCompletionForm() {
                                 </div>
                             </div>
                             
-                            {/* Post Graduation Interest */}
-                            <div className="col-span-2">
-                                <Label htmlFor="post_graduation_plan">Interés después de graduarte</Label>
-                                <Select
-                                    value={formData.post_graduation_plan}
-                                    onValueChange={value => setFormData(prev => ({ ...prev, post_graduation_plan: value }))}
-                                >
-                                    <SelectTrigger id="post_graduation_plan">
-                                        <SelectValue placeholder="Selecciona" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="quedarme trabajando luego de graduarme es mi prioridad">Quedarme trabajando luego de graduarme es mi prioridad</SelectItem>
-                                        <SelectItem value="quiero estudiar en otro pais y  volver a mi pais para emprender o trabajar con mi familia">Quiero estudiar en otro país y volver a mi país para emprender o trabajar con mi familia</SelectItem>
-                                        <SelectItem value="no tengo claro que quiero hacer en el futuro">No tengo claro qué quiero hacer en el futuro</SelectItem>
-                                        <SelectItem value="Me gustaria esduiar en el exterior para poder migrar legalmente">Me gustaría estudiar en el exterior para poder migrar legalmente</SelectItem>
-                                        <SelectItem value="quisiera pasar directo a estudiar una maestria">Quisiera pasar directo a estudiar una maestría</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            {/* Accommodation Interest */}
-                            <div>
-                                <Label htmlFor="accomadation">Interés de alojamiento</Label>
-                                <Select
-                                    value={formData.accomadation}
-                                    onValueChange={value => setFormData(prev => ({ ...prev, accomadation: value }))}
-                                >
-                                    <SelectTrigger id="accomadation">
-                                        <SelectValue placeholder="Selecciona" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Residencias universitarias dentro del campus - cuarto individual">Residencias universitarias dentro del campus - cuarto individual</SelectItem>
-                                        <SelectItem value="Residencias universitarias dentro del campos - cuarto compartido (más económico)">Residencias universitarias dentro del campus - cuarto compartido (más económico)</SelectItem>
-                                        <SelectItem value="Compartir departamento fuera del campus">Compartir departamento fuera del campus</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            
-                            {/* Campus Interest */}
-                            <div>
-                                <Label htmlFor="campus">Tipo de campus</Label>
-                                <Select
-                                    value={formData.campus}
-                                    onValueChange={value => setFormData(prev => ({ ...prev, campus: value }))}
-                                >
-                                    <SelectTrigger id="campus">
-                                        <SelectValue placeholder="Selecciona" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Campus grande y verde fuera de la ciudad (Green Campus)">Campus grande y verde fuera de la ciudad (Green Campus)</SelectItem>
-                                        <SelectItem value="Campus Urbano (dentro de la ciudad) así sea pequeño pero que esté cerca de todo">Campus urbano (dentro de la ciudad) aunque sea pequeño pero cerca de todo</SelectItem>
-                                        <SelectItem value="Campus tamaño intermedio pero ubicado dentro la ciudad">Campus tamaño intermedio pero ubicado dentro de la ciudad</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
                             {/* City Interest */}
                             <div>
                                 <Label htmlFor="city_characteristics">Tipo de ciudad</Label>
@@ -604,27 +531,6 @@ export default function ProfileCompletionForm() {
                                 </div>
                                 <p className="text-xs text-gray-500 mt-1">Puedes seleccionar hasta 2 opciones.</p>
                             </div>
-
-                            {/* Interest Slider */}
-                            <div>
-                                <Label htmlFor="motivation">¿Del 1 al 10 que tan decidido/a estás por el programa mencionado?
-(siendo 1 muy decidido y 10 completamente inseguro)</Label>
-                                <div className="flex items-center space-x-2">
-                                    <Input
-                                        id="motivation"
-                                        name="motivation"
-                                        type="range"
-                                        min="1"
-                                        max="10"
-                                        value={formData.motivation}
-                                        onChange={handleSliderChange}
-                                        className="w-full"
-                                    />
-                                    <Badge variant="outline" className="w-8 h-8 flex items-center justify-center">
-                                        {formData.motivation}
-                                    </Badge>
-                                </div>
-                            </div>
                             
                             {/* Five Characteristics - IMPROVED WITH SHADCN CHECKBOXES */}
                             <div className="col-span-2">
@@ -663,7 +569,18 @@ export default function ProfileCompletionForm() {
                                 <p className="text-xs text-gray-500 mt-1">Puedes seleccionar hasta 5 opciones.</p>
                             </div>
                             
-                            
+                            {/* About You - Optional */}
+                            <div className="col-span-2">
+                                <Label htmlFor="about_you">Dinos más de ti y de lo que buscas (opcional)</Label>
+                                <Textarea
+                                    id="about_you"
+                                    name="about_you"
+                                    placeholder="Cuéntanos un poco sobre ti, tus metas, y qué buscas en tu experiencia de estudios en el extranjero..."
+                                    value={formData.about_you}
+                                    onChange={handleChange}
+                                    className="min-h-[100px]"
+                                />
+                            </div>
                             
                             <Separator className="col-span-2 my-2" />
 
