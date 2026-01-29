@@ -112,7 +112,7 @@ export default function SpatialReasoningTest() {
 
   // Timer hook
   const { formattedTime, percentageRemaining, isTimeUp } = useTestTimer({
-    durationInMinutes: 60,
+    durationInMinutes: 17,
     onTimeUp: handleAutoSubmit,
     submitted,
   });
