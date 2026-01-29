@@ -164,7 +164,7 @@ export default function ProfileCompletionForm() {
             });
         }
     };
-    const destinationOptions = ["Alemania", "Australia", "Bulgaria", "Canadá", "Chipre", "Escocia", "España", "Estados Unidos", "Francia", "India", "Inglaterra", "Irlanda", "Italia", "Malaysia", "Nueva Zelanda", "Países Bajos", "Reino Unido", "Suiza", "UAE", "Otros"];
+    const destinationOptions = ["Alemania", "Australia", "Bulgaria", "Canadá", "Chipre", "Escocia", "España", "Estados Unidos", "Francia", "India", "Inglaterra", "Irlanda", "Italia", "Malaysia", "Nueva Zelanda", "Países Bajos", "Reino Unido", "Suiza", "UAE", "No estoy segur@, quiero ver varias opciones", "Otros"];
 
     const knowledgeareas =  [
         "Negocios y Emprendimiento",
@@ -446,8 +446,8 @@ export default function ProfileCompletionForm() {
                                         <SelectValue placeholder="Selecciona" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Pregrado">Pregrado (grado, doble grado, undergraduate...)</SelectItem>
-                                        <SelectItem value="Posgrado">Posgrado (maestría, postgraduate...)</SelectItem>
+                                        <SelectItem value="Pregrado">Pregrado</SelectItem>
+                                        <SelectItem value="Posgrado">Posgrado</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
