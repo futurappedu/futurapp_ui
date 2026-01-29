@@ -113,7 +113,7 @@ const VerbalTestApp = () => {
 
     // Timer hook
     const { formattedTime, percentageRemaining, isTimeUp, isSubmitting: timerSubmitting } = useTestTimer({
-      durationInMinutes: 60,
+      durationInMinutes: 20,
       onTimeUp: handleAutoSubmit,
       submitted,
     });
