@@ -365,8 +365,12 @@ useEffect(() => {
     let filteredData = transformedData;
     if (studentBudget > 0) {
       filteredData = transformedData.filter((program: Program) => {
-        const bestCost = calculateBestProgramCost(program);
-        return bestCost <= studentBudget;
+        const price = program.precio_max_anual || 0;
+        const fixedDiscount = program.max_monto_beca || 0;
+        const percentDiscount = price * ((program.max_porcentaje_beca || 0) / 100);
+        const bestDiscount = Math.max(fixedDiscount, percentDiscount);
+        const costAfterScholarship = Math.max(0, price - bestDiscount);
+        return costAfterScholarship <= studentBudget;
       });
     }
 
