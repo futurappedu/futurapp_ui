@@ -495,45 +495,6 @@ useEffect(() => {
     }
   };
 
-const calculateBestProgramCost = (program: Program): number => {
-  const baseCost = parseFloat(String(program.precio_max_anual)) || 0;
-  
-  // Get scholarships for this program
-  const programScholarships = scholarships.filter(s => 
-    s.universidad_beca?.toLowerCase() === program.universidad?.toLowerCase()
-  );
-  
-  if (programScholarships.length === 0) return baseCost;
-  
-  // Find the best (lowest) cost with scholarships
-  let bestCost = baseCost;
-  programScholarships.forEach(scholarship => {
-    const finalCost = calculateFinalCost(baseCost, scholarship);
-    if (finalCost < bestCost) {
-      bestCost = finalCost;
-    }
-  });
-  
-  return bestCost;
-};
-
-// Update the calculateFinalCost function to handle the scholarship interface (around line 216)
-const calculateFinalCost = (baseCost: number, scholarship: Scholarship) => {
-  let finalCost = parseFloat(String(baseCost)) || 0;
-  const percentage = parseFloat(String(scholarship.porcentaje_beca_hasta)) || 
-                     parseFloat(String(scholarship.porcentaje_beca_desde)) || 0;
-  const amount = parseFloat(String(scholarship.monto_beca_hasta)) || 
-                 parseFloat(String(scholarship.monto_beca_desde)) || 0;
-
-  if (percentage && percentage > 0) {
-    const rate = percentage > 1 ? percentage / 100 : percentage;
-    finalCost = finalCost * (1 - rate);
-  }
-  if (amount && amount > 0) {
-    finalCost = Math.max(0, finalCost - amount);
-  }
-  return Math.max(0, finalCost);
-};
 
 
   const calculateInvestment = () => {
