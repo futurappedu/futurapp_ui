@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import {  CheckCircle2, Clock, ArrowRight, Search } from 'lucide-react';
+import { CheckCircle2, Clock, ArrowRight, Search, ChevronDown } from 'lucide-react';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,7 @@ export default function UserProfile() {
     phone: ""
   });
   const [loadingTests, setIsLoadingTests] = useState(true);
+  const [testsOpen, setTestsOpen] = useState(false);
   
   interface Test {
     id: number;
@@ -132,110 +134,125 @@ export default function UserProfile() {
             </CardContent>
           </Card>
 
-          {/* Tests Card */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">Tus tests</CardTitle>
-                <CardDescription>
-                  Controla tu progreso y accede a los tests que has completado.
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loadingTests ? (
-                <div className="flex justify-center items-center h-32">
-                  <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                  </svg>
-                  <span className="ml-4 text-primary text-lg">Cargando tests...</span>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {tests
-                  .filter(test => !test.hideInTable)
-                  .map((test) => {
-                    const isCompleted = test.status === "completed";
-                    return (
-                      <div
-                        key={test.id}
-                        className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
-                          !isCompleted
-                            ? "hover:bg-accent/50 cursor-pointer"
-                            : "bg-muted/50 cursor-not-allowed opacity-70"
-                        }`}
-                        onClick={() => {
-                          if (!isCompleted) handleTestClick(test.id);
-                        }}
-                        tabIndex={isCompleted ? -1 : 0}
-                        aria-disabled={isCompleted}
-                      >
-                      <div className="flex items-center gap-3">
-                        {isCompleted ? (
-                          <div className="rounded-full p-2 bg-green-100">
-                            <CheckCircle2 size={20} className="text-green-600" />
-                          </div>
-                        ) : (
-                          <div className="rounded-full p-2 bg-amber-100">
-                            <Clock size={20} className="text-amber-600" />
-                          </div>
-                        )}
-                        <div>
-                          <h3 className="font-medium text-sm">{test.label}</h3>
-                          <p className="text-xs text-muted-foreground">
-                            {isCompleted ? "Completado" : "Pendiente"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                      {isCompleted ? (
-                        test.name !== "Realista" ? (
-                          <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-                            Puntaje: {test.score}%
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-                            Completado
-                          </Badge>
-                        )
-                      ) : (
-                        <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
-                          Empieza el test
-                        </Badge>
-                      )}
-                        <ArrowRight
-                          size={16}
-                          className={`text-muted-foreground ${isCompleted ? "opacity-40 pointer-events-none" : ""}`}
-                        />
-                      </div>
+          {/* Tests Card — collapsible, default collapsed */}
+          <Collapsible.Root open={testsOpen} onOpenChange={setTestsOpen}>
+            <Card>
+              <Collapsible.Trigger asChild>
+                <CardHeader className="flex flex-row items-center justify-between cursor-pointer select-none hover:bg-accent/50 rounded-t-lg transition-colors">
+                  <div>
+                    <CardTitle className="text-lg">Tus tests</CardTitle>
+                    <CardDescription>
+                      Controla tu progreso y accede a los tests que has completado.
+                    </CardDescription>
+                  </div>
+                  <ChevronDown
+                    size={20}
+                    className={`text-muted-foreground shrink-0 transition-transform duration-200 ${
+                      testsOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </CardHeader>
+              </Collapsible.Trigger>
+
+              <Collapsible.Content className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+                <CardContent>
+                  {loadingTests ? (
+                    <div className="flex justify-center items-center h-32">
+                      <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      </svg>
+                      <span className="ml-4 text-primary text-lg">Cargando tests...</span>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-            </CardContent>
-            <CardFooter>
-              <Alert variant="default" className="w-full bg-muted/50">
-                <AlertDescription className="text-xs text-muted-foreground">
-                  Los resultados de los tests se guardan automáticamente.
-                </AlertDescription>
-              </Alert>
-            </CardFooter>
-            <div className="pt-2">
-  {completedTests === tests.length && (
-    <Button
-      variant="default"
-      className="w-full"
-      onClick={() => {
-        navigate("/career_recommender");
-      }}
-    >
-      Recomendador IA
-    </Button>
-  )}
-</div>
-          </Card>
+                  ) : (
+                    <div className="space-y-4">
+                      {tests
+                      .filter(test => !test.hideInTable)
+                      .map((test) => {
+                        const isCompleted = test.status === "completed";
+                        return (
+                          <div
+                            key={test.id}
+                            className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
+                              !isCompleted
+                                ? "hover:bg-accent/50 cursor-pointer"
+                                : "bg-muted/50 cursor-not-allowed opacity-70"
+                            }`}
+                            onClick={() => {
+                              if (!isCompleted) handleTestClick(test.id);
+                            }}
+                            tabIndex={isCompleted ? -1 : 0}
+                            aria-disabled={isCompleted}
+                          >
+                          <div className="flex items-center gap-3">
+                            {isCompleted ? (
+                              <div className="rounded-full p-2 bg-green-100">
+                                <CheckCircle2 size={20} className="text-green-600" />
+                              </div>
+                            ) : (
+                              <div className="rounded-full p-2 bg-amber-100">
+                                <Clock size={20} className="text-amber-600" />
+                              </div>
+                            )}
+                            <div>
+                              <h3 className="font-medium text-sm">{test.label}</h3>
+                              <p className="text-xs text-muted-foreground">
+                                {isCompleted ? "Completado" : "Pendiente"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                          {isCompleted ? (
+                            test.name !== "Realista" ? (
+                              <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+                                Puntaje: {test.score}%
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+                                Completado
+                              </Badge>
+                            )
+                          ) : (
+                            <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
+                              Empieza el test
+                            </Badge>
+                          )}
+                            <ArrowRight
+                              size={16}
+                              className={`text-muted-foreground ${isCompleted ? "opacity-40 pointer-events-none" : ""}`}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                </CardContent>
+                <CardFooter>
+                  <Alert variant="default" className="w-full bg-muted/50">
+                    <AlertDescription className="text-xs text-muted-foreground">
+                      Los resultados de los tests se guardan automáticamente.
+                    </AlertDescription>
+                  </Alert>
+                </CardFooter>
+              </Collapsible.Content>
+
+              {/* Always visible — outside the collapsible content */}
+              {completedTests === tests.length && (
+                <div className="px-6 pb-6 pt-2">
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={() => {
+                      navigate("/career_recommender");
+                    }}
+                  >
+                    Recomendador IA
+                  </Button>
+                </div>
+              )}
+            </Card>
+          </Collapsible.Root>
           {/* Basic Information Card */}
           <Card className="mt-6">
             <CardHeader>
