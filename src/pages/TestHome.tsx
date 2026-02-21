@@ -138,7 +138,7 @@ export default function UserProfile() {
           <Collapsible.Root open={testsOpen} onOpenChange={setTestsOpen}>
             <Card>
               <Collapsible.Trigger asChild>
-                <CardHeader className="flex flex-row items-center justify-between cursor-pointer select-none hover:bg-accent/50 rounded-t-lg transition-colors">
+                <CardHeader className="flex flex-row items-center justify-between cursor-pointer select-none">
                   <div>
                     <CardTitle className="text-lg">Tus tests</CardTitle>
                     <CardDescription>
