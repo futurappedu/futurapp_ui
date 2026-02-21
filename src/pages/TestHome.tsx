@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { CheckCircle2, Clock, ArrowRight, Search, ChevronDown } from 'lucide-react';
-import * as Collapsible from '@radix-ui/react-collapsible';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,20 +57,25 @@ export default function UserProfile() {
     setIsLoadingTests(true);
     Promise.all(
       availableTests.map(async (test) => {
-        const res = await fetch('https://futurappapi-staging.up.railway.app/scores-tests', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: user.email,
-            testType: test.name
-          })
-        });
-        const data = await res.json();
-        return {
-          ...test,
-          score: typeof data.score === 'number' ? data.score : undefined,
-          status: data.completed ? "completed" as const : "pending" as const
-        };
+        try {
+          const res = await fetch('https://futurappapi-staging.up.railway.app/scores-tests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user.email,
+              testType: test.name
+            })
+          });
+          const data = await res.json();
+          return {
+            ...test,
+            score: typeof data.score === 'number' ? data.score : undefined,
+            status: data.completed ? "completed" as const : "pending" as const
+          };
+        } catch (err) {
+          console.error(`Error fetching score for ${test.name}:`, err);
+          return { ...test, score: undefined, status: "pending" as const };
+        }
       })
     ).then(setTests)
      .finally(() => setIsLoadingTests(false));
@@ -135,53 +139,54 @@ export default function UserProfile() {
           </Card>
 
           {/* Tests Card — collapsible, default collapsed */}
-          <Collapsible.Root open={testsOpen} onOpenChange={setTestsOpen}>
-            <Card>
-              <Collapsible.Trigger asChild>
-                <CardHeader className="flex flex-col gap-3 cursor-pointer select-none">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg">Tus tests</CardTitle>
-                      <CardDescription>
-                        Controla tu progreso y accede a los tests que has completado.
-                      </CardDescription>
-                    </div>
-                    <ChevronDown
-                      size={20}
-                      className={`text-muted-foreground shrink-0 transition-transform duration-200 ${
-                        testsOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </div>
-                  {/* Compact scores summary — always visible */}
-                  {!loadingTests && (
-                    <div className="flex flex-wrap gap-2">
-                      {tests
-                        .filter(test => !test.hideInTable)
-                        .map((test) => (
-                          <Badge
-                            key={test.id}
-                            variant="outline"
-                            className={
-                              test.status === "completed"
-                                ? "bg-primary/10 text-primary text-xs"
-                                : "bg-muted text-muted-foreground text-xs"
-                            }
-                          >
-                            {test.label.replace("Razonamiento ", "").replace("Test de ", "")}
-                            {test.status === "completed" && test.name !== "Realista"
-                              ? `: ${test.score}%`
-                              : test.status === "completed"
-                              ? " ✓"
-                              : ""}
-                          </Badge>
-                        ))}
-                    </div>
-                  )}
-                </CardHeader>
-              </Collapsible.Trigger>
+          <Card>
+            <CardHeader
+              className="flex flex-col gap-3 cursor-pointer select-none"
+              onClick={() => setTestsOpen(!testsOpen)}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Tus tests</CardTitle>
+                  <CardDescription>
+                    Controla tu progreso y accede a los tests que has completado.
+                  </CardDescription>
+                </div>
+                <ChevronDown
+                  size={20}
+                  className={`text-muted-foreground shrink-0 transition-transform duration-200 ${
+                    testsOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </div>
+              {/* Compact scores summary — always visible */}
+              {!loadingTests && tests.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {tests
+                    .filter(test => !test.hideInTable)
+                    .map((test) => (
+                      <Badge
+                        key={test.id}
+                        variant="outline"
+                        className={
+                          test.status === "completed"
+                            ? "bg-primary/10 text-primary text-xs"
+                            : "bg-muted text-muted-foreground text-xs"
+                        }
+                      >
+                        {test.label.replace("Razonamiento ", "").replace("Test de ", "")}
+                        {test.status === "completed" && test.name !== "Realista"
+                          ? `: ${test.score}%`
+                          : test.status === "completed"
+                          ? " ✓"
+                          : ""}
+                      </Badge>
+                    ))}
+                </div>
+              )}
+            </CardHeader>
 
-              <Collapsible.Content className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+            {testsOpen && (
+              <>
                 <CardContent>
                   {loadingTests ? (
                     <div className="flex justify-center items-center h-32">
@@ -262,24 +267,24 @@ export default function UserProfile() {
                     </AlertDescription>
                   </Alert>
                 </CardFooter>
-              </Collapsible.Content>
+              </>
+            )}
 
-              {/* Always visible — outside the collapsible content */}
-              {completedTests === tests.length && (
-                <div className="px-6 pb-6 pt-2">
-                  <Button
-                    variant="default"
-                    className="w-full"
-                    onClick={() => {
-                      navigate("/career_recommender");
-                    }}
-                  >
-                    Recomendador IA
-                  </Button>
-                </div>
-              )}
-            </Card>
-          </Collapsible.Root>
+            {/* Always visible — outside the collapsible content */}
+            {completedTests === tests.length && (
+              <div className="px-6 pb-6 pt-2">
+                <Button
+                  variant="default"
+                  className="w-full"
+                  onClick={() => {
+                    navigate("/career_recommender");
+                  }}
+                >
+                  Recomendador IA
+                </Button>
+              </div>
+            )}
+          </Card>
           {/* Basic Information Card */}
           <Card className="mt-6">
             <CardHeader>
