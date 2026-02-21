@@ -138,19 +138,46 @@ export default function UserProfile() {
           <Collapsible.Root open={testsOpen} onOpenChange={setTestsOpen}>
             <Card>
               <Collapsible.Trigger asChild>
-                <CardHeader className="flex flex-row items-center justify-between cursor-pointer select-none">
-                  <div>
-                    <CardTitle className="text-lg">Tus tests</CardTitle>
-                    <CardDescription>
-                      Controla tu progreso y accede a los tests que has completado.
-                    </CardDescription>
+                <CardHeader className="flex flex-col gap-3 cursor-pointer select-none">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Tus tests</CardTitle>
+                      <CardDescription>
+                        Controla tu progreso y accede a los tests que has completado.
+                      </CardDescription>
+                    </div>
+                    <ChevronDown
+                      size={20}
+                      className={`text-muted-foreground shrink-0 transition-transform duration-200 ${
+                        testsOpen ? "rotate-180" : ""
+                      }`}
+                    />
                   </div>
-                  <ChevronDown
-                    size={20}
-                    className={`text-muted-foreground shrink-0 transition-transform duration-200 ${
-                      testsOpen ? "rotate-180" : ""
-                    }`}
-                  />
+                  {/* Compact scores summary — always visible */}
+                  {!loadingTests && (
+                    <div className="flex flex-wrap gap-2">
+                      {tests
+                        .filter(test => !test.hideInTable)
+                        .map((test) => (
+                          <Badge
+                            key={test.id}
+                            variant="outline"
+                            className={
+                              test.status === "completed"
+                                ? "bg-primary/10 text-primary text-xs"
+                                : "bg-muted text-muted-foreground text-xs"
+                            }
+                          >
+                            {test.label.replace("Razonamiento ", "").replace("Test de ", "")}
+                            {test.status === "completed" && test.name !== "Realista"
+                              ? `: ${test.score}%`
+                              : test.status === "completed"
+                              ? " ✓"
+                              : ""}
+                          </Badge>
+                        ))}
+                    </div>
+                  )}
                 </CardHeader>
               </Collapsible.Trigger>
 
