@@ -260,29 +260,25 @@ export default function UserProfile() {
                   </div>
                 )}
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col gap-3">
                   <Alert variant="default" className="w-full bg-muted/50">
                     <AlertDescription className="text-xs text-muted-foreground">
                       Los resultados de los tests se guardan automáticamente.
                     </AlertDescription>
                   </Alert>
+                  {tests.length > 0 && completedTests === tests.length && (
+                    <Button
+                      variant="default"
+                      className="w-full"
+                      onClick={() => {
+                        navigate("/career_recommender");
+                      }}
+                    >
+                      Recomendador IA
+                    </Button>
+                  )}
                 </CardFooter>
               </>
-            )}
-
-            {/* Always visible — outside the collapsible content */}
-            {completedTests === tests.length && (
-              <div className="px-6 pb-6 pt-2">
-                <Button
-                  variant="default"
-                  className="w-full"
-                  onClick={() => {
-                    navigate("/career_recommender");
-                  }}
-                >
-                  Recomendador IA
-                </Button>
-              </div>
             )}
           </Card>
           {/* Basic Information Card */}
