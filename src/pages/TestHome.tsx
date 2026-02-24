@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import {  CheckCircle2, Clock, ArrowRight, Search } from 'lucide-react';
+import { CheckCircle2, Clock, ArrowRight, Search, ChevronDown } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,7 @@ export default function UserProfile() {
     phone: ""
   });
   const [loadingTests, setIsLoadingTests] = useState(true);
+  const [testsOpen, setTestsOpen] = useState(false);
   
   interface Test {
     id: number;
@@ -56,20 +57,25 @@ export default function UserProfile() {
     setIsLoadingTests(true);
     Promise.all(
       availableTests.map(async (test) => {
-        const res = await fetch('https://futurappapi-staging.up.railway.app/scores-tests', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: user.email,
-            testType: test.name
-          })
-        });
-        const data = await res.json();
-        return {
-          ...test,
-          score: typeof data.score === 'number' ? data.score : undefined,
-          status: data.completed ? "completed" as const : "pending" as const
-        };
+        try {
+          const res = await fetch('https://futurappapi-staging.up.railway.app/scores-tests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user.email,
+              testType: test.name
+            })
+          });
+          const data = await res.json();
+          return {
+            ...test,
+            score: typeof data.score === 'number' ? data.score : undefined,
+            status: data.completed ? "completed" as const : "pending" as const
+          };
+        } catch (err) {
+          console.error(`Error fetching score for ${test.name}:`, err);
+          return { ...test, score: undefined, status: "pending" as const };
+        }
       })
     ).then(setTests)
      .finally(() => setIsLoadingTests(false));
@@ -132,109 +138,148 @@ export default function UserProfile() {
             </CardContent>
           </Card>
 
-          {/* Tests Card */}
+          {/* Tests Card — collapsible, default collapsed */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">Tus tests</CardTitle>
-                <CardDescription>
-                  Controla tu progreso y accede a los tests que has completado.
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loadingTests ? (
-                <div className="flex justify-center items-center h-32">
-                  <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                  </svg>
-                  <span className="ml-4 text-primary text-lg">Cargando tests...</span>
+            <CardHeader
+              className="flex flex-col gap-3 cursor-pointer select-none"
+              onClick={() => setTestsOpen(!testsOpen)}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Tus tests</CardTitle>
+                  <CardDescription>
+                    Controla tu progreso y accede a los tests que has completado.
+                  </CardDescription>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {tests
-                  .filter(test => !test.hideInTable)
-                  .map((test) => {
-                    const isCompleted = test.status === "completed";
-                    return (
-                      <div
-                        key={test.id}
-                        className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
-                          !isCompleted
-                            ? "hover:bg-accent/50 cursor-pointer"
-                            : "bg-muted/50 cursor-not-allowed opacity-70"
-                        }`}
-                        onClick={() => {
-                          if (!isCompleted) handleTestClick(test.id);
-                        }}
-                        tabIndex={isCompleted ? -1 : 0}
-                        aria-disabled={isCompleted}
-                      >
-                      <div className="flex items-center gap-3">
-                        {isCompleted ? (
-                          <div className="rounded-full p-2 bg-green-100">
-                            <CheckCircle2 size={20} className="text-green-600" />
-                          </div>
-                        ) : (
-                          <div className="rounded-full p-2 bg-amber-100">
-                            <Clock size={20} className="text-amber-600" />
-                          </div>
-                        )}
-                        <div>
-                          <h3 className="font-medium text-sm">{test.label}</h3>
-                          <p className="text-xs text-muted-foreground">
-                            {isCompleted ? "Completado" : "Pendiente"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                      {isCompleted ? (
-                        test.name !== "Realista" ? (
-                          <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-                            Puntaje: {test.score}%
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-                            Completado
-                          </Badge>
-                        )
-                      ) : (
-                        <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
-                          Empieza el test
-                        </Badge>
-                      )}
-                        <ArrowRight
-                          size={16}
-                          className={`text-muted-foreground ${isCompleted ? "opacity-40 pointer-events-none" : ""}`}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                <ChevronDown
+                  size={20}
+                  className={`text-muted-foreground shrink-0 transition-transform duration-200 ${
+                    testsOpen ? "rotate-180" : ""
+                  }`}
+                />
               </div>
+              {/* Compact scores summary — always visible */}
+              {!loadingTests && tests.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {tests
+                    .filter(test => !test.hideInTable)
+                    .map((test) => (
+                      <Badge
+                        key={test.id}
+                        variant="outline"
+                        className={
+                          test.status === "completed"
+                            ? "bg-primary/10 text-primary text-xs"
+                            : "bg-muted text-muted-foreground text-xs"
+                        }
+                      >
+                        {test.label.replace("Razonamiento ", "").replace("Test de ", "")}
+                        {test.status === "completed" && test.name !== "Realista"
+                          ? `: ${test.score}%`
+                          : test.status === "completed"
+                          ? " ✓"
+                          : ""}
+                      </Badge>
+                    ))}
+                </div>
+              )}
+            </CardHeader>
+
+            {testsOpen && (
+              <>
+                <CardContent>
+                  {loadingTests ? (
+                    <div className="flex justify-center items-center h-32">
+                      <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      </svg>
+                      <span className="ml-4 text-primary text-lg">Cargando tests...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {tests
+                      .filter(test => !test.hideInTable)
+                      .map((test) => {
+                        const isCompleted = test.status === "completed";
+                        return (
+                          <div
+                            key={test.id}
+                            className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
+                              !isCompleted
+                                ? "hover:bg-accent/50 cursor-pointer"
+                                : "bg-muted/50 cursor-not-allowed opacity-70"
+                            }`}
+                            onClick={() => {
+                              if (!isCompleted) handleTestClick(test.id);
+                            }}
+                            tabIndex={isCompleted ? -1 : 0}
+                            aria-disabled={isCompleted}
+                          >
+                          <div className="flex items-center gap-3">
+                            {isCompleted ? (
+                              <div className="rounded-full p-2 bg-green-100">
+                                <CheckCircle2 size={20} className="text-green-600" />
+                              </div>
+                            ) : (
+                              <div className="rounded-full p-2 bg-amber-100">
+                                <Clock size={20} className="text-amber-600" />
+                              </div>
+                            )}
+                            <div>
+                              <h3 className="font-medium text-sm">{test.label}</h3>
+                              <p className="text-xs text-muted-foreground">
+                                {isCompleted ? "Completado" : "Pendiente"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                          {isCompleted ? (
+                            test.name !== "Realista" ? (
+                              <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+                                Puntaje: {test.score}%
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
+                                Completado
+                              </Badge>
+                            )
+                          ) : (
+                            <Badge variant="outline" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200">
+                              Empieza el test
+                            </Badge>
+                          )}
+                            <ArrowRight
+                              size={16}
+                              className={`text-muted-foreground ${isCompleted ? "opacity-40 pointer-events-none" : ""}`}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                </CardContent>
+                <CardFooter className="flex flex-col gap-3">
+                  <Alert variant="default" className="w-full bg-muted/50">
+                    <AlertDescription className="text-xs text-muted-foreground">
+                      Los resultados de los tests se guardan automáticamente.
+                    </AlertDescription>
+                  </Alert>
+                  {tests.length > 0 && completedTests === tests.length && (
+                    <Button
+                      variant="default"
+                      className="w-full"
+                      onClick={() => {
+                        navigate("/career_recommender");
+                      }}
+                    >
+                      Recomendador IA
+                    </Button>
+                  )}
+                </CardFooter>
+              </>
             )}
-            </CardContent>
-            <CardFooter>
-              <Alert variant="default" className="w-full bg-muted/50">
-                <AlertDescription className="text-xs text-muted-foreground">
-                  Los resultados de los tests se guardan automáticamente.
-                </AlertDescription>
-              </Alert>
-            </CardFooter>
-            <div className="pt-2">
-  {completedTests === tests.length && (
-    <Button
-      variant="default"
-      className="w-full"
-      onClick={() => {
-        navigate("/career_recommender");
-      }}
-    >
-      Recomendador IA
-    </Button>
-  )}
-</div>
           </Card>
           {/* Basic Information Card */}
           <Card className="mt-6">
