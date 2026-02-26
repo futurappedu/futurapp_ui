@@ -73,9 +73,20 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
   });
 
   useEffect(() => {
-    fetchUniversities();
-    fetchProgramTypes();
-  }, []);
+    const loadDropdownData = async () => {
+      try {
+        const [univData, typesData] = await Promise.all([
+          adminApi.getAllUniversities(getAccessTokenSilently),
+          adminApi.getProgramTypes(getAccessTokenSilently),
+        ]);
+        setUniversities(univData.items);
+        setProgramTypes(typesData.items);
+      } catch (err) {
+        console.error('Failed to load form dropdown data', err);
+      }
+    };
+    loadDropdownData();
+  }, [getAccessTokenSilently]);
 
   useEffect(() => {
     if (program) {
@@ -99,28 +110,21 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
     }
   }, [program]);
 
-  const fetchUniversities = async () => {
-    try {
-      const data = await adminApi.getAllUniversities(getAccessTokenSilently);
-      setUniversities(data.items);
-    } catch (err) {
-      console.error('Failed to load universities', err);
-    }
-  };
-
-  const fetchProgramTypes = async () => {
-    try {
-      const data = await adminApi.getProgramTypes(getAccessTokenSilently);
-      setProgramTypes(data.items);
-    } catch (err) {
-      console.error('Failed to load program types', err);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!formData.id_universidad || formData.id_universidad <= 0) {
+      setError('University is required.');
+      setLoading(false);
+      return;
+    }
+    if (!formData.id_tipo_programa || formData.id_tipo_programa <= 0) {
+      setError('Program type is required. Please select a program type.');
+      setLoading(false);
+      return;
+    }
 
     try {
       const data = {
@@ -145,8 +149,8 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
         await adminApi.updateProgram(program.id_programa, data, getAccessTokenSilently);
       }
       onSuccess();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save program');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save program');
     } finally {
       setLoading(false);
     }
@@ -171,40 +175,62 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="id_universidad">University *</Label>
-                <Select
-                  value={formData.id_universidad?.toString() || ''}
-                  onValueChange={(value) => setFormData({ ...formData, id_universidad: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select university" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {universities.map((uni) => (
-                      <SelectItem key={uni.id_universidad} value={uni.id_universidad.toString()}>
-                        {uni.universidad}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {universities.length === 0 ? (
+                  <div className="flex h-10 items-center rounded-md border border-input px-3 text-sm text-muted-foreground">
+                    Loading universities...
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.id_universidad > 0 ? formData.id_universidad.toString() : ''}
+                    onValueChange={(value) => setFormData({ ...formData, id_universidad: parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select university" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {universities.map((uni) => (
+                        <SelectItem key={uni.id_universidad} value={uni.id_universidad.toString()}>
+                          {uni.universidad}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               <div>
                 <Label htmlFor="id_tipo_programa">Program Type *</Label>
-                <Select
-                  value={formData.id_tipo_programa?.toString() || ''}
-                  onValueChange={(value) => setFormData({ ...formData, id_tipo_programa: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select program type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {programTypes.map((type) => (
-                      <SelectItem key={type.id_tipo_programa} value={type.id_tipo_programa.toString()}>
-                        {type.descripcion}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {programTypes.length === 0 ? (
+                  <div className="flex h-10 items-center rounded-md border border-input px-3 text-sm text-muted-foreground">
+                    Loading types...
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.id_tipo_programa > 0 ? formData.id_tipo_programa.toString() : ''}
+                    onValueChange={(value) => setFormData({ ...formData, id_tipo_programa: parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select program type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {programTypes.map((type) => (
+                        <SelectItem key={type.id_tipo_programa} value={type.id_tipo_programa.toString()}>
+                          {type.descripcion}
+                        </SelectItem>
+                      ))}
+                      {/* Fallback: show current value if it's not in the loaded list */}
+                      {formData.id_tipo_programa > 0 &&
+                        !programTypes.some((t) => t.id_tipo_programa === formData.id_tipo_programa) && (
+                          <SelectItem
+                            key={`unknown-${formData.id_tipo_programa}`}
+                            value={formData.id_tipo_programa.toString()}
+                          >
+                            {program?.tipo_programa ?? `Type ID ${formData.id_tipo_programa}`}
+                          </SelectItem>
+                        )}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
 
