@@ -175,22 +175,27 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="id_universidad">University *</Label>
-                <Select
-                  key={`univ-${universities.length}`}
-                  value={formData.id_universidad?.toString() || ''}
-                  onValueChange={(value) => setFormData({ ...formData, id_universidad: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select university" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {universities.map((uni) => (
-                      <SelectItem key={uni.id_universidad} value={uni.id_universidad.toString()}>
-                        {uni.universidad}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {universities.length === 0 ? (
+                  <div className="flex h-10 items-center rounded-md border border-input px-3 text-sm text-muted-foreground">
+                    Loading universities...
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.id_universidad > 0 ? formData.id_universidad.toString() : ''}
+                    onValueChange={(value) => setFormData({ ...formData, id_universidad: parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select university" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {universities.map((uni) => (
+                        <SelectItem key={uni.id_universidad} value={uni.id_universidad.toString()}>
+                          {uni.universidad}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               <div>
