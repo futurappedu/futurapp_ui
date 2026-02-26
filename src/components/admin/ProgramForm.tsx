@@ -73,9 +73,20 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
   });
 
   useEffect(() => {
-    fetchUniversities();
-    fetchProgramTypes();
-  }, []);
+    const loadDropdownData = async () => {
+      try {
+        const [univData, typesData] = await Promise.all([
+          adminApi.getAllUniversities(getAccessTokenSilently),
+          adminApi.getProgramTypes(getAccessTokenSilently),
+        ]);
+        setUniversities(univData.items);
+        setProgramTypes(typesData.items);
+      } catch (err) {
+        console.error('Failed to load form dropdown data', err);
+      }
+    };
+    loadDropdownData();
+  }, [getAccessTokenSilently]);
 
   useEffect(() => {
     if (program) {
@@ -98,24 +109,6 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
       });
     }
   }, [program]);
-
-  const fetchUniversities = async () => {
-    try {
-      const data = await adminApi.getAllUniversities(getAccessTokenSilently);
-      setUniversities(data.items);
-    } catch (err) {
-      console.error('Failed to load universities', err);
-    }
-  };
-
-  const fetchProgramTypes = async () => {
-    try {
-      const data = await adminApi.getProgramTypes(getAccessTokenSilently);
-      setProgramTypes(data.items);
-    } catch (err) {
-      console.error('Failed to load program types', err);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,6 +176,7 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
               <div>
                 <Label htmlFor="id_universidad">University *</Label>
                 <Select
+                  key={`univ-${universities.length}`}
                   value={formData.id_universidad?.toString() || ''}
                   onValueChange={(value) => setFormData({ ...formData, id_universidad: parseInt(value) })}
                 >
@@ -202,6 +196,7 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
               <div>
                 <Label htmlFor="id_tipo_programa">Program Type *</Label>
                 <Select
+                  key={`tipo-${programTypes.length}`}
                   value={formData.id_tipo_programa?.toString() || ''}
                   onValueChange={(value) => setFormData({ ...formData, id_tipo_programa: parseInt(value) })}
                 >
