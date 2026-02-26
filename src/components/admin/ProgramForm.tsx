@@ -122,6 +122,17 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
     setLoading(true);
     setError(null);
 
+    if (!formData.id_universidad || formData.id_universidad <= 0) {
+      setError('University is required.');
+      setLoading(false);
+      return;
+    }
+    if (!formData.id_tipo_programa || formData.id_tipo_programa <= 0) {
+      setError('Program type is required. Please select a program type.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const data = {
         id_universidad: formData.id_universidad,
@@ -145,8 +156,8 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
         await adminApi.updateProgram(program.id_programa, data, getAccessTokenSilently);
       }
       onSuccess();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save program');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save program');
     } finally {
       setLoading(false);
     }
@@ -203,6 +214,16 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
                         {type.descripcion}
                       </SelectItem>
                     ))}
+                    {/* Fallback: show current value if it's not in the loaded list */}
+                    {formData.id_tipo_programa > 0 &&
+                      !programTypes.some((t) => t.id_tipo_programa === formData.id_tipo_programa) && (
+                        <SelectItem
+                          key={`unknown-${formData.id_tipo_programa}`}
+                          value={formData.id_tipo_programa.toString()}
+                        >
+                          {program?.tipo_programa ?? `Type ID ${formData.id_tipo_programa}`}
+                        </SelectItem>
+                      )}
                   </SelectContent>
                 </Select>
               </div>
