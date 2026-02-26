@@ -195,32 +195,37 @@ export default function ProgramForm({ program, onSuccess, onCancel }: ProgramFor
 
               <div>
                 <Label htmlFor="id_tipo_programa">Program Type *</Label>
-                <Select
-                  key={`tipo-${programTypes.length}`}
-                  value={formData.id_tipo_programa?.toString() || ''}
-                  onValueChange={(value) => setFormData({ ...formData, id_tipo_programa: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select program type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {programTypes.map((type) => (
-                      <SelectItem key={type.id_tipo_programa} value={type.id_tipo_programa.toString()}>
-                        {type.descripcion}
-                      </SelectItem>
-                    ))}
-                    {/* Fallback: show current value if it's not in the loaded list */}
-                    {formData.id_tipo_programa > 0 &&
-                      !programTypes.some((t) => t.id_tipo_programa === formData.id_tipo_programa) && (
-                        <SelectItem
-                          key={`unknown-${formData.id_tipo_programa}`}
-                          value={formData.id_tipo_programa.toString()}
-                        >
-                          {program?.tipo_programa ?? `Type ID ${formData.id_tipo_programa}`}
+                {programTypes.length === 0 ? (
+                  <div className="flex h-10 items-center rounded-md border border-input px-3 text-sm text-muted-foreground">
+                    Loading types...
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.id_tipo_programa > 0 ? formData.id_tipo_programa.toString() : ''}
+                    onValueChange={(value) => setFormData({ ...formData, id_tipo_programa: parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select program type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {programTypes.map((type) => (
+                        <SelectItem key={type.id_tipo_programa} value={type.id_tipo_programa.toString()}>
+                          {type.descripcion}
                         </SelectItem>
-                      )}
-                  </SelectContent>
-                </Select>
+                      ))}
+                      {/* Fallback: show current value if it's not in the loaded list */}
+                      {formData.id_tipo_programa > 0 &&
+                        !programTypes.some((t) => t.id_tipo_programa === formData.id_tipo_programa) && (
+                          <SelectItem
+                            key={`unknown-${formData.id_tipo_programa}`}
+                            value={formData.id_tipo_programa.toString()}
+                          >
+                            {program?.tipo_programa ?? `Type ID ${formData.id_tipo_programa}`}
+                          </SelectItem>
+                        )}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
 
