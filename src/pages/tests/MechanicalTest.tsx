@@ -113,7 +113,7 @@ const MechanicalTestApp = () => {
 
   // Timer hook
   const { formattedTime, percentageRemaining, isTimeUp } = useTestTimer({
-    durationInMinutes: 17,
+    durationInMinutes: 10,
     onTimeUp: handleAutoSubmit,
     submitted,
   });
