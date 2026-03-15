@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, Award, Percent, Star, Clock, ArrowLeft, Heart, Trash2, Download, Lock, UserCircle } from 'lucide-react';
+import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, BookOpen, Award, Percent, Star, Clock, ArrowLeft, Heart, Trash2, Download, Lock, UserCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,7 @@ interface Scholarship {
 export default function ScholarshipSearch() {
   const navigate = useNavigate();
   const { user, getAccessTokenSilently } = useAuth0(); // Get user email, authentication already handled
+  const [activeTab, setActiveTab] = useState<'programas' | 'universidades'>('programas');
   const [searchProgram, setSearchProgram] = useState('');
   const [searchUniversity, setSearchUniversity] = useState('');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -553,6 +554,32 @@ useEffect(() => {
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Tab navigation */}
+        <div className="flex items-center gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab('programas')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+              activeTab === 'programas'
+                ? 'bg-card border-border text-foreground shadow-sm'
+                : 'border-transparent text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            <BookOpen className="w-4 h-4" />
+            Programas
+          </button>
+          <button
+            onClick={() => setActiveTab('universidades')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+              activeTab === 'universidades'
+                ? 'bg-card border-border text-foreground shadow-sm'
+                : 'border-transparent text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            <Building2 className="w-4 h-4" />
+            Universidades
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_260px] gap-6 items-start">
 
           {/* Left: Filter Panel */}
@@ -868,7 +895,13 @@ useEffect(() => {
             {/* Results list */}
             <div className="bg-card border border-border rounded-xl overflow-hidden">
               <div ref={scrollAreaRef} className="h-[600px] overflow-y-auto">
-                {loading ? (
+                {activeTab === 'universidades' ? (
+                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                    <Building2 className="h-12 w-12 mb-4 text-border" />
+                    <p className="text-lg font-medium text-foreground">Búsqueda por universidad</p>
+                    <p className="text-sm text-center px-8 mt-1">Próximamente podrás buscar y explorar universidades directamente.</p>
+                  </div>
+                ) : loading ? (
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                     <div className="relative">
                       <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary"></div>
