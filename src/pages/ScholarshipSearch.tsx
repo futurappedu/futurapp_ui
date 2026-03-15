@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, BookOpen, Award, Percent, Star, Clock, ArrowLeft, Heart, Trash2, Download, Lock, UserCircle } from 'lucide-react';
+import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, BookOpen, Award, Percent, Star, Clock, ArrowLeft, Heart, Trash2, Download, Lock, UserCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,23 @@ interface Program {
   tiene_beca_parseada?: boolean;
 }
 
+interface UniversityProgram {
+  id_programa: number;
+  programa: string;
+  duracion_min_anos: number | null;
+  duracion_max_anos: number | null;
+  tipo_programa: string | null;
+}
+
+interface University {
+  id_universidad: number;
+  universidad: string;
+  pais: string;
+  num_programas: number;
+  num_matching?: number;
+  matching_programs?: UniversityProgram[];
+}
+
 interface Scholarship {
   id: number;
   id_beca: number;
@@ -53,6 +70,9 @@ export default function ScholarshipSearch() {
   const navigate = useNavigate();
   const { user, getAccessTokenSilently } = useAuth0(); // Get user email, authentication already handled
   const [activeTab, setActiveTab] = useState<'programas' | 'universidades'>('programas');
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [universitiesLoading, setUniversitiesLoading] = useState(false);
+  const [expandedUniversities, setExpandedUniversities] = useState<Set<number>>(new Set());
   const [searchProgram, setSearchProgram] = useState('');
   const [searchUniversity, setSearchUniversity] = useState('');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -81,6 +101,7 @@ export default function ScholarshipSearch() {
   const [maxScholarshipAmount, setMaxScholarshipAmount] = useState(50000);
   const [scholarshipPercentageRange, setScholarshipPercentageRange] = useState([0, 100]);
   const isInitialMount = useRef(true);
+  const searchProgramRef = useRef('');
   const [favoriteProgramIds, setFavoriteProgramIds] = useState<Set<number>>(new Set());
   const [favoritePrograms, setFavoritePrograms] = useState<Program[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
@@ -92,6 +113,11 @@ export default function ScholarshipSearch() {
   useEffect(() => {
     setVisibleCount(20);
   }, [programs]);
+
+  // Keep ref in sync so tab-switch effect always reads latest search term
+  useEffect(() => {
+    searchProgramRef.current = searchProgram;
+  }, [searchProgram]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -240,6 +266,14 @@ export default function ScholarshipSearch() {
     checkProfileCompletion();
   }, [user?.email]);
 
+  // Load universities whenever the tab is active or country filter changes
+  useEffect(() => {
+    if (activeTab === 'universidades') {
+      loadUniversities(selectedCountries, searchProgramRef.current);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, selectedCountries]);
+
 useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -284,6 +318,35 @@ useEffect(() => {
   setScholarshipAmountRange([0, maxScholarshipAmount]);
   setScholarshipPercentageRange([0, 100]);
 };
+  const loadUniversities = async (countries: string[] = [], searchPrograma = '') => {
+    setUniversitiesLoading(true);
+    try {
+      const token = await getAccessTokenSilently();
+      const params = new URLSearchParams();
+      countries.forEach(c => params.append('pais', c));
+      if (searchPrograma.trim()) {
+        params.set('search_programa', searchPrograma.trim());
+      }
+      const res = await fetch(`${apiUrl('universidades')}?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: University[] = await res.json();
+      setUniversities(data);
+      // Auto-expand cards that have matching programs
+      setExpandedUniversities(new Set(
+        data
+          .filter(u => u.matching_programs && u.matching_programs.length > 0)
+          .map(u => u.id_universidad)
+      ));
+    } catch (err) {
+      console.error('Error loading universities:', err);
+      setUniversities([]);
+    } finally {
+      setUniversitiesLoading(false);
+    }
+  };
+
   const searchPrograms = async () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -610,8 +673,18 @@ useEffect(() => {
                   />
                 </div>
 
-                <Button onClick={searchPrograms} className="w-full" disabled={loading}>
-                  {loading ? 'Buscando...' : 'Buscar'}
+                <Button
+                  onClick={() => {
+                    if (activeTab === 'universidades') {
+                      loadUniversities(selectedCountries, searchProgram);
+                    } else {
+                      searchPrograms();
+                    }
+                  }}
+                  className="w-full"
+                  disabled={loading || universitiesLoading}
+                >
+                  {loading || universitiesLoading ? 'Buscando...' : 'Buscar'}
                 </Button>
               </div>
 
@@ -807,8 +880,8 @@ useEffect(() => {
 
           {/* Center: Results */}
           <main>
-            {/* Budget input */}
-            <div className="bg-card border border-border rounded-xl p-4 mb-4">
+            {/* Budget input — only visible in Programas tab */}
+            {activeTab === 'programas' && <div className="bg-card border border-border rounded-xl p-4 mb-4">
               <Label className="text-sm font-medium mb-2 block text-foreground">
                 Presupuesto Anual del Estudiante
               </Label>
@@ -839,68 +912,181 @@ useEffect(() => {
                   Mostrando solo programas dentro de tu presupuesto (costo - mejor beca)
                 </p>
               )}
-            </div>
+            </div>}
 
             {/* Results header */}
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-bold text-foreground">
-                  {showFavorites ? 'Mis Favoritos' : 'Programas Encontrados'}
+                  {activeTab === 'universidades'
+                    ? 'Universidades'
+                    : showFavorites ? 'Mis Favoritos' : 'Programas Encontrados'}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {loading || favoritesLoading ? 'Cargando...' :
-                    showFavorites
-                      ? favoritePrograms.length > 0
-                        ? `${favoritePrograms.length} programa${favoritePrograms.length !== 1 ? 's' : ''} guardado${favoritePrograms.length !== 1 ? 's' : ''}`
-                        : 'No tienes programas favoritos aún'
-                      : resultCount > 0
-                        ? `${resultCount} programa${resultCount !== 1 ? 's' : ''} disponible${resultCount !== 1 ? 's' : ''}`
-                        : 'Usa los filtros para buscar programas'}
+                  {activeTab === 'universidades'
+                    ? universitiesLoading
+                      ? 'Cargando...'
+                      : searchProgramRef.current
+                        ? `${universities.length} universidad${universities.length !== 1 ? 'es' : ''} con programas relacionados a "${searchProgramRef.current}"`
+                        : `${universities.length} universidad${universities.length !== 1 ? 'es' : ''} disponible${universities.length !== 1 ? 's' : ''}`
+                    : loading || favoritesLoading ? 'Cargando...' :
+                      showFavorites
+                        ? favoritePrograms.length > 0
+                          ? `${favoritePrograms.length} programa${favoritePrograms.length !== 1 ? 's' : ''} guardado${favoritePrograms.length !== 1 ? 's' : ''}`
+                          : 'No tienes programas favoritos aún'
+                        : resultCount > 0
+                          ? `${resultCount} programa${resultCount !== 1 ? 's' : ''} disponible${resultCount !== 1 ? 's' : ''}`
+                          : 'Usa los filtros para buscar programas'}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    setShowFavorites(!showFavorites);
-                    setVisibleCount(20);
-                  }}
-                  className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border transition-colors ${
-                    showFavorites
-                      ? 'bg-red-50 border-red-200 text-red-600'
-                      : 'border-border text-muted-foreground hover:bg-muted'
-                  }`}
-                >
-                  <Heart className={`w-4 h-4 ${showFavorites ? 'fill-red-500 text-red-500' : ''}`} />
-                  {showFavorites ? 'Ver Todos' : `Favoritos (${favoritePrograms.length})`}
-                </button>
-                {showFavorites && favoritePrograms.length > 0 && (
-                  <Button variant="outline" size="sm" onClick={handleDownloadReport} className="h-8">
-                    <Download className="h-4 w-4 mr-2" />
-                    Descargar Reporte
-                  </Button>
-                )}
-                {!showFavorites && resultCount > 0 && (
-                  <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full">
-                    {visibleCount} de {resultCount}
-                  </span>
-                )}
-                {showFavorites && favoritePrograms.length > 0 && (
-                  <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full">
-                    {Math.min(visibleCount, favoritePrograms.length)} de {favoritePrograms.length}
-                  </span>
-                )}
-              </div>
+              {activeTab === 'programas' && (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setShowFavorites(!showFavorites);
+                      setVisibleCount(20);
+                    }}
+                    className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border transition-colors ${
+                      showFavorites
+                        ? 'bg-red-50 border-red-200 text-red-600'
+                        : 'border-border text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <Heart className={`w-4 h-4 ${showFavorites ? 'fill-red-500 text-red-500' : ''}`} />
+                    {showFavorites ? 'Ver Todos' : `Favoritos (${favoritePrograms.length})`}
+                  </button>
+                  {showFavorites && favoritePrograms.length > 0 && (
+                    <Button variant="outline" size="sm" onClick={handleDownloadReport} className="h-8">
+                      <Download className="h-4 w-4 mr-2" />
+                      Descargar Reporte
+                    </Button>
+                  )}
+                  {!showFavorites && resultCount > 0 && (
+                    <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full">
+                      {visibleCount} de {resultCount}
+                    </span>
+                  )}
+                  {showFavorites && favoritePrograms.length > 0 && (
+                    <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full">
+                      {Math.min(visibleCount, favoritePrograms.length)} de {favoritePrograms.length}
+                    </span>
+                  )}
+                </div>
+              )}
+              {activeTab === 'universidades' && universities.length > 0 && (
+                <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full">
+                  {universities.length}
+                </span>
+              )}
             </div>
 
             {/* Results list */}
             <div className="bg-card border border-border rounded-xl overflow-hidden">
               <div ref={scrollAreaRef} className="h-[600px] overflow-y-auto">
                 {activeTab === 'universidades' ? (
-                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                    <Building2 className="h-12 w-12 mb-4 text-border" />
-                    <p className="text-lg font-medium text-foreground">Búsqueda por universidad</p>
-                    <p className="text-sm text-center px-8 mt-1">Próximamente podrás buscar y explorar universidades directamente.</p>
-                  </div>
+                  universitiesLoading ? (
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                      <div className="relative">
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary"></div>
+                        <Building2 className="h-8 w-8 text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                      </div>
+                      <p className="text-lg font-medium mt-4 text-foreground">Cargando universidades...</p>
+                    </div>
+                  ) : universities.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                      <Building2 className="h-12 w-12 mb-4 text-border" />
+                      <p className="text-lg font-medium text-foreground">No se encontraron universidades</p>
+                      <p className="text-sm mt-1 text-center px-8">
+                        {searchProgramRef.current
+                          ? `Ninguna universidad tiene programas con "${searchProgramRef.current}"`
+                          : 'Prueba ajustando el filtro de país'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border">
+                      {universities.map((uni) => {
+                        const initials = uni.universidad
+                          .split(/\s+/)
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map(w => w[0].toUpperCase())
+                          .join('');
+                        return (
+                          <div key={uni.id_universidad} className="p-5 hover:bg-muted transition-all">
+                            <div className="flex items-start gap-3">
+                              {/* Avatar */}
+                              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <span className="text-primary font-bold text-xs">{initials}</span>
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-base text-foreground leading-tight">
+                                  {uni.universidad}
+                                </h3>
+                                <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground flex-wrap">
+                                  <div className="flex items-center gap-1">
+                                    <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                                    <span>{uni.pais}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <BookOpen className="h-3.5 w-3.5 flex-shrink-0" />
+                                    <span>{uni.num_programas} programa{uni.num_programas !== 1 ? 's' : ''}</span>
+                                  </div>
+                                </div>
+
+                                {/* Matching programs — collapsible */}
+                                {uni.matching_programs && uni.matching_programs.length > 0 && (() => {
+                                  const isExpanded = expandedUniversities.has(uni.id_universidad);
+                                  const toggle = () => setExpandedUniversities(prev => {
+                                    const next = new Set(prev);
+                                    if (next.has(uni.id_universidad)) next.delete(uni.id_universidad);
+                                    else next.add(uni.id_universidad);
+                                    return next;
+                                  });
+                                  return (
+                                    <div className="mt-3">
+                                      <button
+                                        onClick={toggle}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/30 text-primary text-xs font-medium hover:bg-primary/5 transition-colors"
+                                      >
+                                        {isExpanded
+                                          ? <ChevronUp className="h-3.5 w-3.5" />
+                                          : <ChevronDown className="h-3.5 w-3.5" />}
+                                        {uni.num_matching} programa{uni.num_matching !== 1 ? 's' : ''} con &ldquo;{searchProgramRef.current}&rdquo;
+                                      </button>
+                                      {isExpanded && (
+                                        <div className="mt-2 border border-border rounded-lg overflow-hidden">
+                                          <div className="divide-y divide-border">
+                                            {uni.matching_programs.map(prog => (
+                                              <div key={prog.id_programa} className="flex items-center justify-between px-3 py-2.5">
+                                                <span className="text-sm text-foreground flex-1 mr-3">{prog.programa}</span>
+                                                <div className="flex items-center gap-2 flex-shrink-0">
+                                                  {prog.duracion_max_anos != null && (
+                                                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                                      {prog.duracion_max_anos} año{prog.duracion_max_anos !== 1 ? 's' : ''}
+                                                    </span>
+                                                  )}
+                                                  {prog.tipo_programa && (
+                                                    <Badge variant="outline" className="text-xs">
+                                                      {prog.tipo_programa}
+                                                    </Badge>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )
                 ) : loading ? (
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                     <div className="relative">
