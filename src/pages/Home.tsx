@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart, BookOpen, Briefcase, Users } from "lucide-react";
+import { ArrowRight, BarChart, BookOpen, Users } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Home() {
@@ -12,8 +12,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center">
         <Link className="flex items-center justify-center" to="#">
-          <Briefcase className="h-6 w-6 mr-2" />
-          <span className="font-bold">Futurapp</span>
+          <img src="/logo.png" alt="UniMatch by ILearning" className="h-8" />
         </Link>
       </header>
       <main className="flex-1">
@@ -49,7 +48,7 @@ export default function Home() {
         <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
-              ¿Por qué elegir Futurapp?
+              ¿Por qué elegir UniMatch?
             </h2>
             <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3">
               <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
@@ -94,7 +93,7 @@ export default function Home() {
                 >
                   <div className="space-y-2">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      "Futurapp me ayudó a descubrir una carrera que nunca antes
+                      "UniMatch me ayudó a descubrir una carrera que nunca antes
                       había considerado. ¡Ahora estoy prosperando en un trabajo
                       que amo!"
                     </p>
@@ -122,7 +121,7 @@ export default function Home() {
                 </h2>
                 <p className="mx-auto max-w-[600px] text-primary-foreground/90 md:text-xl">
                   Únete a miles de profesionales que han encontrado su carrera
-                  perfecta con Futurapp.
+                  perfecta con UniMatch.
                 </p>
               </div>
               <Button
@@ -139,7 +138,7 @@ export default function Home() {
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          © 2024 Futurapp. Todos los derechos reservados.
+          © 2024 UniMatch by ILearning. Todos los derechos reservados.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" to="#">
