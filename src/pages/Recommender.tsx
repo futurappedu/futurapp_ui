@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Download, User, Brain, Target, TrendingUp, Briefcase, ArrowRight, BarChart } from "lucide-react";
+import { Download, User, Brain, Target, TrendingUp, ArrowRight, BarChart } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import LogoutButton from "./Logout";
 import { useNavigate, Link } from "react-router-dom";
@@ -285,8 +285,7 @@ function Recommender() {
       <div className="flex flex-col min-h-screen">
         <header className="px-4 lg:px-6 h-16 flex items-center border-b">
           <Link className="flex items-center justify-center" to="/">
-            <Briefcase className="h-6 w-6 mr-2" />
-            <span className="font-bold">Futurapp</span>
+            <img src="/logo.jpeg" alt="UniMatch by ILearning" className="h-12" />
           </Link>
         </header>
         <div className="flex-1 flex items-center justify-center">
@@ -304,8 +303,7 @@ function Recommender() {
       {/* Header matching home page */}
       <header className="px-4 lg:px-6 h-16 flex items-center border-b">
         <Link className="flex items-center justify-center" to="/">
-          <Briefcase className="h-6 w-6 mr-2" />
-          <span className="font-bold">Futurapp</span>
+          <img src="/logo.jpeg" alt="UniMatch by ILearning" className="h-12" />
         </Link>
         <div className="ml-auto">
           {isAuthenticated && <LogoutButton />}
@@ -624,7 +622,7 @@ function Recommender() {
       {/* Footer matching home page */}
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          © 2024 Futurapp. Todos los derechos reservados.
+          © 2024 UniMatch by ILearning. Todos los derechos reservados.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" to="#">

@@ -16,7 +16,7 @@ const Login: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-md">
       <div className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-3xl font-bold mb-6 text-center">Bienvenido a Futurapp</h1>
+        <h1 className="text-3xl font-bold mb-6 text-center">Bienvenido a UniMatch</h1>
         <p className="mb-6 text-center text-gray-600">
           Inicia sesión para acceder a nuestro recomendador de carreras profesionales.
         </p>
