@@ -12,7 +12,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center">
         <Link className="flex items-center justify-center" to="#">
-          <img src="/logo.png" alt="UniMatch by ILearning" className="h-8" />
+          <img src="/logo.jpeg" alt="UniMatch by ILearning" className="h-8" />
         </Link>
       </header>
       <main className="flex-1">
