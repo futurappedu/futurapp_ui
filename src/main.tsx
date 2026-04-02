@@ -23,8 +23,13 @@ import Admin from "./pages/Admin";
 import { Auth0Provider } from "@auth0/auth0-react";
 import About from "./pages/About";
 
-const domain = "dev-cw4j08ldhb6pgkzs.us.auth0.com"; // e.g. dev-abc123.us.auth0.com
-const clientId = "FOHKg168YFW90b7jRMF2k4K49Jb1vjXF"; // Your Auth0 Client ID
+// Auth0 config — values come from .env (VITE_AUTH0_DOMAIN, VITE_AUTH0_CLIENT_ID, VITE_AUTH0_AUDIENCE)
+// The custom domain (e.g. login.uni-match.io) is set via VITE_AUTH0_DOMAIN.
+// VITE_AUTH0_AUDIENCE must remain the default Auth0 tenant URL — not the custom domain —
+// because the Management API audience is bound to the original tenant identifier.
+const domain = import.meta.env.VITE_AUTH0_DOMAIN as string;
+const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID as string;
+const audience = import.meta.env.VITE_AUTH0_AUDIENCE as string;
 
 const Auth0ProviderWithNavigate = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -39,7 +44,7 @@ const Auth0ProviderWithNavigate = ({ children }: { children: React.ReactNode }) 
       clientId={clientId}
       authorizationParams={{
         redirect_uri: window.location.origin,
-        audience: "https://dev-cw4j08ldhb6pgkzs.us.auth0.com/api/v2/",
+        audience,
       }}
       onRedirectCallback={onRedirectCallback}
     >
