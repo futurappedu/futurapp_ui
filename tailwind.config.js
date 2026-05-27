@@ -22,6 +22,7 @@ module.exports = {
         heading: ['Poppins', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
+        display: ['Bricolage Grotesque', 'Poppins', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -56,6 +57,21 @@ module.exports = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        // Dashboard design tokens (UniMatch)
+        'brand-deep': {
+          DEFAULT: "hsl(var(--brand-deep))",
+          foreground: "hsl(var(--brand-deep-foreground))",
+        },
+        'brand-accent': {
+          DEFAULT: "hsl(var(--brand-accent))",
+          foreground: "hsl(var(--brand-accent-foreground))",
+        },
+        'match-green': "hsl(var(--match-green))",
+        'match-amber': "hsl(var(--match-amber))",
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          muted: "hsl(var(--surface-muted))",
         },
         // ILearning Brand Colors - Additional semantic tokens
         success: {
@@ -129,6 +145,8 @@ module.exports = {
         'primary': '0 10px 25px rgba(37, 99, 235, 0.3)',
         'orange': '0 10px 25px rgba(249, 115, 22, 0.3)',
         'card-hover': '0 20px 40px rgba(37, 99, 235, 0.3)',
+        'card': '0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)',
+        'elevated': '0 1px 2px rgba(0,0,0,0.04), 0 12px 32px rgba(0,0,0,0.08)',
       },
     },
   },
