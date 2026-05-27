@@ -48,6 +48,16 @@
     --ring: 217.2 91.2% 52.9%;
     --radius: 0.5rem;
 
+    /* Dashboard design tokens (UniMatch) */
+    --brand-deep: 221 39% 11%;
+    --brand-deep-foreground: 210 40% 98%;
+    --brand-accent: 262 83% 58%;
+    --brand-accent-foreground: 0 0% 100%;
+    --match-green: 160 84% 39%;
+    --match-amber: 38 92% 50%;
+    --surface: 0 0% 100%;
+    --surface-muted: 220 14% 96%;
+
     /* Chart colors using brand palette */
     --chart-1: 217.2 91.2% 52.9%;
     --chart-2: 160.1 84.1% 39.4%;
