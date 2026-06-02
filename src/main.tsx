@@ -20,7 +20,7 @@ import Login from "./pages/Login"; // optional login page if you want a custom l
 import ProtectedRoute from "./pages/ProtectedRoute";
 import AdminRoute from "./pages/AdminRoute";
 import Admin from "./pages/Admin";
-import { Auth0Provider, type AppState } from "@auth0/auth0-react";
+import { Auth0Provider } from "@auth0/auth0-react";
 import About from "./pages/About";
 
 // Auth0 config — values come from .env (VITE_AUTH0_DOMAIN, VITE_AUTH0_CLIENT_ID, VITE_AUTH0_AUDIENCE)
@@ -30,30 +30,21 @@ import About from "./pages/About";
 const domain = import.meta.env.VITE_AUTH0_DOMAIN as string;
 const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID as string;
 const audience = import.meta.env.VITE_AUTH0_AUDIENCE as string;
-const returnUrl =
-  (import.meta.env.VITE_AUTH0_RETURN_URL as string | undefined) ??
-  window.location.origin;
 
 const Auth0ProviderWithNavigate = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
-  const onRedirectCallback = (appState?: AppState) => {
-    navigate(appState?.returnTo || "/test_home", { replace: true });
+  const onRedirectCallback = () => {
+    navigate("/login", { replace: true });
   };
-
-  if (!domain || !clientId) {
-    console.error(
-      "Missing Auth0 configuration. Please define VITE_AUTH0_DOMAIN and VITE_AUTH0_CLIENT_ID in .env"
-    );
-  }
 
   return (
     <Auth0Provider
       domain={domain}
       clientId={clientId}
       authorizationParams={{
-        redirect_uri: returnUrl,
-        ...(audience ? { audience } : {}),
+        redirect_uri: window.location.origin,
+        audience,
       }}
       onRedirectCallback={onRedirectCallback}
     >
