@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Check, Loader2, Lock, Plus, Search, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { adminApi } from '@/services/adminApi';
+import { apiUrl } from '@/config/api';
 
 const TOTAL_SLOTS = 5;
 
@@ -15,10 +17,16 @@ interface SelectedUniversity {
   name: string;
 }
 
+interface ShortlistSlot {
+  position: number;
+  universidad_id: number | null;
+  name: string | null;
+}
+
 const normalizeText = (value: string): string =>
   value
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase();
 
 const getAbbreviation = (name: string): string =>
@@ -111,6 +119,9 @@ export function DashboardShortlist() {
   const [slots, setSlots] = useState<Array<SelectedUniversity | null>>(() =>
     Array.from({ length: TOTAL_SLOTS }, () => null)
   );
+  const [isLoadingShortlist, setIsLoadingShortlist] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -121,11 +132,79 @@ export function DashboardShortlist() {
   const filled = slots.filter(Boolean).length;
   const isUnlocked = filled === TOTAL_SLOTS;
 
+  // Track whether the current slots came from a server load (skip persisting initial hydration)
+  const isInitialLoad = useRef(true);
+
   const selectedUniversityIds = useMemo(
     () => new Set(slots.filter((slot): slot is SelectedUniversity => slot !== null).map((slot) => slot.id)),
     [slots]
   );
 
+  // Hydrate shortlist from server on mount
+  useEffect(() => {
+    const loadShortlist = async () => {
+      try {
+        setIsLoadingShortlist(true);
+        const token = await getAccessTokenSilently();
+        const res = await fetch(apiUrl('v1/me/shortlist'), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) throw new Error('Failed to load shortlist');
+
+        const data: ShortlistSlot[] = await res.json();
+        const hydrated = data.map((slot) =>
+          slot.universidad_id && slot.name
+            ? { id: slot.universidad_id, name: slot.name }
+            : null
+        );
+        isInitialLoad.current = true;
+        setSlots(hydrated);
+      } catch (error) {
+        console.error('Failed to load shortlist', error);
+        toast.error('No pudimos cargar tu shortlist. Recarga la página.');
+      } finally {
+        setIsLoadingShortlist(false);
+      }
+    };
+
+    loadShortlist();
+  }, [getAccessTokenSilently]);
+
+  // Persist shortlist whenever slots change (skip initial hydration)
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      return;
+    }
+
+    const persist = async () => {
+      try {
+        setIsSaving(true);
+        const token = await getAccessTokenSilently();
+        const body = slots.map((slot) => slot?.id ?? null);
+        const res = await fetch(apiUrl('v1/me/shortlist'), {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ slots: body }),
+        });
+
+        if (!res.ok) throw new Error('Failed to save shortlist');
+      } catch (error) {
+        console.error('Failed to save shortlist', error);
+        toast.error('No pudimos guardar tu selección. Intenta de nuevo.');
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    persist();
+  }, [slots, getAccessTokenSilently]);
+
+  // Debounce search query
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       setDebouncedQuery(query.trim());
@@ -136,6 +215,7 @@ export function DashboardShortlist() {
     };
   }, [query]);
 
+  // Fetch search results when query changes
   useEffect(() => {
     const fetchUniversities = async () => {
       if (activeSlotIndex === null) {
@@ -211,13 +291,40 @@ export function DashboardShortlist() {
     }
   };
 
+  if (isLoadingShortlist) {
+    return (
+      <div className="bg-brand-deep text-brand-deep-foreground rounded-3xl p-6 sticky top-8">
+        <div className="flex items-baseline justify-between mb-1">
+          <h2 className="font-display text-lg font-bold">Mi Shortlist</h2>
+          <span className="text-[11px] text-white/50 font-mono tabular-nums">0/{TOTAL_SLOTS}</span>
+        </div>
+        <p className="text-xs text-white/60 mb-6 leading-relaxed">
+          Define tus 5 opciones finales para desbloquear requisitos, fechas y tu plan de aplicación.
+        </p>
+        <ol className="space-y-2.5">
+          {Array.from({ length: TOTAL_SLOTS }).map((_, i) => (
+            <li key={i}>
+              <div className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-white/15 bg-white/[0.03] animate-pulse">
+                <span className="size-6 rounded bg-white/10 shrink-0" />
+                <span className="h-3 w-36 rounded bg-white/10" />
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-brand-deep text-brand-deep-foreground rounded-3xl p-6 sticky top-8">
       <div className="flex items-baseline justify-between mb-1">
         <h2 className="font-display text-lg font-bold">Mi Shortlist</h2>
-        <span className="text-[11px] text-white/50 font-mono tabular-nums">
-          {filled}/{TOTAL_SLOTS}
-        </span>
+        <div className="flex items-center gap-2">
+          {isSaving && <Loader2 className="size-3 animate-spin text-white/40" />}
+          <span className="text-[11px] text-white/50 font-mono tabular-nums">
+            {filled}/{TOTAL_SLOTS}
+          </span>
+        </div>
       </div>
       <p className="text-xs text-white/60 mb-6 leading-relaxed">
         Define tus 5 opciones finales para desbloquear requisitos, fechas y tu plan de aplicación.
@@ -242,7 +349,7 @@ export function DashboardShortlist() {
                 </span>
 
                 {slot ? (
-                  <span className="text-xs font-semibold text-white leading-snug pr-2">
+                  <span className="text-xs font-semibold text-white leading-snug pr-6">
                     {slot.name}
                   </span>
                 ) : (
