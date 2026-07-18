@@ -69,12 +69,12 @@ interface Scholarship {
 const SEARCH_PAIS_KEY = 'search_pais';
 const SEARCH_PROGRAMA_KEY = 'search_programa';
 
-// Reads a campaign search param stashed by Login.tsx and removes it so it's
-// only applied once (e.g. a later manual visit to this page won't reapply it).
-function consumeSearchParam(key: string): string | null {
-  const value = sessionStorage.getItem(key);
-  if (value !== null) sessionStorage.removeItem(key);
-  return value;
+// Pure read of a campaign search param stashed by Login.tsx. Kept side-effect
+// free so it's safe to use inside a useState lazy initializer — React
+// StrictMode calls those twice in development, and a getItem+removeItem
+// combo here would make the second call read back null, wiping the value.
+function peekSearchParam(key: string): string | null {
+  return sessionStorage.getItem(key);
 }
 
 export default function ScholarshipSearch() {
@@ -84,10 +84,10 @@ export default function ScholarshipSearch() {
   const [universities, setUniversities] = useState<University[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [expandedUniversities, setExpandedUniversities] = useState<Set<number>>(new Set());
-  const [searchProgram, setSearchProgram] = useState(() => consumeSearchParam(SEARCH_PROGRAMA_KEY) ?? '');
+  const [searchProgram, setSearchProgram] = useState(() => peekSearchParam(SEARCH_PROGRAMA_KEY) ?? '');
   const [searchUniversity, setSearchUniversity] = useState('');
   const [selectedCountries, setSelectedCountries] = useState<string[]>(() => {
-    const pais = consumeSearchParam(SEARCH_PAIS_KEY);
+    const pais = peekSearchParam(SEARCH_PAIS_KEY);
     return pais ? [pais] : [];
   });
   const [selectedProgramTypes, setSelectedProgramTypes] = useState<string[]>([]);
@@ -123,6 +123,13 @@ export default function ScholarshipSearch() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const [profileCompleted, setProfileCompleted] = useState<boolean | null>(null);
   const [profileCheckLoading, setProfileCheckLoading] = useState(true);
+
+  // Consume the campaign search params once initial state has read them, so
+  // a later manual visit to this page doesn't reapply stale filters.
+  useEffect(() => {
+    sessionStorage.removeItem(SEARCH_PAIS_KEY);
+    sessionStorage.removeItem(SEARCH_PROGRAMA_KEY);
+  }, []);
 
   useEffect(() => {
     setVisibleCount(20);
