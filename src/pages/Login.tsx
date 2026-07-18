@@ -29,7 +29,7 @@ const Login: React.FC = () => {
 
     // If user is already authenticated, redirect to test_home,
     // unless a campaign search link is pending — then go to the search page.
-    navigate(hasSearchParams ? '/scholarship-search' : '/test_home');
+    navigate(hasSearchParams ? '/scholarship_search' : '/test_home');
   }, [isAuthenticated, isLoading, navigate]);
 
   return (
