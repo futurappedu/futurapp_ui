@@ -66,6 +66,17 @@ interface Scholarship {
   enlace?: string;
 }
 
+const SEARCH_PAIS_KEY = 'search_pais';
+const SEARCH_PROGRAMA_KEY = 'search_programa';
+
+// Reads a campaign search param stashed by Login.tsx and removes it so it's
+// only applied once (e.g. a later manual visit to this page won't reapply it).
+function consumeSearchParam(key: string): string | null {
+  const value = sessionStorage.getItem(key);
+  if (value !== null) sessionStorage.removeItem(key);
+  return value;
+}
+
 export default function ScholarshipSearch() {
   const navigate = useNavigate();
   const { user, getAccessTokenSilently } = useAuth0(); // Get user email, authentication already handled
@@ -73,9 +84,12 @@ export default function ScholarshipSearch() {
   const [universities, setUniversities] = useState<University[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [expandedUniversities, setExpandedUniversities] = useState<Set<number>>(new Set());
-  const [searchProgram, setSearchProgram] = useState('');
+  const [searchProgram, setSearchProgram] = useState(() => consumeSearchParam(SEARCH_PROGRAMA_KEY) ?? '');
   const [searchUniversity, setSearchUniversity] = useState('');
-  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>(() => {
+    const pais = consumeSearchParam(SEARCH_PAIS_KEY);
+    return pais ? [pais] : [];
+  });
   const [selectedProgramTypes, setSelectedProgramTypes] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 100000]);
   const [minPrice, setMinPrice] = useState(0);
