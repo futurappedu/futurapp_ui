@@ -2,15 +2,34 @@ import React, { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
 
+const SEARCH_PAIS_KEY = 'search_pais';
+const SEARCH_PROGRAMA_KEY = 'search_programa';
+
 const Login: React.FC = () => {
   const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
 
+  // Save campaign search params (pais/programa) to sessionStorage before
+  // Auth0's redirect clears the URL — the query string won't survive the
+  // login round-trip otherwise (Auth0's redirect_uri is bare origin).
   useEffect(() => {
-    // If user is already authenticated, redirect to test_home
-    if (!isLoading && isAuthenticated) {
-      navigate("/test_home");
-    }
+    const params = new URLSearchParams(window.location.search);
+    const pais = params.get('pais');
+    const programa = params.get('programa');
+    if (pais) sessionStorage.setItem(SEARCH_PAIS_KEY, pais);
+    if (programa) sessionStorage.setItem(SEARCH_PROGRAMA_KEY, programa);
+  }, []);
+
+  useEffect(() => {
+    if (isLoading || !isAuthenticated) return;
+
+    const hasSearchParams =
+      sessionStorage.getItem(SEARCH_PAIS_KEY) !== null ||
+      sessionStorage.getItem(SEARCH_PROGRAMA_KEY) !== null;
+
+    // If user is already authenticated, redirect to test_home,
+    // unless a campaign search link is pending — then go to the search page.
+    navigate(hasSearchParams ? '/scholarship_search' : '/test_home');
   }, [isAuthenticated, isLoading, navigate]);
 
   return (
