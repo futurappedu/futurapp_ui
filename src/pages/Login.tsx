@@ -1,9 +1,69 @@
 import React, { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
+import { Search, Award, type LucideIcon } from 'lucide-react';
 
 const SEARCH_PAIS_KEY = 'search_pais';
 const SEARCH_PROGRAMA_KEY = 'search_programa';
+
+const FEATURE_BULLETS: Array<{ icon: LucideIcon; title: string; description: string }> = [
+  {
+    icon: Search,
+    title: 'Explora programas universitarios',
+    description:
+      'Busca entre programas de universidades en distintos países y compara sus planes de estudio.',
+  },
+  {
+    icon: Award,
+    title: 'Encuentra becas a tu medida',
+    description: 'Cruzamos tu perfil con becas disponibles para descubrir cuáles se ajustan a ti.',
+  },
+];
+
+function LogoMark({ className = '', iconClassName = 'size-9', textClassName = 'text-xl' }: {
+  className?: string;
+  iconClassName?: string;
+  textClassName?: string;
+}) {
+  return (
+    <div className={`flex items-center gap-2.5 ${className}`}>
+      <img src="/favicon.jpeg" alt="" className={`${iconClassName} rounded-lg shrink-0`} />
+      <span className={`font-display font-bold tracking-tight ${textClassName}`}>UniMatch</span>
+    </div>
+  );
+}
+
+function FeatureBullets({ tone }: { tone: 'dark' | 'light' }) {
+  return (
+    <div className={tone === 'dark' ? 'mt-10 space-y-5' : 'mt-6 space-y-4'}>
+      {FEATURE_BULLETS.map(({ icon: Icon, title, description }) => (
+        <div key={title} className="flex items-start gap-3">
+          <div
+            className={[
+              'size-9 rounded-xl flex items-center justify-center shrink-0',
+              tone === 'dark' ? 'bg-white/10' : 'bg-brand-accent/10',
+            ].join(' ')}
+          >
+            <Icon className="size-4 text-brand-accent" strokeWidth={2} />
+          </div>
+          <div>
+            <p className={`font-display font-bold text-sm ${tone === 'light' ? 'text-foreground' : ''}`}>
+              {title}
+            </p>
+            <p
+              className={[
+                'text-xs mt-0.5 leading-relaxed',
+                tone === 'dark' ? 'text-white/60' : 'text-muted-foreground',
+              ].join(' ')}
+            >
+              {description}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const Login: React.FC = () => {
   const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
@@ -32,21 +92,75 @@ const Login: React.FC = () => {
     navigate(hasSearchParams ? '/scholarship_search' : '/test_home');
   }, [isAuthenticated, isLoading, navigate]);
 
+  // Show a spinner instead of the button while Auth0 is loading or while an
+  // already-authenticated user is about to be redirected away.
+  const showSpinner = isLoading || isAuthenticated;
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-md">
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-3xl font-bold mb-6 text-center">Bienvenido a UniMatch</h1>
-        <p className="mb-6 text-center text-gray-600">
-          Inicia sesión para acceder a nuestro recomendador de carreras profesionales.
+    <div className="min-h-screen flex bg-background">
+      {/* Brand panel — hidden on mobile */}
+      <div className="hidden md:flex md:w-1/2 flex-col justify-between bg-brand-deep text-brand-deep-foreground p-10 lg:p-14">
+        <LogoMark iconClassName="size-11" textClassName="text-2xl" />
+
+        <div>
+          <h1 className="font-display text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
+            Descubre tu carrera profesional ideal
+            <span className="text-brand-accent italic font-medium">.</span>
+          </h1>
+          <p className="mt-4 text-white/60 max-w-md leading-relaxed">
+            Recomendaciones personalizadas, impulsadas por IA, para encontrar la universidad y la
+            carrera que mejor encajan contigo.
+          </p>
+
+          <FeatureBullets tone="dark" />
+        </div>
+
+        <p className="text-[10px] text-white/40 uppercase tracking-[0.2em]">
+          © 2024 UniMatch by ILearning
         </p>
-        {!isAuthenticated && (
-          <button
-            onClick={() => loginWithRedirect()}
-            className="w-full bg-primary text-white p-3 rounded-md font-medium hover:bg-primary/90 transition-colors"
-          >
-            Iniciar Sesión
-          </button>
-        )}
+      </div>
+
+      {/* Login card */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm">
+          {/* Mobile-only intro: brand panel content is hidden below md, so a
+              condensed version (logo, headline, tagline, feature bullets)
+              appears above the card instead of just the bare logo. */}
+          <div className="mb-8 md:hidden">
+            <LogoMark className="mb-6" iconClassName="size-10" textClassName="text-xl" />
+            <h1 className="font-display text-2xl font-bold tracking-tight leading-tight text-foreground">
+              Descubre tu carrera profesional ideal
+              <span className="text-brand-accent italic font-medium">.</span>
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+              Recomendaciones personalizadas, impulsadas por IA, para encontrar la universidad y la
+              carrera que mejor encajan contigo.
+            </p>
+            <FeatureBullets tone="light" />
+          </div>
+
+          <div className="bg-surface border border-border rounded-3xl shadow-card p-8">
+            <h2 className="font-display text-2xl font-bold text-foreground">Bienvenido a UniMatch</h2>
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+              Inicia sesión para acceder a tu recomendador de carreras y universidades.
+            </p>
+
+            <div className="mt-6">
+              {showSpinner ? (
+                <div className="w-full py-3 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-brand-accent" />
+                </div>
+              ) : (
+                <button
+                  onClick={() => loginWithRedirect()}
+                  className="w-full py-3 bg-brand-accent text-brand-accent-foreground text-sm font-bold rounded-full hover:opacity-90 transition-opacity"
+                >
+                  Iniciar sesión
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
