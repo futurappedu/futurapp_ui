@@ -33,6 +33,38 @@ function LogoMark({ className = '', iconClassName = 'size-9', textClassName = 't
   );
 }
 
+function FeatureBullets({ tone }: { tone: 'dark' | 'light' }) {
+  return (
+    <div className={tone === 'dark' ? 'mt-10 space-y-5' : 'mt-6 space-y-4'}>
+      {FEATURE_BULLETS.map(({ icon: Icon, title, description }) => (
+        <div key={title} className="flex items-start gap-3">
+          <div
+            className={[
+              'size-9 rounded-xl flex items-center justify-center shrink-0',
+              tone === 'dark' ? 'bg-white/10' : 'bg-brand-accent/10',
+            ].join(' ')}
+          >
+            <Icon className="size-4 text-brand-accent" strokeWidth={2} />
+          </div>
+          <div>
+            <p className={`font-display font-bold text-sm ${tone === 'light' ? 'text-foreground' : ''}`}>
+              {title}
+            </p>
+            <p
+              className={[
+                'text-xs mt-0.5 leading-relaxed',
+                tone === 'dark' ? 'text-white/60' : 'text-muted-foreground',
+              ].join(' ')}
+            >
+              {description}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const Login: React.FC = () => {
   const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
@@ -80,19 +112,7 @@ const Login: React.FC = () => {
             carrera que mejor encajan contigo.
           </p>
 
-          <div className="mt-10 space-y-5">
-            {FEATURE_BULLETS.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="flex items-start gap-4">
-                <div className="size-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                  <Icon className="size-5 text-brand-accent" strokeWidth={2} />
-                </div>
-                <div>
-                  <p className="font-display font-bold text-sm">{title}</p>
-                  <p className="text-xs text-white/60 mt-1 leading-relaxed">{description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <FeatureBullets tone="dark" />
         </div>
 
         <p className="text-[10px] text-white/40 uppercase tracking-[0.2em]">
@@ -103,7 +123,21 @@ const Login: React.FC = () => {
       {/* Login card */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
-          <LogoMark className="mb-8 md:hidden" iconClassName="size-10" textClassName="text-xl" />
+          {/* Mobile-only intro: brand panel content is hidden below md, so a
+              condensed version (logo, headline, tagline, feature bullets)
+              appears above the card instead of just the bare logo. */}
+          <div className="mb-8 md:hidden">
+            <LogoMark className="mb-6" iconClassName="size-10" textClassName="text-xl" />
+            <h1 className="font-display text-2xl font-bold tracking-tight leading-tight text-foreground">
+              Descubre tu carrera profesional ideal
+              <span className="text-brand-accent italic font-medium">.</span>
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+              Recomendaciones personalizadas, impulsadas por IA, para encontrar la universidad y la
+              carrera que mejor encajan contigo.
+            </p>
+            <FeatureBullets tone="light" />
+          </div>
 
           <div className="bg-surface border border-border rounded-3xl shadow-card p-8">
             <h2 className="font-display text-2xl font-bold text-foreground">Bienvenido a UniMatch</h2>
