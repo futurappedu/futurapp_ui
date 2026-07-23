@@ -20,6 +20,19 @@ const FEATURE_BULLETS: Array<{ icon: LucideIcon; title: string; description: str
   },
 ];
 
+function LogoMark({ className = '', iconClassName = 'size-9', textClassName = 'text-xl' }: {
+  className?: string;
+  iconClassName?: string;
+  textClassName?: string;
+}) {
+  return (
+    <div className={`flex items-center gap-2.5 ${className}`}>
+      <img src="/favicon.jpeg" alt="" className={`${iconClassName} rounded-lg shrink-0`} />
+      <span className={`font-display font-bold tracking-tight ${textClassName}`}>UniMatch</span>
+    </div>
+  );
+}
+
 const Login: React.FC = () => {
   const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
@@ -55,7 +68,7 @@ const Login: React.FC = () => {
     <div className="min-h-screen flex bg-background">
       {/* Brand panel — hidden on mobile */}
       <div className="hidden md:flex md:w-1/2 flex-col justify-between bg-brand-deep text-brand-deep-foreground p-10 lg:p-14">
-        <img src="/logo.jpeg" alt="UniMatch by ILearning" className="h-12 w-auto rounded-md" />
+        <LogoMark iconClassName="size-11" textClassName="text-2xl" />
 
         <div>
           <h1 className="font-display text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
@@ -90,11 +103,7 @@ const Login: React.FC = () => {
       {/* Login card */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
-          <img
-            src="/logo.jpeg"
-            alt="UniMatch by ILearning"
-            className="h-10 w-auto rounded-md mb-8 md:hidden"
-          />
+          <LogoMark className="mb-8 md:hidden" iconClassName="size-10" textClassName="text-xl" />
 
           <div className="bg-surface border border-border rounded-3xl shadow-card p-8">
             <h2 className="font-display text-2xl font-bold text-foreground">Bienvenido a UniMatch</h2>
