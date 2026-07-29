@@ -68,6 +68,7 @@ interface Scholarship {
 
 const SEARCH_PAIS_KEY = 'search_pais';
 const SEARCH_PROGRAMA_KEY = 'search_programa';
+const SEARCH_TIPO_KEY = 'search_tipo';
 
 // Pure read of a campaign search param stashed by Login.tsx. Kept side-effect
 // free so it's safe to use inside a useState lazy initializer — React
@@ -90,7 +91,10 @@ export default function ScholarshipSearch() {
     const pais = peekSearchParam(SEARCH_PAIS_KEY);
     return pais ? [pais] : [];
   });
-  const [selectedProgramTypes, setSelectedProgramTypes] = useState<string[]>([]);
+  const [selectedProgramTypes, setSelectedProgramTypes] = useState<string[]>(() => {
+    const tipo = peekSearchParam(SEARCH_TIPO_KEY);
+    return tipo ? [tipo] : [];
+  });
   const [priceRange, setPriceRange] = useState([0, 100000]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100000);
@@ -129,6 +133,7 @@ export default function ScholarshipSearch() {
   useEffect(() => {
     sessionStorage.removeItem(SEARCH_PAIS_KEY);
     sessionStorage.removeItem(SEARCH_PROGRAMA_KEY);
+    sessionStorage.removeItem(SEARCH_TIPO_KEY);
   }, []);
 
   useEffect(() => {
