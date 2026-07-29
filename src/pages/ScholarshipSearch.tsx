@@ -70,6 +70,13 @@ const SEARCH_PAIS_KEY = 'search_pais';
 const SEARCH_PROGRAMA_KEY = 'search_programa';
 const SEARCH_TIPO_KEY = 'search_tipo';
 
+// nivel_programa is a Postgres enum restricted to these two lowercase values;
+// map to Spanish labels for display.
+const NIVEL_LABELS: Record<string, string> = {
+  undergraduate: 'Pregrado',
+  postgraduate: 'Posgrado',
+};
+
 // Pure read of a campaign search param stashed by Login.tsx. Kept side-effect
 // free so it's safe to use inside a useState lazy initializer — React
 // StrictMode calls those twice in development, and a getItem+removeItem
@@ -91,10 +98,8 @@ export default function ScholarshipSearch() {
     const pais = peekSearchParam(SEARCH_PAIS_KEY);
     return pais ? [pais] : [];
   });
-  const [selectedProgramTypes, setSelectedProgramTypes] = useState<string[]>(() => {
-    const tipo = peekSearchParam(SEARCH_TIPO_KEY);
-    return tipo ? [tipo] : [];
-  });
+  const [selectedProgramTypes, setSelectedProgramTypes] = useState<string[]>([]);
+  const [selectedNivel, setSelectedNivel] = useState(() => peekSearchParam(SEARCH_TIPO_KEY) ?? 'all');
   const [priceRange, setPriceRange] = useState([0, 100000]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100000);
@@ -110,6 +115,7 @@ export default function ScholarshipSearch() {
   const [filtersLoading, setFiltersLoading] = useState(true);
   const [countries, setCountries] = useState<string[]>([]);
   const [programTypes, setProgramTypes] = useState<string[]>([]);
+  const [niveles, setNiveles] = useState<string[]>([]);
   const [scholarshipTypes, setScholarshipTypes] = useState<string[]>([]);
   const [selectedScholarshipType, setSelectedScholarshipType] = useState('all');
   const [durationRange, setDurationRange] = useState([1, 10]); // Default max 10 years
@@ -175,6 +181,7 @@ export default function ScholarshipSearch() {
         const data = await res.json();
         setCountries(data.paises || []);
         setProgramTypes(data.tipos || []);
+        setNiveles(data.niveles || []);
         setScholarshipTypes(data.tipos_beca || []);
 
         // Set max duration from backend
@@ -201,6 +208,7 @@ export default function ScholarshipSearch() {
       console.error('Error loading filters:', err);
       setCountries([]);
       setProgramTypes([]);
+      setNiveles([]);
       setScholarshipTypes([]);
     } finally {
       setFiltersLoading(false);
@@ -320,6 +328,7 @@ useEffect(() => {
   }, [
     selectedCountries,
     selectedProgramTypes,
+    selectedNivel,
     priceRange,
     durationRange,
     scholarshipOnly,
@@ -336,6 +345,7 @@ useEffect(() => {
   setSearchUniversity('');
   setSelectedCountries([]);
   setSelectedProgramTypes([]);
+  setSelectedNivel('all');
   setPriceRange([minPrice, maxPrice]);
   setDurationRange([1, maxDuration]);
   setScholarshipOnly(false);
@@ -389,6 +399,7 @@ useEffect(() => {
         filtros.tipo_beca = selectedScholarshipType;
       }
       if (selectedProgramTypes.length > 0) filtros.tipos_programa = selectedProgramTypes;
+      if (selectedNivel && selectedNivel !== 'all') filtros.nivel_programa = selectedNivel;
       if (scholarshipOnly) filtros.beca = true;
       if (priceRange && priceRange.length === 2) {
         filtros.min_cost = priceRange[0];
@@ -777,6 +788,23 @@ useEffect(() => {
                           </div>
                         ))}
                       </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Nivel</Label>
+                      <Select value={selectedNivel} onValueChange={setSelectedNivel}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecciona nivel" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos los niveles</SelectItem>
+                          {niveles.map(nivel => (
+                            <SelectItem key={nivel} value={nivel}>{NIVEL_LABELS[nivel] ?? nivel}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <Separator />
