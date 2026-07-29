@@ -5,6 +5,7 @@ import { Search, Award, type LucideIcon } from 'lucide-react';
 
 const SEARCH_PAIS_KEY = 'search_pais';
 const SEARCH_PROGRAMA_KEY = 'search_programa';
+const SEARCH_TIPO_KEY = 'search_tipo';
 
 const FEATURE_BULLETS: Array<{ icon: LucideIcon; title: string; description: string }> = [
   {
@@ -69,15 +70,17 @@ const Login: React.FC = () => {
   const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
 
-  // Save campaign search params (pais/programa) to sessionStorage before
+  // Save campaign search params (pais/programa/tipo) to sessionStorage before
   // Auth0's redirect clears the URL — the query string won't survive the
   // login round-trip otherwise (Auth0's redirect_uri is bare origin).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const pais = params.get('pais');
     const programa = params.get('programa');
+    const tipo = params.get('tipo');
     if (pais) sessionStorage.setItem(SEARCH_PAIS_KEY, pais);
     if (programa) sessionStorage.setItem(SEARCH_PROGRAMA_KEY, programa);
+    if (tipo) sessionStorage.setItem(SEARCH_TIPO_KEY, tipo);
   }, []);
 
   useEffect(() => {
@@ -85,7 +88,8 @@ const Login: React.FC = () => {
 
     const hasSearchParams =
       sessionStorage.getItem(SEARCH_PAIS_KEY) !== null ||
-      sessionStorage.getItem(SEARCH_PROGRAMA_KEY) !== null;
+      sessionStorage.getItem(SEARCH_PROGRAMA_KEY) !== null ||
+      sessionStorage.getItem(SEARCH_TIPO_KEY) !== null;
 
     // If user is already authenticated, redirect to test_home,
     // unless a campaign search link is pending — then go to the search page.
