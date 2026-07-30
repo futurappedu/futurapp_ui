@@ -34,8 +34,8 @@ const audience = import.meta.env.VITE_AUTH0_AUDIENCE as string;
 const Auth0ProviderWithNavigate = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
-  const onRedirectCallback = () => {
-    navigate("/login", { replace: true });
+  const onRedirectCallback = (appState?: { returnTo?: string }) => {
+    navigate(appState?.returnTo ?? "/login", { replace: true });
   };
 
   return (

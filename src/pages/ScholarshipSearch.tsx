@@ -87,7 +87,7 @@ function peekSearchParam(key: string): string | null {
 
 export default function ScholarshipSearch() {
   const navigate = useNavigate();
-  const { user, getAccessTokenSilently } = useAuth0(); // Get user email, authentication already handled
+  const { user, isAuthenticated, isLoading, getAccessTokenSilently, loginWithRedirect } = useAuth0();
   const [activeTab, setActiveTab] = useState<'programas' | 'universidades'>('programas');
   const [universities, setUniversities] = useState<University[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
@@ -171,12 +171,12 @@ export default function ScholarshipSearch() {
     const fetchFilters = async () => {
       setFiltersLoading(true);
       try {
-        const token = await getAccessTokenSilently();
-        const res = await fetch(apiUrl('filter_options'), {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const headers: Record<string, string> = {};
+        if (isAuthenticated) {
+          const token = await getAccessTokenSilently();
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        const res = await fetch(apiUrl('filter_options'), { headers });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setCountries(data.paises || []);
@@ -215,7 +215,8 @@ export default function ScholarshipSearch() {
     }
   };
   fetchFilters();
-}, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [isAuthenticated]);
 
   // Favorites API functions
   const loadFavorites = async () => {
@@ -309,11 +310,15 @@ export default function ScholarshipSearch() {
   }, [activeTab, selectedCountries]);
 
 useEffect(() => {
+    // Wait for Auth0 to resolve the session first — otherwise a logged-in
+    // user whose session is still restoring would get the anonymous
+    // (redacted) response on this one-time initial load.
+    if (isLoading) return;
     if (isInitialMount.current) {
       isInitialMount.current = false;
       searchPrograms(); // Load all programs on mount
     }
-  }, []);
+  }, [isLoading]);
 
   useEffect(() => {
     // Skip the initial mount (already handled above)
@@ -426,13 +431,14 @@ useEffect(() => {
       filtros.max_cost_with_scholarship = studentBudget;
     }
 
-    const token = await getAccessTokenSilently();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (isAuthenticated) {
+      const token = await getAccessTokenSilently();
+      headers['Authorization'] = `Bearer ${token}`;
+    }
     const res = await fetch(apiUrl('filter_results'), {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
+      headers,
       body: JSON.stringify(filtros),
       signal,
     });
@@ -511,6 +517,13 @@ useEffect(() => {
     }
   };
 
+  // Anonymous users get a redacted program (no universidad/enlace) instead
+  // of an auth wall on the search page itself; login is only required to
+  // unlock a specific program's identity/link or to favorite it.
+  const promptLogin = () => {
+    loginWithRedirect({ appState: { returnTo: '/scholarship_search' } });
+  };
+
   const trackProgramClick = async (programId: number, url: string) => {
     if (!user?.email) return;
 
@@ -531,7 +544,12 @@ useEffect(() => {
 
   const toggleFavorite = async (program: Program, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent program selection when clicking favorite button
-    
+
+    if (!isAuthenticated) {
+      promptLogin();
+      return;
+    }
+
     if (!user?.email) {
       console.error('User email not available');
       return;
@@ -1183,7 +1201,17 @@ useEffect(() => {
                             </h3>
                             <div className="flex items-center gap-2 text-muted-foreground mb-2">
                               <Building2 className="h-4 w-4" />
-                              <span className="font-medium text-sm">{program.universidad}</span>
+                              {program.universidad ? (
+                                <span className="font-medium text-sm">{program.universidad}</span>
+                              ) : !isAuthenticated ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); promptLogin(); }}
+                                  className="font-medium text-sm text-muted-foreground italic underline decoration-dotted hover:text-primary"
+                                >
+                                  Inicia sesión para ver la universidad
+                                </button>
+                              ) : null}
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -1222,7 +1250,7 @@ useEffect(() => {
                           </div>
                         </div>
 
-                        {program.enlace && (
+                        {program.enlace ? (
                           <Button size="sm" variant="outline" asChild>
                             <a
                               href={program.enlace}
@@ -1233,7 +1261,16 @@ useEffect(() => {
                               Ver programa →
                             </a>
                           </Button>
-                        )}
+                        ) : !isAuthenticated ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => { e.stopPropagation(); promptLogin(); }}
+                          >
+                            <Lock className="h-3.5 w-3.5 mr-1.5" />
+                            Inicia sesión para ver
+                          </Button>
+                        ) : null}
                       </div>
                     ))}
                   </div>
