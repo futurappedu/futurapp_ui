@@ -77,12 +77,16 @@ const NIVEL_LABELS: Record<string, string> = {
   postgraduate: 'Posgrado',
 };
 
-// Pure read of a campaign search param stashed by Login.tsx. Kept side-effect
+// Pure read of a campaign search param, either from this page's own URL
+// (a direct deep-link, e.g. from the n8n WhatsApp flow) or from
+// sessionStorage (stashed by Login.tsx before Auth0's redirect clears the
+// URL, for anyone who still ends up logging in first). Kept side-effect
 // free so it's safe to use inside a useState lazy initializer — React
 // StrictMode calls those twice in development, and a getItem+removeItem
 // combo here would make the second call read back null, wiping the value.
-function peekSearchParam(key: string): string | null {
-  return sessionStorage.getItem(key);
+function peekSearchParam(urlParam: string, sessionKey: string): string | null {
+  const fromUrl = new URLSearchParams(window.location.search).get(urlParam);
+  return fromUrl ?? sessionStorage.getItem(sessionKey);
 }
 
 export default function ScholarshipSearch() {
@@ -92,14 +96,14 @@ export default function ScholarshipSearch() {
   const [universities, setUniversities] = useState<University[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [expandedUniversities, setExpandedUniversities] = useState<Set<number>>(new Set());
-  const [searchProgram, setSearchProgram] = useState(() => peekSearchParam(SEARCH_PROGRAMA_KEY) ?? '');
+  const [searchProgram, setSearchProgram] = useState(() => peekSearchParam('programa', SEARCH_PROGRAMA_KEY) ?? '');
   const [searchUniversity, setSearchUniversity] = useState('');
   const [selectedCountries, setSelectedCountries] = useState<string[]>(() => {
-    const pais = peekSearchParam(SEARCH_PAIS_KEY);
+    const pais = peekSearchParam('pais', SEARCH_PAIS_KEY);
     return pais ? [pais] : [];
   });
   const [selectedProgramTypes, setSelectedProgramTypes] = useState<string[]>([]);
-  const [selectedNivel, setSelectedNivel] = useState(() => peekSearchParam(SEARCH_TIPO_KEY) ?? 'all');
+  const [selectedNivel, setSelectedNivel] = useState(() => peekSearchParam('tipo', SEARCH_TIPO_KEY) ?? 'all');
   const [priceRange, setPriceRange] = useState([0, 100000]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100000);
@@ -140,6 +144,9 @@ export default function ScholarshipSearch() {
     sessionStorage.removeItem(SEARCH_PAIS_KEY);
     sessionStorage.removeItem(SEARCH_PROGRAMA_KEY);
     sessionStorage.removeItem(SEARCH_TIPO_KEY);
+    if (window.location.search) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
   }, []);
 
   useEffect(() => {
