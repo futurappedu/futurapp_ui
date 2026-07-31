@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, BookOpen, Award, Percent, Star, Clock, ArrowLeft, Heart, Trash2, Download, Lock, UserCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, BookOpen, Award, Percent, Star, Clock, Heart, Trash2, Download, Lock, UserCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { apiUrl } from '@/config/api';
 
@@ -93,6 +93,7 @@ export default function ScholarshipSearch() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, getAccessTokenSilently, loginWithRedirect } = useAuth0();
   const [activeTab, setActiveTab] = useState<'programas' | 'universidades'>('programas');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [universities, setUniversities] = useState<University[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [expandedUniversities, setExpandedUniversities] = useState<Set<number>>(new Set());
@@ -660,20 +661,17 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <button
-            className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+      <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto flex items-center gap-3 sm:gap-4">
+          <Link to="/" className="flex items-center shrink-0">
+            <img src="/logo.jpeg" alt="UniMatch by ILearning" className="h-8 lg:h-10" />
+          </Link>
+          <div className="hidden sm:flex w-10 h-10 bg-primary/10 rounded-xl items-center justify-center shrink-0">
             <GraduationCap className="w-5 h-5 text-primary" />
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground leading-tight">Buscador de Programas</h1>
-            <p className="text-sm text-muted-foreground">Encuentra el programa universitario perfecto y calcula tu inversión</p>
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-lg font-bold text-foreground leading-tight">Buscador de Programas</h1>
+            <p className="hidden sm:block text-sm text-muted-foreground">Encuentra el programa universitario perfecto y calcula tu inversión</p>
           </div>
         </div>
       </header>
@@ -709,9 +707,22 @@ useEffect(() => {
 
           {/* Left: Filter Panel */}
           <aside className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-border flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <span className="font-semibold text-foreground text-sm">Filtros</span>
+            <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <span className="font-semibold text-foreground text-sm">Filtros</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(prev => !prev)}
+                className="lg:hidden p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground"
+                aria-label={mobileFiltersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}
+                aria-expanded={mobileFiltersOpen}
+              >
+                {mobileFiltersOpen
+                  ? <ChevronUp className="h-4 w-4" />
+                  : <ChevronDown className="h-4 w-4" />}
+              </button>
             </div>
             <div className="p-5 space-y-4">
               <div className="space-y-3">
@@ -750,20 +761,21 @@ useEffect(() => {
                 </Button>
               </div>
 
-              <Separator />
+              <div className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block space-y-4`}>
+                <Separator />
 
-              {filtersLoading ? (
-                <div className="py-8 flex flex-col items-center text-muted-foreground">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-2"></div>
-                  <span className="text-sm">Cargando filtros...</span>
-                </div>
-              ) : (
-                <ScrollArea className="h-[500px]">
-                  <div className="space-y-4 pr-4">
-                    <Button variant="outline" className="w-full" onClick={clearAllFilters}>
-                      <Filter className="h-4 w-4 mr-2" />
-                      Limpiar Filtros
-                    </Button>
+                {filtersLoading ? (
+                  <div className="py-8 flex flex-col items-center text-muted-foreground">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-2"></div>
+                    <span className="text-sm">Cargando filtros...</span>
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-4 pr-4">
+                      <Button variant="outline" className="w-full" onClick={clearAllFilters}>
+                        <Filter className="h-4 w-4 mr-2" />
+                        Limpiar Filtros
+                      </Button>
 
                     <Separator />
 
@@ -954,13 +966,14 @@ useEffect(() => {
                   </div>
                 </ScrollArea>
               )}
+              </div>
             </div>
           </aside>
 
           {/* Center: Results */}
           <main>
-            {/* Budget input — only visible in Programas tab */}
-            {activeTab === 'programas' && <div className="bg-card border border-border rounded-xl p-4 mb-4">
+            {/* Budget input — only visible in Programas tab, and collapsed alongside filters on mobile */}
+            {activeTab === 'programas' && <div className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block bg-card border border-border rounded-xl p-4 mb-4`}>
               <Label className="text-sm font-medium mb-2 block text-foreground">
                 Presupuesto Anual del Estudiante
               </Label>
