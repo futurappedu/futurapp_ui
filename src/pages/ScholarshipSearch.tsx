@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { apiUrl } from '@/config/api';
 
@@ -663,18 +663,21 @@ useEffect(() => {
       {/* Header */}
       <header className="bg-card border-b border-border px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
+          <Link to="/" className="flex items-center shrink-0">
+            <img src="/logo.jpeg" alt="UniMatch by ILearning" className="h-8 lg:h-10" />
+          </Link>
           <button
-            className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
+            className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground shrink-0"
             onClick={() => navigate(-1)}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
             <GraduationCap className="w-5 h-5 text-primary" />
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground leading-tight">Buscador de Programas</h1>
-            <p className="text-sm text-muted-foreground">Encuentra el programa universitario perfecto y calcula tu inversión</p>
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold text-foreground leading-tight truncate">Buscador de Programas</h1>
+            <p className="text-sm text-muted-foreground truncate">Encuentra el programa universitario perfecto y calcula tu inversión</p>
           </div>
         </div>
       </header>
