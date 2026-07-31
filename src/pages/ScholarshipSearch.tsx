@@ -975,8 +975,8 @@ useEffect(() => {
 
           {/* Center: Results */}
           <main>
-            {/* Budget input — only visible in Programas tab */}
-            {activeTab === 'programas' && <div className="bg-card border border-border rounded-xl p-4 mb-4">
+            {/* Budget input — only visible in Programas tab, and collapsed alongside filters on mobile */}
+            {activeTab === 'programas' && <div className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block bg-card border border-border rounded-xl p-4 mb-4`}>
               <Label className="text-sm font-medium mb-2 block text-foreground">
                 Presupuesto Anual del Estudiante
               </Label>
