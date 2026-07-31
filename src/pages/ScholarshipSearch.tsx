@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, BookOpen, Award, Percent, Star, Clock, ArrowLeft, Heart, Trash2, Download, Lock, UserCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Search, Filter, Calculator, GraduationCap, DollarSign, MapPin, Building2, BookOpen, Award, Percent, Star, Clock, Heart, Trash2, Download, Lock, UserCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -666,12 +666,6 @@ useEffect(() => {
           <Link to="/" className="flex items-center shrink-0">
             <img src="/logo.jpeg" alt="UniMatch by ILearning" className="h-8 lg:h-10" />
           </Link>
-          <button
-            className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground shrink-0"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
           <div className="hidden sm:flex w-10 h-10 bg-primary/10 rounded-xl items-center justify-center shrink-0">
             <GraduationCap className="w-5 h-5 text-primary" />
           </div>
