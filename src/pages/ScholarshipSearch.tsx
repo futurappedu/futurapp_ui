@@ -93,6 +93,7 @@ export default function ScholarshipSearch() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, getAccessTokenSilently, loginWithRedirect } = useAuth0();
   const [activeTab, setActiveTab] = useState<'programas' | 'universidades'>('programas');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [universities, setUniversities] = useState<University[]>([]);
   const [universitiesLoading, setUniversitiesLoading] = useState(false);
   const [expandedUniversities, setExpandedUniversities] = useState<Set<number>>(new Set());
@@ -709,11 +710,24 @@ useEffect(() => {
 
           {/* Left: Filter Panel */}
           <aside className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-border flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <span className="font-semibold text-foreground text-sm">Filtros</span>
+            <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <span className="font-semibold text-foreground text-sm">Filtros</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(prev => !prev)}
+                className="lg:hidden p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground"
+                aria-label={mobileFiltersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}
+                aria-expanded={mobileFiltersOpen}
+              >
+                {mobileFiltersOpen
+                  ? <ChevronUp className="h-4 w-4" />
+                  : <ChevronDown className="h-4 w-4" />}
+              </button>
             </div>
-            <div className="p-5 space-y-4">
+            <div className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block p-5 space-y-4`}>
               <div className="space-y-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
