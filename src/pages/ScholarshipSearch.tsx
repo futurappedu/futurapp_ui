@@ -727,7 +727,7 @@ useEffect(() => {
                   : <ChevronDown className="h-4 w-4" />}
               </button>
             </div>
-            <div className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block p-5 space-y-4`}>
+            <div className="p-5 space-y-4">
               <div className="space-y-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -764,20 +764,21 @@ useEffect(() => {
                 </Button>
               </div>
 
-              <Separator />
+              <div className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block space-y-4`}>
+                <Separator />
 
-              {filtersLoading ? (
-                <div className="py-8 flex flex-col items-center text-muted-foreground">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-2"></div>
-                  <span className="text-sm">Cargando filtros...</span>
-                </div>
-              ) : (
-                <ScrollArea className="h-[500px]">
-                  <div className="space-y-4 pr-4">
-                    <Button variant="outline" className="w-full" onClick={clearAllFilters}>
-                      <Filter className="h-4 w-4 mr-2" />
-                      Limpiar Filtros
-                    </Button>
+                {filtersLoading ? (
+                  <div className="py-8 flex flex-col items-center text-muted-foreground">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-2"></div>
+                    <span className="text-sm">Cargando filtros...</span>
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-4 pr-4">
+                      <Button variant="outline" className="w-full" onClick={clearAllFilters}>
+                        <Filter className="h-4 w-4 mr-2" />
+                        Limpiar Filtros
+                      </Button>
 
                     <Separator />
 
@@ -968,6 +969,7 @@ useEffect(() => {
                   </div>
                 </ScrollArea>
               )}
+              </div>
             </div>
           </aside>
 
