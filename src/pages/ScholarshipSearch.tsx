@@ -661,8 +661,8 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
+      <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto flex items-center gap-3 sm:gap-4">
           <Link to="/" className="flex items-center shrink-0">
             <img src="/logo.jpeg" alt="UniMatch by ILearning" className="h-8 lg:h-10" />
           </Link>
@@ -672,12 +672,12 @@ useEffect(() => {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+          <div className="hidden sm:flex w-10 h-10 bg-primary/10 rounded-xl items-center justify-center shrink-0">
             <GraduationCap className="w-5 h-5 text-primary" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg font-bold text-foreground leading-tight truncate">Buscador de Programas</h1>
-            <p className="text-sm text-muted-foreground truncate">Encuentra el programa universitario perfecto y calcula tu inversión</p>
+            <h1 className="text-base sm:text-lg font-bold text-foreground leading-tight">Buscador de Programas</h1>
+            <p className="hidden sm:block text-sm text-muted-foreground">Encuentra el programa universitario perfecto y calcula tu inversión</p>
           </div>
         </div>
       </header>
