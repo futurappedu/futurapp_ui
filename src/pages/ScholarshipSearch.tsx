@@ -528,7 +528,22 @@ useEffect(() => {
   // Anonymous users get a redacted program (no universidad/enlace) instead
   // of an auth wall on the search page itself; login is only required to
   // unlock a specific program's identity/link or to favorite it.
+  //
+  // The Auth0 round trip is a full page reload, so current filter state
+  // (whether it came from a campaign URL or was picked manually) would
+  // otherwise be lost. Stash it in sessionStorage — the same mechanism
+  // Login.tsx uses for campaign links — so peekSearchParam() can restore
+  // it once the page remounts after auth.
   const promptLogin = () => {
+    if (selectedCountries[0]) {
+      sessionStorage.setItem(SEARCH_PAIS_KEY, selectedCountries[0]);
+    }
+    if (searchProgram) {
+      sessionStorage.setItem(SEARCH_PROGRAMA_KEY, searchProgram);
+    }
+    if (selectedNivel && selectedNivel !== 'all') {
+      sessionStorage.setItem(SEARCH_TIPO_KEY, selectedNivel);
+    }
     loginWithRedirect({ appState: { returnTo: '/scholarship_search' } });
   };
 
