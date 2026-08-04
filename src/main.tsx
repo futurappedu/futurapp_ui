@@ -22,6 +22,7 @@ import AdminRoute from "./pages/AdminRoute";
 import Admin from "./pages/Admin";
 import { Auth0Provider } from "@auth0/auth0-react";
 import About from "./pages/About";
+import GlobalAuthEffects from "./components/GlobalAuthEffects";
 
 // Auth0 config — values come from .env (VITE_AUTH0_DOMAIN, VITE_AUTH0_CLIENT_ID, VITE_AUTH0_AUDIENCE)
 // The custom domain (e.g. login.uni-match.io) is set via VITE_AUTH0_DOMAIN.
@@ -57,6 +58,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
     <Auth0ProviderWithNavigate>
+        <GlobalAuthEffects />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Home />} />
